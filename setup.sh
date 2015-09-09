@@ -29,7 +29,7 @@ USE_PYPY=
 RMVENV=0
 REMOTE=
 
-while getopts ":ie:E:p:P:h" opt
+while getopts "ie:E:p:P:r:h" opt
 do
 	case $opt in
 		i)
@@ -64,6 +64,8 @@ do
 			;;
 	esac
 done
+
+EXTRA_REPOS=${@:$OPTIND:$OPTIND+100}
 
 function info
 {
