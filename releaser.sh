@@ -28,7 +28,7 @@ case $CMD in
 
 		$0 version $VERSION $REPOS
 		REPOS=$REPOS ./git_all.sh checkout master
-		REPOS=$REPOS ./git_all.sh commit -m "ticked version number to $(today_version)" setup.py
+		REPOS=$REPOS ./git_all.sh commit -m "ticked version number to $VERSION" setup.py
 		REPOS=$REPOS ./git_all.sh push origin master
 		REPOS=$REPOS ./git_all.sh push github master
 		$0 register $REPOS
