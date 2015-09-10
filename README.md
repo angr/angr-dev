@@ -24,7 +24,7 @@ $ workon angr
 To update angr, simply pull all the git repositories.
 
 ```bash
-./git_all pull
+./git_all.sh pull
 ```
 
 For repositories that have C components (pyvex), you might have to rebuild.
