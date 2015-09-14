@@ -41,7 +41,7 @@ case $CMD in
 		$0 sdist $REPOS
 		$0 wheel pyvex
 		;;
-	sync-github)
+	sync)
 		REPOS=$@
 		[ -z "$REPOS" ] && REPOS="angr-management angr simuvex claripy cle pyvex archinfo"
 
