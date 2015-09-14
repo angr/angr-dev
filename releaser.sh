@@ -86,4 +86,7 @@ case $CMD in
 			cd ..
 		done
 		;;
+	*)
+		echo "Unknown command."
+		;;
 esac
