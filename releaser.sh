@@ -14,22 +14,26 @@ shift
 
 function today_version
 {
-	echo 4.$(($(date +%y)-10)).$(date +%d.%m | tr -d 0)
+	echo 4.$(($(date +%y)-10)).$(date +%m.%d | tr -d 0)
 }
 
 case $CMD in
 	release)
 		VERSION=$1
-		shift
+		shift || true
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
 		REPOS=$@
 		[ -z "$REPOS" ] && REPOS="angr-management angr simuvex claripy cle pyvex archinfo"
 
-		$0 version $VERSION $REPOS
 		REPOS=$REPOS ./git_all.sh checkout master
-		REPOS=$REPOS ./git_all.sh pull
-		REPOS=$REPOS ./git_all.sh commit -m "ticked version number to $VERSION" setup.py
+		$0 version $VERSION $REPOS
+		REPOS=$REPOS ./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "ticked version number to $VERSION" setup.py
+		REPOS=$REPOS ./git_all.sh show HEAD | cat
+		echo
+		echo -n "Does the diff look good (y|n)? "
+		read a
+		[ "$a" == "y" ] || exit 1
 		REPOS=$REPOS ./git_all.sh push origin master
 		REPOS=$REPOS ./git_all.sh push github master
 		REPOS=$REPOS ./git_all.sh checkout @{-1}
