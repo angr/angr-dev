@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 #while getopt "v" opt
 #do
@@ -28,12 +28,25 @@ case $CMD in
 
 		$0 version $VERSION $REPOS
 		REPOS=$REPOS ./git_all.sh checkout master
+		REPOS=$REPOS ./git_all.sh pull
 		REPOS=$REPOS ./git_all.sh commit -m "ticked version number to $VERSION" setup.py
 		REPOS=$REPOS ./git_all.sh push origin master
 		REPOS=$REPOS ./git_all.sh push github master
+		REPOS=$REPOS ./git_all.sh checkout @{-1}
 		$0 register $REPOS
 		$0 sdist $REPOS
 		$0 wheel pyvex
+		;;
+	sync-github)
+		REPOS=$@
+		[ -z "$REPOS" ] && REPOS="angr-management angr simuvex claripy cle pyvex archinfo"
+
+		REPOS=$REPOS ./git_all.sh checkout master
+		REPOS=$REPOS ./git_all.sh pull origin master
+		REPOS=$REPOS ./git_all.sh pull github master
+		REPOS=$REPOS ./git_all.sh push github master
+		REPOS=$REPOS ./git_all.sh push origin master
+		REPOS=$REPOS ./git_all.sh checkout @{-1}
 		;;
 	version)
 		VERSION=$1
