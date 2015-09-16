@@ -54,12 +54,43 @@ case $CMD in
 		;;
 	version)
 		VERSION=$1
-		shift
+		shift || true
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
-		for i in $@
+		REPOS=$@
+		[ -z "$REPOS" ] && REPOS="angr-management angr simuvex claripy cle pyvex archinfo"
+
+		for i in $REPOS
 		do
-			sed -i -e "s/version=['\"][^'\"]*['\"]/version='$VERSION'/g" $i/setup.py
+			cd $i
+			if [ "$(git show --format="%aN" -s HEAD)" == 'angr release bot' ]
+			then
+				echo "Skipping $i -- no changes"
+				cd ..
+				continue
+			fi
+
+			echo "Ticking version number of $i to $VERSION"
+			sed -i -e "s/version=['\"][^'\"]*['\"]/version='$VERSION'/g" setup.py
+			cd ..
+		done
+		;;
+	remote)
+		NAME=$1
+		shift
+
+		PREFIX=$1
+		shift
+
+		REPOS=$@
+		[ -z "$REPOS" ] && REPOS="angr-management angr simuvex claripy cle pyvex archinfo"
+
+		for i in $REPOS
+		do
+			cd $i
+			git remote rm $NAME || echo "no remote $NAME set for $i"
+			git remote add $NAME $PREFIX/$i
+			cd ..
 		done
 		;;
 	register)
