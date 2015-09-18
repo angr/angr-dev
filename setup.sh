@@ -13,6 +13,7 @@ function usage
 	echo "    -p ENV	create a pypy environment ENV"
 	echo "    -p ENV	create a pypy environment ENV"
 	echo "    -r REMOTE	use a different remote base (default: https://github.com/angr/)"
+	echo "             	Can be specified multiple times."
 	echo "    EXTRA_REPOS	any extra repositories you want to clone from the angr org."
 	echo
 	echo "This script clones all the angr repositories and sets up an angr"
@@ -27,7 +28,7 @@ INSTALL_REQS=0
 ANGR_VENV=
 USE_PYPY=
 RMVENV=0
-REMOTE=
+REMOTES=
 
 while getopts "ie:E:p:P:r:h" opt
 do
@@ -54,7 +55,7 @@ do
 			RMVENV=1
 			;;
 		r)
-			REMOTE=$OPTARG
+			REMOTES="$REMOTES $OPTARG"
 			;;
 		\?)
 			usage
@@ -149,7 +150,7 @@ then
 	fi
 fi
 
-REMOTES="$REMOTE https://git:@github.com/angr https://git:@github.com/zardus https://git:@github.com/rhelmot"
+REMOTES="$REMOTES https://git:@github.com/angr https://git:@github.com/zardus https://git:@github.com/rhelmot"
 function clone_repo
 {
 	NAME=$1
