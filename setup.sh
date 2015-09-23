@@ -8,11 +8,13 @@ function usage
 	echo "Usage: $0 [-i] [-e ENV] [-p ENV] [-r REMOTE] [EXTRA_REPOS]"
 	echo
 	echo "    -i		install required packages"
+	echo "    -C		don't do the actual installation (quit after cloning)"
 	echo "    -e ENV	create a cpython environment ENV"
 	echo "    -E ENV	re-create a cpython environment ENV"
 	echo "    -p ENV	create a pypy environment ENV"
 	echo "    -p ENV	create a pypy environment ENV"
 	echo "    -r REMOTE	use a different remote base (default: https://github.com/angr/)"
+	echo "             	Can be specified multiple times."
 	echo "    EXTRA_REPOS	any extra repositories you want to clone from the angr org."
 	echo
 	echo "This script clones all the angr repositories and sets up an angr"
@@ -27,9 +29,10 @@ INSTALL_REQS=0
 ANGR_VENV=
 USE_PYPY=
 RMVENV=0
-REMOTE=
+REMOTES=
+INSTALL=1
 
-while getopts "ie:E:p:P:r:h" opt
+while getopts "iCe:E:p:P:r:h" opt
 do
 	case $opt in
 		i)
@@ -54,7 +57,10 @@ do
 			RMVENV=1
 			;;
 		r)
-			REMOTE=$OPTARG
+			REMOTES="$REMOTES $OPTARG"
+			;;
+		C)
+			INSTALL=0
 			;;
 		\?)
 			usage
@@ -149,7 +155,7 @@ then
 	fi
 fi
 
-REMOTES="$REMOTE https://git:@github.com/angr https://git:@github.com/zardus https://git:@github.com/rhelmot"
+REMOTES="$REMOTES https://git:@github.com/angr https://git:@github.com/zardus https://git:@github.com/rhelmot"
 function clone_repo
 {
 	NAME=$1
@@ -188,12 +194,15 @@ do
 	[ -e "$NAME/setup.py" ] && TO_INSTALL="$TO_INSTALL $NAME"
 done
 
-info "Deploying links into virtual environment!"
-(python --version 2>&1| grep -q PyPy) && TO_INSTALL=${TO_INSTALL// angr-management/}
-pip install ${TO_INSTALL// / -e }
+if [ $INSTALL -eq 1 ]
+then
+	info "Deploying links into virtual environment!"
+	(python --version 2>&1| grep -q PyPy) && TO_INSTALL=${TO_INSTALL// angr-management/}
+	pip install ${TO_INSTALL// / -e }
 
-info "Installing some other helpful stuff."
-pip install ipython pylint ipdb nose
+	info "Installing some other helpful stuff."
+	pip install ipython pylint ipdb nose
+fi
 
 echo ''
 info "All done! Execute \"workon $ANGR_VENV\" to use your new angr virtual"
