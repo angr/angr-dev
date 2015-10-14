@@ -14,7 +14,7 @@ shift
 
 function today_version
 {
-	echo 4.$(($(date +%y)-10)).$(date +%m.%d | tr -d 0)
+	echo 4.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/\.0*/./")
 }
 
 case $CMD in
@@ -29,7 +29,7 @@ case $CMD in
 		REPOS=$REPOS ./git_all.sh checkout master
 		$0 version $VERSION $REPOS
 		REPOS=$REPOS ./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "ticked version number to $VERSION" setup.py
-		REPOS=$REPOS ./git_all.sh diff master origin/master | cat
+		REPOS=$REPOS ./git_all.sh diff origin/master master | cat
 		echo
 		echo -n "Does the diff look good (y|n)? "
 		read a
