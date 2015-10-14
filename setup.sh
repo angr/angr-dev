@@ -156,6 +156,25 @@ then
 fi
 
 REMOTES="$REMOTES https://git:@github.com/angr https://git:@github.com/zardus https://git:@github.com/rhelmot"
+
+function try_remote
+{
+	URL=$1
+	debug "Trying to clone from $URL"
+	git clone $URL > /tmp/angr-$$ 2> /tmp/angr-$$
+	r=$?
+
+	if grep -q "ssh_exchange_identification: read: Connection reset by peer" /tmp/angr-$$
+	then
+		warning "Too many concurrent connections to the server. Retrying after sleep."
+		sleep $[$RANDOM % 5]
+		try_remote $URL
+		return $?
+	else
+		return $r
+	fi
+}
+
 function clone_repo
 {
 	NAME=$1
@@ -169,8 +188,7 @@ function clone_repo
 	for r in $REMOTES
 	do
 		URL="$r/$NAME"
-		debug "Trying to clone from $URL"
-		( git clone $URL >> /tmp/angr-$$ 2>> /tmp/angr-$$ ) && debug "Success!" && break
+		try_remote $URL && debug "Success!" && break
 	done
 
 	if [ ! -e $NAME ]
