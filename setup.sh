@@ -161,7 +161,8 @@ function try_remote
 {
 	URL=$1
 	debug "Trying to clone from $URL"
-	git clone $URL > /tmp/angr-$$ 2> /tmp/angr-$$
+	rm -f /tmp/angr-$$
+	git clone $URL >> /tmp/angr-$$ 2>> /tmp/angr-$$
 	r=$?
 
 	if grep -q "ssh_exchange_identification: read: Connection reset by peer" /tmp/angr-$$
