@@ -17,6 +17,8 @@ function today_version
 	echo 4.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/\.0*/./")
 }
 
+DEFAULT_REPOS="angr-management angr simuvex claripy cle pyvex archinfo vex"
+
 case $CMD in
 	release)
 		VERSION=$1
@@ -24,7 +26,7 @@ case $CMD in
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
 		REPOS=$@
-		[ -z "$REPOS" ] && REPOS="angr-management angr simuvex claripy cle pyvex archinfo"
+		[ -z "$REPOS" ] && REPOS=$DEFAULT_REPOS
 
 		REPOS=$REPOS ./git_all.sh checkout master
 		$0 version $VERSION $REPOS
@@ -43,7 +45,7 @@ case $CMD in
 		;;
 	sync)
 		REPOS=$@
-		[ -z "$REPOS" ] && REPOS="angr-management angr simuvex claripy cle pyvex archinfo"
+		[ -z "$REPOS" ] && REPOS=$DEFAULT_REPOS
 
 		REPOS=$REPOS ./git_all.sh checkout master
 		REPOS=$REPOS ./git_all.sh pull origin master
@@ -58,10 +60,12 @@ case $CMD in
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
 		REPOS=$@
-		[ -z "$REPOS" ] && REPOS="angr-management angr simuvex claripy cle pyvex archinfo"
+		[ -z "$REPOS" ] && REPOS=$DEFAULT_REPOS
 
 		for i in $REPOS
 		do
+			[ ! -e $i/setup.py ] && continue
+
 			cd $i
 			if [ "$(git show --format="%aN" -s HEAD)" == 'angr release bot' ]
 			then
@@ -83,7 +87,7 @@ case $CMD in
 		shift
 
 		REPOS=$@
-		[ -z "$REPOS" ] && REPOS="angr-management angr simuvex claripy cle pyvex archinfo"
+		[ -z "$REPOS" ] && REPOS=$DEFAULT_REPOS
 
 		for i in $REPOS
 		do
@@ -96,6 +100,8 @@ case $CMD in
 	register)
 		for i in $@
 		do
+			[ ! -e $i/setup.py ] && continue
+
 			cd $i
 			python setup.py register
 			cd ..
@@ -104,6 +110,8 @@ case $CMD in
 	sdist)
 		for i in $@
 		do
+			[ ! -e $i/setup.py ] && continue
+
 			cd $i
 			python setup.py sdist upload
 			cd ..
@@ -112,6 +120,8 @@ case $CMD in
 	wheel)
 		for i in $@
 		do
+			[ ! -e $i/setup.py ] && continue
+
 			cd $i
 			python setup.py bdist_wheel upload
 			cd ..
