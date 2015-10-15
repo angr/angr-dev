@@ -18,9 +18,9 @@ function careful_pull
 
 	if grep -q "ssh_exchange_identification: read: Connection reset by peer" /tmp/clone-$$
 	then
-		warning "Too many concurrent connections to the server. Retrying after sleep."
+		red "Too many concurrent connections to the server. Retrying after sleep."
 		sleep $[$RANDOM % 5]
-		try_remote $URL
+		careful_pull
 		return $?
 	else
 		[ $r -eq 0 ] && rm -f /tmp/clone-$$
