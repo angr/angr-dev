@@ -90,7 +90,7 @@ function debug
 
 function error
 {
-	echo "$(tput setaf 1 2>/dev/null)[!!] $@$(tput sgr0 2>/dev/null)"
+	echo "$(tput setaf 1 2>/dev/null)[!!] $@$(tput sgr0 2>/dev/null)" >&2
 	exit 1
 }
 
