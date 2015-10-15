@@ -13,17 +13,17 @@ function red
 function careful_pull
 {
 	rm -f /tmp/pull-$$
-	git pull >> /tmp/clone-$$ 2>> /tmp/clone-$$
+	git pull >> /tmp/pull-$$ 2>> /tmp/pull-$$
 	r=$?
 
-	if grep -q "ssh_exchange_identification: read: Connection reset by peer" /tmp/clone-$$
+	if grep -q "ssh_exchange_identification: read: Connection reset by peer" /tmp/pull-$$
 	then
 		red "Too many concurrent connections to the server. Retrying after sleep."
 		sleep $[$RANDOM % 5]
 		careful_pull
 		return $?
 	else
-		[ $r -eq 0 ] && rm -f /tmp/clone-$$
+		[ $r -eq 0 ] && rm -f /tmp/pull-$$
 		return $r
 	fi
 }
