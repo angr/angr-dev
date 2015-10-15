@@ -204,7 +204,7 @@ function clone_repo
 	return 0
 }
 
-REPOS="ana idalink cooldict mulpyplexer monkeyhex superstruct vex pyvex archinfo cle claripy simuvex angr angr-management $EXTRA_REPOS"
+REPOS="ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management $EXTRA_REPOS"
 
 info "Cloning angr components!"
 for r in $REPOS
