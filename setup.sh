@@ -75,22 +75,22 @@ EXTRA_REPOS=${@:$OPTIND:$OPTIND+100}
 
 function info
 {
-	echo "$(tput setaf 4)[+] $@$(tput sgr0)"
+	echo "$(tput setaf 4 2>/dev/null)[+] $@$(tput sgr0 2>/dev/null)"
 }
 
 function warning
 {
-	echo "$(tput setaf 3)[!] $@$(tput sgr0)"
+	echo "$(tput setaf 3 2>/dev/null)[!] $@$(tput sgr0 2>/dev/null)"
 }
 
 function debug
 {
-	echo "$(tput setaf 6)[-] $@$(tput sgr0)"
+	echo "$(tput setaf 6 2>/dev/null)[-] $@$(tput sgr0 2>/dev/null)"
 }
 
 function error
 {
-	echo "$(tput setaf 1)[!!] $@$(tput sgr0)"
+	echo "$(tput setaf 1 2>/dev/null)[!!] $@$(tput sgr0 2>/dev/null)"
 	exit 1
 }
 
@@ -161,17 +161,18 @@ function try_remote
 {
 	URL=$1
 	debug "Trying to clone from $URL"
-	rm -f /tmp/angr-$$
-	git clone $URL >> /tmp/angr-$$ 2>> /tmp/angr-$$
+	rm -f /tmp/clone-$$
+	git clone $URL >> /tmp/clone-$$ 2>> /tmp/clone-$$
 	r=$?
 
-	if grep -q "ssh_exchange_identification: read: Connection reset by peer" /tmp/angr-$$
+	if grep -q "ssh_exchange_identification: read: Connection reset by peer" /tmp/clone-$$
 	then
 		warning "Too many concurrent connections to the server. Retrying after sleep."
 		sleep $[$RANDOM % 5]
 		try_remote $URL
 		return $?
 	else
+		[ $r -ne 0 ] && rm -f /tmp/clone-$$
 		return $r
 	fi
 }
@@ -195,12 +196,11 @@ function clone_repo
 	if [ ! -e $NAME ]
 	then
 		error "Failed to clone $NAME. Error was:"
-		cat /tmp/angr-$$
-		rm -f /tmp/angr-$$
+		cat /tmp/clone-$$
+		rm -f /tmp/clone-$$
 		return 1
 	fi
 
-	rm -f /tmp/angr-$$
 	return 0
 }
 
@@ -215,12 +215,26 @@ done
 
 if [ $INSTALL -eq 1 ]
 then
-	info "Deploying links into virtual environment!"
+	info "Installing python packages (logging to /tmp/pip-$$)!"
 	(python --version 2>&1| grep -q PyPy) && TO_INSTALL=${TO_INSTALL// angr-management/}
-	pip install ${TO_INSTALL// / -e }
+	if pip install ${TO_INSTALL// / -e } >> /tmp/pip-$$ 2>> /tmp/pip-$$
+	then
+		info "Success!"
+		rm -f /tmp/pip-$$
+	else
+		error "Something failed to install. Check /tmp/pip-$$ for details."
+		exit 1
+	fi
 
-	info "Installing some other helpful stuff."
-	pip install ipython pylint ipdb nose
+	info "Installing some other helpful stuff (logging to /tmp/pip-$$)."
+	if pip install ipython pylint ipdb nose >> /tmp/pip-$$ 2>> /tmp/pip-$$
+	then
+		info "Success!"
+		rm -f /tmp/pip-$$
+	else
+		error "Something failed to install. Check /tmp/pip-$$ for details."
+		exit 1
+	fi
 fi
 
 echo ''
