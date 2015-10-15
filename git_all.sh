@@ -37,7 +37,7 @@ function doit
 	green "================================================================================"
 	green "=== Running on $DIR."
 
-	if [ "$@" == "CAREFUL_PULL" ]
+	if [ "$1" == "CAREFUL_PULL" ]
 	then
 		careful_pull && green "=== SUCCESS" || red "=== FAILURE"
 	else
