@@ -2,12 +2,12 @@
 
 function green
 {
-	echo "$(tput setaf 6)$@$(tput sgr0)"
+	echo "$(tput setaf 6 2>/dev/null)$@$(tput sgr0 2>/dev/null)"
 }
 
 function red
 {
-	echo "$(tput setaf 1)$@$(tput sgr0)"
+	echo "$(tput setaf 1 2>/dev/null)$@$(tput sgr0 2>/dev/null)"
 }
 
 function careful_pull
