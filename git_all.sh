@@ -10,6 +10,24 @@ function red
 	echo "$(tput setaf 1)$@$(tput sgr0)"
 }
 
+function careful_pull
+{
+	rm -f /tmp/pull-$$
+	git pull >> /tmp/clone-$$ 2>> /tmp/clone-$$
+	r=$?
+
+	if grep -q "ssh_exchange_identification: read: Connection reset by peer" /tmp/clone-$$
+	then
+		warning "Too many concurrent connections to the server. Retrying after sleep."
+		sleep $[$RANDOM % 5]
+		try_remote $URL
+		return $?
+	else
+		[ $r -eq 0 ] && rm -f /tmp/clone-$$
+		return $r
+	fi
+}
+
 function doit
 {
 	DIR=$1
@@ -18,7 +36,13 @@ function doit
 	cd $DIR
 	green "================================================================================"
 	green "=== Running on $DIR."
-	git "$@" && green "=== SUCCESS" || red "=== FAILURE"
+
+	if [ "$@" == "CAREFUL_PULL" ]
+	then
+		careful_pull && green "=== SUCCESS" || red "=== FAILURE"
+	else
+		git "$@" && green "=== SUCCESS" || red "=== FAILURE"
+	fi
 	cd ..
 }
 
