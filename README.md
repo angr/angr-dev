@@ -19,6 +19,15 @@ $ workon angr
 [1] import angr
 ```
 
+## Install (docker)
+
+Alternatively, you can use the dockerfile:
+
+```ShellSession
+$ docker build -t angr - < angr-dev/Dockerfile
+$ docker run -it angr
+```
+
 ## Updating
 
 To update angr, simply pull all the git repositories.
