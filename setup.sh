@@ -172,6 +172,7 @@ function try_remote
 		try_remote $URL
 		return $?
 	else
+		cat /tmp/clone-$$ >> /tmp/clone-$(basename $URL)
 		[ $r -eq 0 ] && rm -f /tmp/clone-$$
 		return $r
 	fi
