@@ -165,7 +165,7 @@ function try_remote
 	git clone $URL >> /tmp/clone-$$ 2>> /tmp/clone-$$
 	r=$?
 
-	if grep -q "ssh_exchange_identification: read: Connection reset by peer" /tmp/clone-$$
+	if grep -q -E "(ssh_exchange_identification: read: Connection reset by peer|ssh_exchange_identification: Connection closed by remote host)" /tmp/clone-$$
 	then
 		warning "Too many concurrent connections to the server. Retrying after sleep."
 		sleep $[$RANDOM % 5]
