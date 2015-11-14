@@ -10,6 +10,28 @@ function red
 	echo "$(tput setaf 1 2>/dev/null)$@$(tput sgr0 2>/dev/null)"
 }
 
+RED=$(tput setaf 1 2>/dev/null)
+GREEN=$(tput setaf 2 2>/dev/null)
+NORMAL=$(tput sgr0 2>/dev/null)
+right_align() {
+	MSG="$1"
+	PADDING="$2"
+	COLOR="$3"
+
+	[ -z "$PADDING" ] && PADDING="="
+	[ -z "$COLOR" ] && COLOR="$GREEN"
+	[ -e $(which tput) ] && COL=$(tput cols) || COL=80
+	let PAD=\($COL-${#MSG}-2\)/2
+
+	printf "$COLOR"
+	printf -- "$PADDING%.0s" $(eval "echo {1..$PAD}")
+	printf " %s " "$MSG"
+	printf -- "$PADDING%.0s" $(eval "echo {1..$PAD}")
+	[ $[$PAD*2 + ${#MSG} + 2] -lt $COL ] && printf "$PADDING"
+	printf "$NORMAL"
+	printf "\n"
+}
+
 function careful_pull
 {
 	rm -f /tmp/pull-$$
@@ -34,14 +56,13 @@ function doit
 	shift
 
 	cd $DIR
-	green "================================================================================"
-	green "=== Running on $DIR."
+	right_align "RUNNING ON: $DIR" "#"
 
 	if [ "$1" == "CAREFUL_PULL" ]
 	then
-		careful_pull && green "=== SUCCESS" || red "=== FAILURE"
+		careful_pull && right_align "SUCCESS" "-" || right_align "FAILURE (return code $?)" "-" "$RED"
 	else
-		git "$@" && green "=== SUCCESS" || red "=== FAILURE"
+		git "$@" && right_align "SUCCESS" "-" || right_align "FAILURE (return code $?)" "-" "$RED"
 	fi
 	cd ..
 }
