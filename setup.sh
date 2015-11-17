@@ -155,7 +155,7 @@ then
 	fi
 fi
 
-ORIGIN_REMOTE=$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s/\/angr-dev//")
+ORIGIN_REMOTE=$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s/\/angr-dev.*//")
 REMOTES="$REMOTES ${ORIGIN_REMOTE/\/github.com/\/git:@github.com} https://git:@github.com/zardus https://git:@github.com/rhelmot"
 
 function try_remote
