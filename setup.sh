@@ -12,6 +12,7 @@ function usage
 	echo "    -e ENV	create a cpython environment ENV"
 	echo "    -E ENV	re-create a cpython environment ENV"
 	echo "    -p ENV	create a pypy environment ENV"
+	echo "    -P ENV	re-create a pypy environment ENV"
 	echo "    -r REMOTE	use a different remote base (default: https://github.com/angr/)"
 	echo "             	Can be specified multiple times."
 	echo "    EXTRA_REPOS	any extra repositories you want to clone from the angr org."
