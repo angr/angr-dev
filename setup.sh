@@ -154,7 +154,8 @@ then
 	fi
 fi
 
-REMOTES="$REMOTES https://git:@github.com/angr https://git:@github.com/zardus https://git:@github.com/rhelmot"
+ORIGIN_REMOTE=$(git remote -v | grep origin | head -n1 | awk '{print $2}')
+REMOTES="$REMOTES ${ORIGIN_REMOTE/\/github.com/\/git:@github.com} https://git:@github.com/zardus https://git:@github.com/rhelmot"
 
 function try_remote
 {
