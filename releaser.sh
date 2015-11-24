@@ -17,7 +17,7 @@ function today_version
 	echo 4.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/\.0*/./")
 }
 
-DEFAULT_REPOS="angr-management angr simuvex claripy cle pyvex archinfo vex"
+DEFAULT_REPOS="angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex"
 
 case $CMD in
 	release)
