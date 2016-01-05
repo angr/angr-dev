@@ -14,7 +14,7 @@ shift
 
 function today_version
 {
-	echo 4.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/\.0*/./")
+	echo 4.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/^0*//g" -e "s/\.0*/./g")
 }
 
 DEFAULT_REPOS="angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex"
