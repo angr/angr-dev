@@ -102,7 +102,7 @@ then
 fi
 
 info "Checking dependencies..."
-[ -e /etc/debian_version -a $(dpkg -l $DEBS | wc -l) -ne 14 ] && echo "Please install the following packages: $DEBS" && exit 1
+[ -e /etc/debian_version -a $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && echo "Please install the following packages: $DEBS" && exit 1
 [ ! -e /etc/debian_version ] && echo -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
 
 set +e
