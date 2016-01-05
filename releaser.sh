@@ -17,7 +17,7 @@ function today_version
 	echo 4.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/^0*//g" -e "s/\.0*/./g")
 }
 
-DEFAULT_REPOS="angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex"
+export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex}
 
 case $CMD in
 	release)
@@ -25,42 +25,33 @@ case $CMD in
 		shift || true
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
-		REPOS=$@
-		[ -z "$REPOS" ] && REPOS=$DEFAULT_REPOS
-
-		REPOS=$REPOS ./git_all.sh checkout master
-		$0 version $VERSION $REPOS
-		REPOS=$REPOS ./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "ticked version number to $VERSION" setup.py
-		REPOS=$REPOS ./git_all.sh diff origin/master master | cat
+		./git_all.sh checkout master
+		$0 version $VERSION
+		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "ticked version number to $VERSION" setup.py
+		./git_all.sh diff origin/master master | cat
 		echo
 		echo -n "Does the diff look good (y|n)? "
 		read a
 		[ "$a" == "y" ] || exit 1
-		REPOS=$REPOS ./git_all.sh push origin master
-		REPOS=$REPOS ./git_all.sh push github master
-		REPOS=$REPOS ./git_all.sh checkout @{-1}
-		$0 register $REPOS
-		$0 sdist $REPOS
-		$0 wheel pyvex
+		./git_all.sh push origin master
+		./git_all.sh push github master
+		./git_all.sh checkout @{-1}
+		$0 register
+		$0 sdist
+		#[[ $REPOS == *pyvex* ]] && REPOS=pyvex $0 wheel pyvex
 		;;
 	sync)
-		REPOS=$@
-		[ -z "$REPOS" ] && REPOS=$DEFAULT_REPOS
-
-		REPOS=$REPOS ./git_all.sh checkout master
-		REPOS=$REPOS ./git_all.sh pull origin master
-		REPOS=$REPOS ./git_all.sh pull github master
-		REPOS=$REPOS ./git_all.sh push github master
-		REPOS=$REPOS ./git_all.sh push origin master
-		REPOS=$REPOS ./git_all.sh checkout @{-1}
+		./git_all.sh checkout master
+		./git_all.sh pull origin master
+		./git_all.sh pull github master
+		./git_all.sh push github master
+		./git_all.sh push origin master
+		./git_all.sh checkout @{-1}
 		;;
 	version)
 		VERSION=$1
 		shift || true
 		[ -z "$VERSION" ] && VERSION=$(today_version)
-
-		REPOS=$@
-		[ -z "$REPOS" ] && REPOS=$DEFAULT_REPOS
 
 		for i in $REPOS
 		do
@@ -86,9 +77,6 @@ case $CMD in
 		PREFIX=$1
 		shift
 
-		REPOS=$@
-		[ -z "$REPOS" ] && REPOS=$DEFAULT_REPOS
-
 		for i in $REPOS
 		do
 			cd $i
@@ -98,7 +86,7 @@ case $CMD in
 		done
 		;;
 	register)
-		for i in $@
+		for i in $REPOS
 		do
 			[ ! -e $i/setup.py ] && continue
 
@@ -108,7 +96,7 @@ case $CMD in
 		done
 		;;
 	sdist)
-		for i in $@
+		for i in $REPOS
 		do
 			[ ! -e $i/setup.py ] && continue
 
@@ -118,7 +106,7 @@ case $CMD in
 		done
 		;;
 	wheel)
-		for i in $@
+		for i in $REPOS
 		do
 			[ ! -e $i/setup.py ] && continue
 
