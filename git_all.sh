@@ -50,6 +50,18 @@ function careful_pull
 	fi
 }
 
+function success
+{
+	center_align "SUCCESS" "-"
+	SUCCESSFUL="$SUCCESSFUL $1"
+}
+
+function fail
+{
+	center_align "FAILURE (return code $2)" "-" "$RED"
+	FAILED="$FAILED $1"
+}
+
 function doit
 {
 	DIR=$1
@@ -60,9 +72,9 @@ function doit
 
 	if [ "$1" == "CAREFUL_PULL" ]
 	then
-		careful_pull && center_align "SUCCESS" "-" || center_align "FAILURE (return code $?)" "-" "$RED"
+		careful_pull && success $DIR || fail $DIR $?
 	else
-		git "$@" && center_align "SUCCESS" "-" || center_align "FAILURE (return code $?)" "-" "$RED"
+		git "$@" && success $DIR || fail $DIR $?
 	fi
 	cd ..
 }
@@ -79,4 +91,17 @@ else
 		i=${i/\/.git\//}
 		doit $i "$@"
 	done
+fi
+
+echo ""
+if [ -n "$SUCCESSFUL" ]
+then
+	green "# Succeeded:"
+	echo $SUCCESSFUL
+fi
+echo ""
+if [ -n "$FAILED" ]
+then
+	red "# Failed:"
+	echo $FAILED
 fi
