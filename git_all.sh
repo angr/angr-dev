@@ -13,7 +13,7 @@ function red
 RED=$(tput setaf 1 2>/dev/null)
 GREEN=$(tput setaf 2 2>/dev/null)
 NORMAL=$(tput sgr0 2>/dev/null)
-right_align() {
+center_align() {
 	MSG="$1"
 	PADDING="$2"
 	COLOR="$3"
@@ -56,13 +56,13 @@ function doit
 	shift
 
 	cd $DIR
-	right_align "RUNNING ON: $DIR" "#"
+	center_align "RUNNING ON: $DIR" "#"
 
 	if [ "$1" == "CAREFUL_PULL" ]
 	then
-		careful_pull && right_align "SUCCESS" "-" || right_align "FAILURE (return code $?)" "-" "$RED"
+		careful_pull && center_align "SUCCESS" "-" || center_align "FAILURE (return code $?)" "-" "$RED"
 	else
-		git "$@" && right_align "SUCCESS" "-" || right_align "FAILURE (return code $?)" "-" "$RED"
+		git "$@" && center_align "SUCCESS" "-" || center_align "FAILURE (return code $?)" "-" "$RED"
 	fi
 	cd ..
 }
