@@ -17,7 +17,7 @@ function today_version
 	echo 4.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/^0*//g" -e "s/\.0*/./g")
 }
 
-export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex}
+export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex binaries}
 
 case $CMD in
 	release)
