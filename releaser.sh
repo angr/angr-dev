@@ -17,6 +17,18 @@ function today_version
 	echo 4.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/^0*//g" -e "s/\.0*/./g")
 }
 
+function build_api_docs
+{
+	make -C ../angr-doc/api-doc html
+	rm -rf ../angr.github.io/api-doc
+	cp -r ../angr-doc/api-doc/build/html ../angr.github.io/api-doc
+
+	cd ../angr.github.io
+	git commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "updated api-docs for version $VERSION" api-doc
+	git push origin master
+	cd -
+}
+
 export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex binaries}
 
 case $CMD in
@@ -38,6 +50,7 @@ case $CMD in
 		./git_all.sh checkout @{-1}
 		$0 register
 		$0 sdist
+		build_api_docs
 		#[[ $REPOS == *pyvex* ]] && REPOS=pyvex $0 wheel pyvex
 		;;
 	sync)
