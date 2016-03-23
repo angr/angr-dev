@@ -21,7 +21,7 @@ function build_docs
 {
     cd ../angr-doc
     git checkout master
-    git push gitbook master
+    git push github master
     cd -
 
 	make -C ../angr-doc/api-doc html
