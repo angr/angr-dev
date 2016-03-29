@@ -40,12 +40,12 @@ def main(branch_name=None):
 
     for pr in prs:
         repo_path = os.path.join(angr_dir, pr.base['repo']['name'])
-        print '\x1b[32;1m$', 'git', 'checkout', '-b', branch_name, 'master', '\x1b[0m'
-        subprocess.call(['git', 'checkout', '-b', branch_name, 'master'], cwd=repo_path)
+        print '\x1b[32;1m$', 'git', 'checkout', '-B', branch_name, 'master', '\x1b[0m'
+        subprocess.call(['git', 'checkout', '-B', branch_name, 'master'], cwd=repo_path)
         print '\x1b[32;1m$', 'git', 'pull', pr.head['repo']['git_url'], pr.head['ref'], '\x1b[0m'
         subprocess.call(['git', 'pull', pr.head['repo']['git_url'], pr.head['ref']], cwd=repo_path)
         print '\x1b[32;1m$', 'git', 'push', '-f', '-u', 'origin', branch_name, '\x1b[0m'
-        #subprocess.call(['git', 'push', '-f', '-u', 'origin', branch_name], cwd=repo_path)
+        subprocess.call(['git', 'push', '-f', '-u', 'origin', branch_name], cwd=repo_path)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
