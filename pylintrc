@@ -7,9 +7,6 @@
 # pygtk.require().
 #init-hook=
 
-# Profiled execution.
-profile=no
-
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
 ignore=CVS
@@ -34,7 +31,7 @@ load-plugins=
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
 
-disable=bad-indentation,line-too-long,invalid-name,missing-docstring,too-many-instance-attributes,no-space-after-comma,fixme,star-args,too-many-arguments,multiple-statements,too-few-public-methods,no-space-after-operator,too-many-locals,too-many-statements,too-many-branches,too-many-return-statements,global-statement,too-many-public-methods,old-style-class,protected-access,abstract-class-not-used,too-many-lines,deprecated-module,bad-builtin,deprecated-lambda,mixed-indentation,locally-disabled,bad-continuation,too-many-ancestors,duplicate-code,wrong-import-position,multiple-imports,ungrouped-imports,wrong-import-order,redefined-variable-type
+disable=bad-indentation,line-too-long,invalid-name,missing-docstring,too-many-instance-attributes,no-space-after-comma,fixme,star-args,too-many-arguments,multiple-statements,too-few-public-methods,no-space-after-operator,too-many-locals,too-many-statements,too-many-branches,too-many-return-statements,global-statement,too-many-public-methods,old-style-class,protected-access,abstract-class-not-used,too-many-lines,deprecated-module,bad-builtin,deprecated-lambda,mixed-indentation,locally-disabled,bad-continuation,too-many-ancestors,duplicate-code,wrong-import-position,multiple-imports,ungrouped-imports,wrong-import-order,redefined-variable-type,unidiomatic-typecheck
 #bad-continuation,
 
 [REPORTS]
@@ -58,10 +55,6 @@ reports=yes
 # (RP0004).
 evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
 
-# Add a comment according to your evaluation note. This is used by the global
-# evaluation report (RP0004).
-comment=no
-
 
 [TYPECHECK]
 
@@ -73,21 +66,17 @@ ignore-mixin-members=yes
 # (useful for classes with attributes dynamically set).
 ignored-classes=SQLObject,nose.tools,nose.tools.trivial,sympy
 
-# When zope mode is activated, add a predefined set of Zope acquired attributes
-# to generated-members.
-zope=no
-
 # List of members which are set dynamically and missed by pylint inference
 # system, and so shouldn't trigger E0201 when accessed. Python regular
 # expressions are accepted.
 generated-members=REQUEST,acl_users,aq_parent
 
-ignored-modules = sh
+ignored-modules=sh
 
 [FORMAT]
 
 # Maximum number of characters on a single line.
-max-line-length=80
+max-line-length=120
 
 # Maximum number of lines in a module
 max-module-lines=1000
@@ -98,9 +87,6 @@ indent-string='    '
 
 
 [BASIC]
-
-# Required attributes for module, separated by a comma
-required-attributes=
 
 # List of builtins function names that should not be used, separated by a comma
 bad-functions=map,filter,apply,input
@@ -229,10 +215,6 @@ int-import-graph=
 
 
 [CLASSES]
-
-# List of interface methods to ignore, separated by a comma. This is used for
-# instance to not check methods defines in Zope's Interface base class.
-ignore-iface-methods=isImplementedBy,deferred,extends,names,namesAndDescriptions,queryDescriptionFor,getBases,getDescriptionFor,getDoc,getName,getTaggedValue,getTaggedValueTags,isEqualOrExtendedBy,setTaggedValue,isImplementedByInstancesOf,adaptWith,is_implemented_by
 
 # List of method names used to declare (i.e. assign) instance attributes.
 defining-attr-methods=__init__,__new__,setUp
