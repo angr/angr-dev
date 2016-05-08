@@ -1,0 +1,306 @@
+#!/bin/bash
+
+#
+# Angr testing script
+# This is a fork of the internal angr testing script which is slaved to our infrastructure, so it's not actually maintained
+# Lives in /usr/local/bin/angr-test
+#
+
+if [[ -z $VIRTUAL_ENV ]]; then
+    echo "This script must be run from within the Angr virtualenv"
+    exit 1
+fi
+
+# Set up global variables
+export PERSIST_DATA=/home/angr/.persist
+export PATH=$VIRTUAL_ENV/bin:$PATH
+declare -A RESULTS=()
+
+SCRIPTNAME=$(which $0)
+if (git status >/dev/null 2>/dev/null); then
+    export IN_GIT_REPO=1
+    export COMMIT=$(git rev-parse --short HEAD)
+    export BRANCH=$(git branch --list -rv | grep $COMMIT | grep origin | head -n 1 | cut -c 10- | grep -o '^[^ ]*')
+    export CURRENT_REPO_PATH=$(git rev-parse --show-toplevel)
+    cd $CURRENT_REPO_PATH
+    export CURRENT_REPO_NAME=$(dirname */__init__.py | grep -v test)
+    cd $OLDPWD
+    if [[ -f $CURRENT_REPO_PATH/$CURRENT_REPO_NAME/__init__.py ]]; then
+        export WELL_FORMED_REPO=0
+    else
+        export WELL_FORMED_REPO=
+    fi
+    if git remote -v | grep angr-doc\\.git >/dev/null; then
+        export WELL_FORMED_REPO=0
+        export CURRENT_REPO_NAME="angr-doc"
+    fi
+    if (git status 2>&1 | grep 'On branch' >/dev/null); then
+        export USE_COMMIT_HASH=
+    else
+        export USE_COMMIT_HASH=0
+    fi
+else
+    export IN_GIT_REPO=0
+fi
+
+# Define functions
+
+main () {
+    update_self "$@"
+    if [[ -z $1 ]]; then
+        usage
+        exit 1
+    elif [[ $1 == "sync" ]]; then
+        synchronize $2
+        exit 0
+    elif [[ $1 == "lint" ]]; then
+        lint                # this command might cause the program to terminate
+        exit 0
+    else
+        perform_tests "$@"  # this command will cause the program to terminate
+        echo "This statement should not be reached"
+        exit 1
+    fi
+}
+
+update_self () {
+    cd /home/angr/angr-dev
+    git pull >/dev/null 2>/dev/null
+    if ! diff angr-test $SCRIPTNAME >/dev/null; then
+        echo 'Updating sync script!'
+        cd $OLDPWD
+        sudo cp /home/angr/angr-dev/angr-test $SCRIPTNAME && exec $SCRIPTNAME "$@"
+    fi
+    cd $OLDPWD
+}
+
+usage () {
+    cat <<EOF
+Angr test script
+Usage: $0 [ sync | lint | <repo1> <repo2> ... ]
+
+This program assumes angr-dev is in /home/angr/angr-dev
+and that the rest of the angr repositories are in /home/angr/angr/*.
+
+Sync command:
+    Must be run from within a repository. Will attempt to syncronize
+    the rest of the angr repositories to the current commit hash, then
+    the current branch name, then to master. Will rebuild repositories
+    that need rebuilding.
+
+    "angr-test sync hard" will discard your local branches in favor of the
+    remote ones.
+
+Lint command:
+    Must be run from within a repository in which the files to be linted
+    are inside a folder that contains an __init__.py file. Test folders are
+    not linted. Will lint with command:
+
+        pylint /home/angr/angr/\$REPO/\$REPO
+
+    The current best-linting status of the master branch will be kept in
+    $PERSIST_DATA. Tests will fail if they perform worse than this
+    benchmark.
+
+Test commands:
+    If run from within a repository, will produce coverage data for the
+    repoitory it is run within. Will test any repository \$REPO specified
+    on the command line with the following command:
+
+        nosetests -v --with-timer /home/angr/angr/\$REPO/tests/test_*.py
+
+    After all the tests are run, a summary will be printed and the program
+    will exit with status zero if all the test commands exited with status
+    zero, else with status one.
+
+EOF
+}
+
+assert_wellformed () {
+    if [[ -z $WELL_FORMED_REPO ]]; then
+        echo "$1 command can only be run within an angr repo"
+        exit 1
+    fi
+}
+
+synchronize () {
+    assert_wellformed sync
+    echo "Syncing with branch $BRANCH..."
+    echo "Cache contents:"
+    #ls -alhR $PERSIST_DATA
+    cd /home/angr/angr
+    for REPO in vex pyvex cle claripy simuvex angr ana cooldict binaries archinfo ../angr-doc; do
+        if [[ ! -d $REPO ]]; then
+            continue
+        fi
+
+        cd $REPO
+        if (!(git status >/dev/null 2>/dev/null)); then
+            cd $OLDPWD
+            continue
+        fi
+
+        if (!(git diff --quiet)); then
+            if [[ $1 == "hard" ]]; then
+                git reset --hard HEAD
+            else
+                echo "NOT syncing repository $REPO with changes on the working tree"
+                cd $OLDPWD
+                continue
+            fi
+        fi
+
+        echo -e "\e[33;1m**** Syncing ${REPO}...\e[0m"
+        git fetch origin
+        git remote prune origin
+
+        if [[ $1 == "hard" ]]; then
+            git rev-parse HEAD | xargs git checkout >/dev/null 2>/dev/null
+            git branch | grep -v '*' | xargs git branch -D
+        fi
+
+        { test $USE_COMMIT_HASH && git checkout -f $COMMIT; } || { git checkout -f $BRANCH; } || { git checkout -f master; } || \
+            { echo 'Unable to check out any branch!' && exit 1; }
+
+        if [[ $1 != "hard" ]]; then
+            git pull
+        fi
+
+        echo -e "\e[33;1m**** $REPO on commit $(git rev-parse --short HEAD)\e[0m"
+        if [ "$REPO" == "pyvex" ]; then
+            { rm -rf build && python setup.py build; } || \
+                { echo 'Unable to build Pyvex!' && exit 1; }
+        fi
+        if [ "$REPO" == "vex" ]; then
+            { make; } || { echo 'Unable to build VEX!' && exit 1; }
+        fi
+        if [ -f requirements.txt ]; then
+            echo "Installing requirements.txt..."
+            { pip install -r requirements.txt >/dev/null; } || { echo 'Unable to install requirements!' && exit 1; }
+        fi
+        echo -e "\e[32;1m**** $REPO synchronized!\e[0m"
+        cd ..
+    done
+}
+
+lint() {
+    assert_wellformed lint
+    if [ -d $PERSIST_DATA ]; then
+        mkdir -p $PERSIST_DATA/lint-migration
+    fi
+
+    TEMP_RAW=$(mktemp)
+    TEMP_PROCESSED=$(mktemp)
+    header $CURRENT_REPO_NAME "Linting"
+    pylint $CURRENT_REPO_PATH/$CURRENT_REPO_NAME | tee $TEMP_RAW
+
+    grep '\*\*\*\*\*\*\*\*\*\*\*\*\*' $TEMP_RAW | cut -f 3 -d ' ' | sort > $TEMP_PROCESSED
+    BASELINE=$PERSIST_DATA/lint-migration/$CURRENT_REPO_NAME
+    if [ -f $BASELINE ]; then
+        if diff $BASELINE $TEMP_PROCESSED | grep '>' >/dev/null; then
+            echo -e "\e[33;1m======== LINTING FAILED =========\e[0m"
+            echo Files that failed to lint:
+            diff $BASELINE $TEMP_PROCESSED | grep '>'
+            rm -f $TEMP_RAW $TEMP_PROCESSED
+            exit 1
+        else
+            echo -e "\e[32;1m======== Linting passed! =========\e[0m"
+        fi
+    else
+        echo "No lint migration data available, no test performed with lint data"
+    fi
+
+    if [[ $BRANCH == "master" ]]; then
+        if [ -d $PERSIST_DATA ]; then
+            echo "Updating lint migration data!"
+            mv $TEMP_PROCESSED $BASELINE
+        fi
+    fi
+
+    rm -f $TEMP_RAW $TEMP_PROCESSED
+}
+
+header () {
+    WHAT=$1
+    TYPE=$2
+    cat <<EOF
+==========================================================
+
+                Running $TYPE for $WHAT
+
+==========================================================
+EOF
+}
+
+perform_tests () {
+    # First clear all the old pyc files - they can mess things up
+    find $(realpath /home/angr/angr) -name '*.pyc' -print0 | xargs -0 rm 2>/dev/null
+    cd /home/angr
+    while [[ -n $1 ]]; do
+        if [[ $1 == 'docs' ]]; then
+            test_docs
+            shift
+        else
+            perform_test $1
+            shift
+        fi
+    done
+    print_summary
+    appropriate_exit
+}
+
+test_docs () {
+    cd /home/angr/angr-doc
+    header angr-doc Tests
+    nosetests -v --nologcapture --with-timer test.py
+    RESULTS["docs"]=$?
+}
+
+perform_test () {
+    WHAT=$1
+    shift
+    shift
+    LOGFILE=$(mktemp)
+    header $WHAT "Tests"
+
+    nosetests -v --nologcapture --with-timer $(coverage_command $WHAT) /home/angr/angr/$WHAT/tests/test_*.py 2>&1 | tee $LOGFILE
+    RESULTS[$WHAT]=${PIPESTATUS[0]}
+
+    grep TOTAL $LOGFILE | awk '{ print "TOTAL: "$4; }'
+    rm $LOGFILE
+}
+
+coverage_command() {
+    if [ -n "$WELL_FORMED_REPO" -a "$1" == "$CURRENT_REPO_NAME" ]; then
+        echo "--with-coverage --cover-package=$CURRENT_REPO_NAME --cover-erase"
+    fi
+}
+
+print_summary () {
+    echo
+    echo "               Results                "
+    echo " ====================================="
+    for WHAT in ${!RESULTS[*]}; do
+        RESULT=${RESULTS[$WHAT]}
+        if [ -z "$RESULT" ]; then
+            MSG="didn't run"
+        elif [ $RESULT -ne 0 ]; then
+            MSG='FAILURE'
+        else
+            MSG='SUCCESS'
+        fi
+        printf ' %-30s%s\n' $WHAT $MSG
+    done
+    echo
+}
+
+appropriate_exit() {
+    SUM=0
+    for what in ${!RESULTS[*]}
+    do
+        SUM=$(($SUM + ${RESULTS[$what]}))
+    done
+    exit $SUM
+}
+
+main "$@"
