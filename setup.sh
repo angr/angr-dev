@@ -183,7 +183,7 @@ function clone_repo
 	NAME=$1
 	if [ -e $NAME ]
 	then
-		info "Skipping $NAME -- already cloned."
+		info "Skipping $NAME -- already cloned. Use ./git_all.sh pull for update."
 		return 0
 	fi
 
