@@ -126,7 +126,7 @@ then
 		rmvirtualenv $ANGR_VENV || error "Failed to remote virtualenv $ANGR_VENV."
 	elif lsvirtualenv | grep -q "^$ANGR_VENV$"
 	then
-		error "Virtualenv $ANGR_VENV already exists."
+		error "Virtualenv $ANGR_VENV already exists. Use -E instead of -e if you want to re-create the environment."
 	fi
 
 	if [ "$USE_PYPY" -eq 1 ]
