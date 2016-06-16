@@ -20,3 +20,4 @@ else
 fi
 
 [ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ] && ../lint.py
+exit 0
