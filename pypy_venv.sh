@@ -10,13 +10,15 @@ cd $DIR
 mkdir -p pypy
 cd pypy
 
+VERSION=${2-pypy2-v5.3.0-linux64}
+
 # get pypy
-[ ! -e pypy-2.6.0-linux64 ] && wget https://bitbucket.org/pypy/pypy/downloads/pypy-2.6.0-linux64.tar.bz2 --local-encoding=utf-8 -O - | tar xvj
+[ ! -e $VERSION ] && wget https://bitbucket.org/pypy/pypy/downloads/$VERSION.tar.bz2 --local-encoding=utf-8 -O - | tar xj
 
 # virtualenv
 set +e
 source /etc/bash_completion.d/virtualenvwrapper
-mkvirtualenv -p $PWD/pypy-2.6.0-linux64/bin/pypy $NAME
+mkvirtualenv -p $PWD/$VERSION/bin/pypy $NAME
 set -e
 pip install -U setuptools
 
