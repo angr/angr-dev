@@ -29,7 +29,7 @@ def lint_repo(pylint_rc):
 
     changed_files = [
         o.split()[-1] for o in
-        subprocess.check_output("git diff --name-status master".split()).split("\n")[:-1]
+        subprocess.check_output("git diff --name-status origin/master".split()).split("\n")[:-1]
     ]
     tolint = [ f for f in changed_files if f.endswith(".py") ]
 
@@ -44,9 +44,15 @@ def compare_lint(dirname):
     pylint_rc = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pylintrc')
     os.chdir(dirname)
     new_scores = lint_repo(pylint_rc)
-    subprocess.check_call("git checkout master".split())
+    subprocess.check_call("git checkout origin/master".split())
     old_scores = lint_repo(pylint_rc)
     subprocess.check_call("git checkout @{-1}".split())
+
+    print ""
+    print "#############################################"
+    print "###              LINT REPORT              ###"
+    print "#############################################"
+    print ""
 
     regressions = [ ]
     for v in new_scores:
