@@ -235,7 +235,7 @@ function install_wheels
 	tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
 }
 
-REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angr-doc $EXTRA_REPOS}
+REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angr-doc binaries $EXTRA_REPOS}
 [ $WHEELS -eq 1 ] && REPOS="$REPOS wheels"
 
 info "Cloning angr components!"
