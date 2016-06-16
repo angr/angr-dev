@@ -265,7 +265,7 @@ then
 	fi
 
 	info "Installing some other helpful stuff (logging to /tmp/pip-$$)."
-	if pip install ipython pylint ipdb nose nose-timer >> $OUTFILE 2>> $ERRFILE
+	if pip install ipython pylint ipdb nose nose-timer coverage >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
 		rm -f /tmp/pip-$$
