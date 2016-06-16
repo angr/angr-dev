@@ -8,7 +8,7 @@ then
 	COVERAGE="--with-coverage --cover-package=$ANGR_REPO --cover-erase"
 fi
 
-NOSE_OPTIONS="-v --nologcapture --with-timer $COVERAGE --processes=2 --process-restartworker"
+NOSE_OPTIONS="-v --nologcapture --with-timer $COVERAGE --processes=2 --process-timeout=570 --process-restartworker"
 
 cd $ANGR_REPO
 if [ -f "test.py" ]
