@@ -8,13 +8,15 @@ then
 	COVERAGE="--with-coverage --cover-package=$ANGR_REPO --cover-erase"
 fi
 
+NOSE_OPTIONS="-v --nologcapture --with-timer $COVERAGE --processes=2 --process-restartworker"
+
 cd $ANGR_REPO
 if [ -f "test.py" ]
 then
-	nosetests -v --nologcapture --with-timer $COVERAGE test.py
+	nosetests $NOSE_OPTIONS test.py
 elif [ -d "tests" ]
 then
-	nosetests -v --nologcapture --with-timer $COVERAGE tests/
+	nosetests $NOSE_OPTIONS tests/
 else
 	echo "### No tests for repository $ANGR_REPO?"
 fi
