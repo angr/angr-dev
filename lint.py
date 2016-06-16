@@ -24,12 +24,16 @@ def lint_file(filename, pylint_rc):
     l.info("File %s has score %.2f", filename, score)
     return score
 
-def lint_dir(dirname, pylint_rc):
+def lint_repo(pylint_rc):
     lint_scores = { }
-    tolint = [ ]
 
-    for root,_,files in os.walk(dirname):
-        tolint.extend(os.path.join(root, f) for f in files if f.endswith(".py"))
+    changed_files = [
+        o.split()[-1] for o in
+        subprocess.check_output("git diff --name-status master".split()).split("\n")[:-1]
+    ]
+    tolint = [ f for f in changed_files if f.endswith(".py") ]
+
+    print "Changed files: %s" % (tolint,)
 
     for f in tolint:
         lint_scores[f] = lint_file(f, pylint_rc)
@@ -39,9 +43,9 @@ def lint_dir(dirname, pylint_rc):
 def compare_lint(dirname):
     pylint_rc = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pylintrc')
     os.chdir(dirname)
-    new_scores = lint_dir(dirname, pylint_rc)
+    new_scores = lint_repo(pylint_rc)
     subprocess.check_call("git checkout master".split())
-    old_scores = lint_dir(dirname, pylint_rc)
+    old_scores = lint_repo(pylint_rc)
     subprocess.check_call("git checkout @{-1}".split())
 
     regressions = [ ]
