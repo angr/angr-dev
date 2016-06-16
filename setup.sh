@@ -10,6 +10,7 @@ function usage
 	echo "    -i		install required packages"
 	echo "    -C		don't do the actual installation (quit after cloning)"
 	echo "    -w		use pre-built packages where available"
+	echo "    -v		verbose (don't redirect installation logging)"
 	echo "    -e ENV	create a cpython environment ENV"
 	echo "    -E ENV	re-create a cpython environment ENV"
 	echo "    -p ENV	create a pypy environment ENV"
@@ -33,12 +34,16 @@ RMVENV=0
 REMOTES=
 INSTALL=1
 WHEELS=0
+VERBOSE=0
 
-while getopts "iCwe:E:p:P:r:h" opt
+while getopts "iCwve:E:p:P:r:h" opt
 do
 	case $opt in
 		i)
 			INSTALL_REQS=1
+			;;
+		v)
+			VERBOSE=1
 			;;
 		e)
 			ANGR_VENV=$OPTARG
@@ -77,6 +82,15 @@ do
 done
 
 EXTRA_REPOS=${@:$OPTIND:$OPTIND+100}
+
+if [ $VERBOSE -eq 1 ]
+then
+	OUTFILE=/dev/stdout
+	ERRFILE=/dev/stderr
+else
+	OUTFILE=/tmp/pip-$$
+	ERRFILE=/tmp/pip-$$
+fi
 
 function info
 {
@@ -213,12 +227,12 @@ function clone_repo
 function install_wheels
 {
 	LATEST_Z3=$(ls -tr wheels/angr_only_z3_custom-*)
-	echo "Installing $LATEST_Z3..." >> /tmp/pip-$$ 2>> /tmp/pip-$$
-	pip install $LATEST_Z3 >> /tmp/pip-$$ 2>> /tmp/pip-$$
+	echo "Installing $LATEST_Z3..." >> $OUTFILE 2>> $ERRFILE
+	pip install $LATEST_Z3 >> $OUTFILE 2>> $ERRFILE
 
 	LATEST_VEX=$(ls -tr wheels/vex-*)
-	echo "Extracting $LATEST_VEX..." >> /tmp/pip-$$ 2>> /tmp/pip-$$
-	tar xvzf $LATEST_VEX >> /tmp/pip-$$ 2>> /tmp/pip-$$
+	echo "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
+	tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
 }
 
 REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angr-doc $EXTRA_REPOS}
@@ -233,12 +247,12 @@ done
 
 if [ $INSTALL -eq 1 ]
 then
-	info "Installing python packages (logging to /tmp/pip-$$)!"
+	info "Installing python packages (logging to $OUTFILE)!"
 
 	[ $WHEELS -eq 1 ] && install_wheels
 
 	(python --version 2>&1| grep -q PyPy) && TO_INSTALL=${TO_INSTALL// angr-management/}
-	if pip install ${TO_INSTALL// / -e } >> /tmp/pip-$$ 2>> /tmp/pip-$$
+	if pip install ${TO_INSTALL// / -e } >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
 		rm -f /tmp/pip-$$
@@ -248,7 +262,7 @@ then
 	fi
 
 	info "Installing some other helpful stuff (logging to /tmp/pip-$$)."
-	if pip install ipython pylint ipdb nose >> /tmp/pip-$$ 2>> /tmp/pip-$$
+	if pip install ipython pylint ipdb nose >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
 		rm -f /tmp/pip-$$
