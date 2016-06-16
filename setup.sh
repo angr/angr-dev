@@ -9,6 +9,7 @@ function usage
 	echo
 	echo "    -i		install required packages"
 	echo "    -C		don't do the actual installation (quit after cloning)"
+	echo "    -w		use pre-built packages where available"
 	echo "    -e ENV	create a cpython environment ENV"
 	echo "    -E ENV	re-create a cpython environment ENV"
 	echo "    -p ENV	create a pypy environment ENV"
@@ -31,8 +32,9 @@ USE_PYPY=
 RMVENV=0
 REMOTES=
 INSTALL=1
+WHEELS=0
 
-while getopts "iCe:E:p:P:r:h" opt
+while getopts "iCwe:E:p:P:r:h" opt
 do
 	case $opt in
 		i)
@@ -61,6 +63,9 @@ do
 			;;
 		C)
 			INSTALL=0
+			;;
+		w)
+			WHEELS=1
 			;;
 		\?)
 			usage
@@ -205,7 +210,19 @@ function clone_repo
 	return 0
 }
 
+function install_wheels
+{
+	LATEST_Z3=$(ls -tr wheels/angr_only_z3_custom-*)
+	echo "Installing $LATEST_Z3..." >> /tmp/pip-$$ 2>> /tmp/pip-$$
+	pip install $LATEST_Z3 >> /tmp/pip-$$ 2>> /tmp/pip-$$
+
+	LATEST_VEX=$(ls -tr wheels/vex-*)
+	echo "Extracting $LATEST_VEX..." >> /tmp/pip-$$ 2>> /tmp/pip-$$
+	tar xvzf $LATEST_VEX >> /tmp/pip-$$ 2>> /tmp/pip-$$
+}
+
 REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angr-doc $EXTRA_REPOS}
+[ $WHEELS -eq 1 ] && REPOS="$REPOS wheels"
 
 info "Cloning angr components!"
 for r in $REPOS
@@ -217,6 +234,9 @@ done
 if [ $INSTALL -eq 1 ]
 then
 	info "Installing python packages (logging to /tmp/pip-$$)!"
+
+	[ $WHEELS -eq 1 ] && install_wheels
+
 	(python --version 2>&1| grep -q PyPy) && TO_INSTALL=${TO_INSTALL// angr-management/}
 	if pip install ${TO_INSTALL// / -e } >> /tmp/pip-$$ 2>> /tmp/pip-$$
 	then
