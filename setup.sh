@@ -258,9 +258,9 @@ then
 	if pip install ${TO_INSTALL// / -e } >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
-		rm -f /tmp/pip-$$
+		[ $VERBOSE -eq 1 ] || rm -f $OUTFILE
 	else
-		error "Something failed to install. Check /tmp/pip-$$ for details."
+		error "Something failed to install. Check $OUTFILE for details."
 		exit 1
 	fi
 
@@ -268,7 +268,7 @@ then
 	if pip install ipython pylint ipdb nose nose-timer coverage >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
-		rm -f /tmp/pip-$$
+		[ $VERBOSE -eq 1 ] || rm -f $OUTFILE
 	else
 		error "Something failed to install. Check /tmp/pip-$$ for details."
 		exit 1
