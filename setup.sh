@@ -233,6 +233,10 @@ function install_wheels
 	LATEST_VEX=$(ls -tr wheels/vex-*)
 	echo "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
 	tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
+
+	LATEST_QEMU=$(ls -tr wheels/shellphish_qemu-*)
+	echo "Installing $LATEST_QEMU" >> $OUTFILE 2>> $ERRFILE
+	pip install $LATEST_QEMU >> $OUTFILE 2>> $ERRFILE
 }
 
 REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angr-doc binaries $EXTRA_REPOS}
