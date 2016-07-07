@@ -17,6 +17,7 @@ function usage
 	echo "    -P ENV	re-create a pypy environment ENV"
 	echo "    -r REMOTE	use a different remote base (default: https://github.com/angr/)"
 	echo "             	Can be specified multiple times."
+	echo "    -b BRANCH     Check out a given branch across all the repositories."
 	echo "    -D            Ignore the default repo list."
 	echo "    EXTRA_REPOS	any extra repositories you want to clone from the angr org."
 	echo
@@ -37,8 +38,9 @@ REMOTES=
 INSTALL=1
 WHEELS=0
 VERBOSE=0
+BRANCH=
 
-while getopts "iCwDve:E:p:P:r:h" opt
+while getopts "iCwDve:E:p:P:r:b:h" opt
 do
 	case $opt in
 		i)
@@ -64,6 +66,9 @@ do
 			ANGR_VENV=$OPTARG
 			USE_PYPY=1
 			RMVENV=1
+			;;
+		b)
+			BRANCH=$OPTARG
 			;;
 		r)
 			REMOTES="$REMOTES $OPTARG"
@@ -257,6 +262,12 @@ do
 	clone_repo $r || exit 1
 	[ -e "$NAME/setup.py" ] && TO_INSTALL="$TO_INSTALL $NAME"
 done
+
+if [ -n "$BRANCH" ]
+then
+	info "Checking out branch $BRANCH."
+	./git_all.sh checkout $BRANCH
+fi
 
 if [ $INSTALL -eq 1 ]
 then
