@@ -17,6 +17,7 @@ function usage
 	echo "    -P ENV	re-create a pypy environment ENV"
 	echo "    -r REMOTE	use a different remote base (default: https://github.com/angr/)"
 	echo "             	Can be specified multiple times."
+	echo "    -D            Ignore the default repo list."
 	echo "    EXTRA_REPOS	any extra repositories you want to clone from the angr org."
 	echo
 	echo "This script clones all the angr repositories and sets up an angr"
@@ -26,6 +27,7 @@ function usage
 }
 
 DEBS=${DEBS-virtualenvwrapper python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev}
+REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angr-doc binaries}
 
 INSTALL_REQS=0
 ANGR_VENV=
@@ -36,7 +38,7 @@ INSTALL=1
 WHEELS=0
 VERBOSE=0
 
-while getopts "iCwve:E:p:P:r:h" opt
+while getopts "iCwDve:E:p:P:r:h" opt
 do
 	case $opt in
 		i)
@@ -72,6 +74,9 @@ do
 		w)
 			WHEELS=1
 			;;
+		D)
+			REPOS=""
+			;;
 		\?)
 			usage
 			;;
@@ -81,7 +86,10 @@ do
 	esac
 done
 
+[ $WHEELS -eq 1 ] && REPOS="$REPOS wheels"
+
 EXTRA_REPOS=${@:$OPTIND:$OPTIND+100}
+REPOS="$REPOS $EXTRA_REPOS"
 
 if [ $VERBOSE -eq 1 ]
 then
@@ -238,9 +246,6 @@ function install_wheels
 	echo "Installing $LATEST_QEMU" >> $OUTFILE 2>> $ERRFILE
 	pip install $LATEST_QEMU >> $OUTFILE 2>> $ERRFILE
 }
-
-REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angr-doc binaries $EXTRA_REPOS}
-[ $WHEELS -eq 1 ] && REPOS="$REPOS wheels"
 
 info "Cloning angr components!"
 for r in $REPOS
