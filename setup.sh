@@ -251,7 +251,12 @@ done
 
 if [ $INSTALL -eq 1 ]
 then
-	info "Installing python packages (logging to $OUTFILE)!"
+	if [ $VERBOSE -eq 1 ]
+	then
+		info "Installing python packages!"
+	else
+		info "Installing python packages (logging to $OUTFILE)!"
+	fi
 
 	[ $WHEELS -eq 1 ] && install_wheels
 
@@ -264,7 +269,8 @@ then
 		info "Success!"
 		[ $VERBOSE -eq 1 ] || rm -f $OUTFILE
 	else
-		error "Something failed to install. Check $OUTFILE for details."
+		error "Something failed to install. Check $OUTFILE for details, or read it here:"
+		cat $OUTFILE
 		exit 1
 	fi
 
@@ -274,7 +280,8 @@ then
 		info "Success!"
 		[ $VERBOSE -eq 1 ] || rm -f $OUTFILE
 	else
-		error "Something failed to install. Check /tmp/pip-$$ for details."
+		error "Something failed to install. Check $OUTFILE for details, or read it here:"
+		cat $OUTFILE
 		exit 1
 	fi
 fi
