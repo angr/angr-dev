@@ -16,12 +16,22 @@ then
 	exit
 fi
 
-WHERE=${@-.}
-TEST_FILES=$(find $WHERE -iname 'test*.py' | egrep -v '^./(capstone|pypy|python|qemu|unicorn|shellphish-)')
+if [ -n "$@" ]
+then
+	TESTS=$(
+		find $WHERE -iname 'test*.py' |
+		sed -e "s|^\./|" -e "s|/.*|" |
+		sort -u |
+		egrep -v '^(capstone|pypy|python|qemu|unicorn|shellphish-)' |
+		sed -e "s|fidget|fidget/tests/test*.py|" -e "s|claripy|claripy/tests|"
+	)
+else
+	TESTS="$@"
+fi
 
 export NOSE_PROCESSES=${NOSE_PROCESSES-$(nproc)}
 export NOSE_PROCESS_TIMEOUT=${NOSE_PROCESS_TIMEOUT-600}
 export NOSE_PROCESS_RESTARTWORKER=${NOSE_PROCESS_RESTARTWORKER-1}
 NOSE_OPTIONS=${NOSE_OPTIONS--v --nologcapture}
 
-nosetests $NOSE_OPTIONS $TEST_FILES
+nosetests $NOSE_OPTIONS $TESTS
