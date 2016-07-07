@@ -16,18 +16,19 @@ then
 	exit
 fi
 
-if [ -n "$@" ]
+if [ -z "$@" ]
 then
 	TESTS=$(
-		find $WHERE -iname 'test*.py' |
-		sed -e "s|^\./|" -e "s|/.*|" |
+		find . -iname 'test*.py' |
+		sed -e "s|^\./||" | sed -e "s|/.*||" |
 		sort -u |
-		egrep -v '^(capstone|pypy|python|qemu|unicorn|shellphish-)' |
-		sed -e "s|fidget|fidget/tests/test*.py|" -e "s|claripy|claripy/tests|"
+		egrep -v '^(capstone|pypy|python|qemu|unicorn|shellphish-)'
 	)
 else
 	TESTS="$@"
 fi
+
+TESTS=$(echo "$TESTS " | sed -e "s|fidget/* |fidget/tests/test*.py |" -e "s|claripy/* |claripy/tests |")
 
 export NOSE_PROCESSES=${NOSE_PROCESSES-$(nproc)}
 export NOSE_PROCESS_TIMEOUT=${NOSE_PROCESS_TIMEOUT-600}
