@@ -274,7 +274,7 @@ then
 		exit 1
 	fi
 
-	info "Installing some other helpful stuff (logging to /tmp/pip-$$)."
+	info "Installing some other helpful stuff (logging to $OUTFILE)."
 	if pip install ipython pylint ipdb nose nose-timer coverage >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
