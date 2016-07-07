@@ -264,7 +264,7 @@ then
 	(python --version 2>&1| grep -q PyPy) && TO_INSTALL=${TO_INSTALL// angr-management/}
 	[ -n "$TRAVIS" ] && TO_INSTALL=${TO_INSTALL// angr-management/}
 
-	if pip install ${TO_INSTALL// / -e } >> $OUTFILE 2>> $ERRFILE
+	if pip install -v ${TO_INSTALL// / -e } >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
 		[ $VERBOSE -eq 1 ] || rm -f $OUTFILE
