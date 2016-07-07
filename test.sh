@@ -17,7 +17,7 @@ then
 fi
 
 WHERE=${@-.}
-TEST_FILES=$(find $WHERE -path ./python -prune -o -path ./pypy -prune -o -path ./capstone -prune -o -iname 'test_*.py' -o -iname 'test.py')
+TEST_FILES=$(find $WHERE -iname 'test*.py' | egrep -v '^./(capstone|pypy|python|qemu|unicorn|shellphish-)')
 
 export NOSE_PROCESSES=${NOSE_PROCESSES-$(nproc)}
 export NOSE_PROCESS_TIMEOUT=${NOSE_PROCESS_TIMEOUT-600}
