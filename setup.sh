@@ -245,6 +245,10 @@ function install_wheels
 	LATEST_QEMU=$(ls -tr wheels/shellphish_qemu-*)
 	echo "Installing $LATEST_QEMU" >> $OUTFILE 2>> $ERRFILE
 	pip install $LATEST_QEMU >> $OUTFILE 2>> $ERRFILE
+
+	LATEST_AFL=$(ls -tr wheels/shellphish_afl-*)
+	echo "Installing $LATEST_AFL" >> $OUTFILE 2>> $ERRFILE
+	pip install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
 }
 
 info "Cloning angr components!"
