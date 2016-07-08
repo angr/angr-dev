@@ -25,9 +25,11 @@ def lint_file(filename):
         else:
             pylint_out = e.output
 
-    score = float(pylint_out.split('\n')[-3].split("/")[0].split(" ")[-1])
+    out_lines = pylint_out.split('\n')
+    errors = out_lines[1:out_lines.index('Report')-2]
+    score = float(out_lines[-3].split("/")[0].split(" ")[-1])
     l.info("File %s has score %.2f", filename, score)
-    return score
+    return errors, score
 
 def lint_files(tolint):
     return { f: lint_file(f) for f in tolint if os.path.isfile(f) }
@@ -50,10 +52,10 @@ def compare_lint():
     tolint = [ f for f in changed_files if f.endswith(".py") ]
     print "Changed files: %s" % (tolint,)
 
-    new_scores = lint_files(tolint)
+    new_results = lint_files(tolint)
     subprocess.check_call("git checkout origin/master".split())
     try:
-        old_scores = lint_files(tolint)
+        old_results = lint_files(tolint)
     finally:
         subprocess.check_call("git checkout @{-1}".split())
 
@@ -64,21 +66,25 @@ def compare_lint():
     print ""
 
     regressions = [ ]
-    for v in new_scores:
-        if v not in old_scores:
-            if new_scores[v] != 10.00:
-                print "LINT FAILURE: new file %s lints at %.2f/10.00" % (v, new_scores[v])
-                regressions.append((v, None, new_scores[v]))
+    for v in new_results:
+        new_errors, new_score = new_results[v]
+        if v not in old_results:
+            if new_score != 10.00:
+                print "LINT FAILURE: new file %s lints at %.2f/10.00. Errors:" % (v, new_score)
+                print "... " + "\n... ".join(new_errors)
+                regressions.append((v, None, new_score))
             else:
                 print "LINT SUCCESS: new file %s is a perfect 10.00!" % v
-        elif v in old_scores:
-            if new_scores[v] < old_scores[v]:
-                print "LINT FAILURE: %s regressed to %.2f/%.2f" % (v, new_scores[v], old_scores[v])
-                regressions.append((v, old_scores[v], new_scores[v]))
-            elif new_scores[v] > old_scores[v]:
-                print "LINT SUCCESS: %s has improved to %.2f (from %.2f)! " % (v, new_scores[v], old_scores[v])
+        else:
+            _, old_score = old_results[v]
+            if new_score < old_score:
+                print "LINT FAILURE: %s regressed to %.2f/%.2f" % (v, new_score, old_score)
+                print "... " + "\n... ".join(new_errors)
+                regressions.append((v, old_score, new_score))
+            elif new_score > old_score:
+                print "LINT SUCCESS: %s has improved to %.2f (from %.2f)! " % (v, new_score, old_score)
             else:
-                print "LINT SUCCESS: %s has remained at %.2f " % (v, new_scores[v])
+                print "LINT SUCCESS: %s has remained at %.2f " % (v, new_score)
 
     print ""
     print "###"
