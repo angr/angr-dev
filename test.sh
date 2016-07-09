@@ -16,7 +16,7 @@ then
 	exit
 fi
 
-if [ -z "$@" ]
+if [ $# == 0 ]
 then
 	TESTS=$(
 		find . -iname 'test*.py' |
