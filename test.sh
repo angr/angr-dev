@@ -28,7 +28,7 @@ else
 	TESTS="$@"
 fi
 
-TESTS=$(echo "$TESTS " | tr '\n' ' ' | sed -e "s|fidget/*\s|fidget/tests/test*.py |" -e "s|claripy/*\s|claripy/tests |")
+TESTS=$(echo "$TESTS " | tr '\n' ' ' | sed -e "s|fidget/*\s|fidget/tests/test*.py |" -e "s|claripy/*\s|claripy/tests |" -e "s|patcherex/*\s|patcherex/tests/test_*.py |")
 
 export NOSE_PROCESSES=${NOSE_PROCESSES-$(nproc)}
 export NOSE_PROCESS_TIMEOUT=${NOSE_PROCESS_TIMEOUT-600}
