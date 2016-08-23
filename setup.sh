@@ -28,7 +28,7 @@ function usage
 }
 
 DEBS=${DEBS-virtualenvwrapper python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev}
-REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angr-doc binaries}
+REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex capstone pyvex cle claripy unicorn simuvex angr angr-management angr-doc binaries}
 
 INSTALL_REQS=0
 ANGR_VENV=
