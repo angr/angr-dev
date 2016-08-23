@@ -19,16 +19,16 @@ function today_version
 
 function build_docs
 {
-    cd ../angr-doc
+    cd angr-doc
     git checkout master
     git push github master
     cd -
 
-	make -C ../angr-doc/api-doc html
-	rm -rf ../angr.github.io/api-doc
-	cp -r ../angr-doc/api-doc/build/html ../angr.github.io/api-doc
+	make -C angr-doc/api-doc html
+	rm -rf angr.github.io/api-doc
+	cp -r angr-doc/api-doc/build/html angr.github.io/api-doc
 
-	cd ../angr.github.io
+	cd angr.github.io
 	git commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "updated api-docs for version $VERSION" api-doc
 	git push origin master
 	cd -
