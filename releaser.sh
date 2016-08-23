@@ -58,6 +58,9 @@ case $CMD in
 		build_docs
 		#[[ $REPOS == *pyvex* ]] && REPOS=pyvex $0 wheel pyvex
 		;;
+	docs)
+		build_docs
+		;;
 	sync)
 		./git_all.sh checkout master
 		./git_all.sh pull origin master
@@ -119,7 +122,7 @@ case $CMD in
 			[ ! -e $i/setup.py ] && continue
 
 			cd $i
-			python setup.py sdist upload
+			python setup.py sdist upload || true
 			cd ..
 		done
 		;;
@@ -129,7 +132,7 @@ case $CMD in
 			[ ! -e $i/setup.py ] && continue
 
 			cd $i
-			python setup.py bdist_wheel upload
+			python setup.py bdist_wheel upload || true
 			cd ..
 		done
 		;;
