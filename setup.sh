@@ -30,11 +30,14 @@ function usage
 DEBS=${DEBS-virtualenvwrapper python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev}
 REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex capstone pyvex cle claripy unicorn simuvex angr angr-management angr-doc binaries}
 
+ORIGIN_REMOTE=$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s/\/angr-dev.*//")
+REMOTES=${REMOTES-${ORIGIN_REMOTE/\/github.com/\/git:@github.com} https://git:@github.com/zardus https://git:@github.com/rhelmot}
+
+
 INSTALL_REQS=0
 ANGR_VENV=
 USE_PYPY=
 RMVENV=0
-REMOTES=
 INSTALL=1
 WHEELS=0
 VERBOSE=0
@@ -71,7 +74,7 @@ do
 			BRANCH=$OPTARG
 			;;
 		r)
-			REMOTES="$REMOTES $OPTARG"
+			REMOTES="$OPTARG $REMOTES"
 			;;
 		C)
 			INSTALL=0
@@ -186,9 +189,6 @@ then
 		exit 1
 	fi
 fi
-
-ORIGIN_REMOTE=$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s/\/angr-dev.*//")
-REMOTES="$REMOTES ${ORIGIN_REMOTE/\/github.com/\/git:@github.com} https://git:@github.com/zardus https://git:@github.com/rhelmot"
 
 function try_remote
 {
