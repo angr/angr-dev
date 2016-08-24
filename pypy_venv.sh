@@ -10,10 +10,24 @@ cd $DIR
 mkdir -p pypy
 cd pypy
 
-VERSION=${2-pypy2-v5.3.1-linux64}
 
-# get pypy
-[ ! -e $VERSION ] && wget https://bitbucket.org/pypy/pypy/downloads/$VERSION.tar.bz2 --local-encoding=utf-8 -O - | tar xj
+if [ -f "/etc/arch-release" ]; then
+    echo "This is an arch distro"
+    ARCH=$(uname -m)
+    VERSION=${2-pypy-5.3.1-1-$ARCH}
+    # get pypy
+    [ ! -e $VERSION.pkg.tar.xz ] && wget https://mirrors.kernel.org/archlinux/community/os/$ARCH/$VERSION.pkg.tar.xz
+    if [ ! -e $VERSION ]; then
+        tar xf $VERSION.pkg.tar.xz
+        mv ./opt/pypy ./$VERSION
+    fi
+else
+    VERSION=${2-pypy2-v5.3.1-linux64}
+
+    # get pypy
+    [ ! -e $VERSION ] && wget https://bitbucket.org/pypy/pypy/downloads/$VERSION.tar.bz2 --local-encoding=utf-8 -O - | tar xj
+fi
+
 
 # virtualenv
 set +e
