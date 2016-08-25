@@ -173,7 +173,7 @@ then
 	then
 		./pypy_venv.sh $ANGR_VENV
 	else
-		mkvirtualenv $ANGR_VENV
+		mkvirtualenv --python=python2 $ANGR_VENV
 	fi
 
 	set -e
