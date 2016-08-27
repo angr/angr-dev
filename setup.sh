@@ -98,7 +98,7 @@ if [ $WHEELS -eq 1 ]
 then
 	REPOS="$REPOS wheels"
 	REPOS=${REPOS// unicorn/}
-	[ $USE_PYPY -eq 1 ] || REPOS=${REPOS// capstone/}
+	REPOS=${REPOS// capstone/}
 fi
 
 EXTRA_REPOS=${@:$OPTIND:$OPTIND+100}
