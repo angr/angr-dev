@@ -180,21 +180,6 @@ then
 	workon $ANGR_VENV || error "Unable to activate the virtual environment."
 fi
 
-if [ -z "$VIRTUAL_ENV" ]
-then
-	warning "You are installing angr outside of a virtualenv. This is NOT"
-	warning "RECOMMENDED. Activate a virtualenv before running this script"
-	warning "or use one of the following options: -e -E -p -P. Please type"
-	warning "\"I know this is a bad idea.\" (without quotes) and press enter"
-	warning "to continue."
-
-	read ans
-	if [ "$ans" != "I know this is a bad idea." ]
-	then
-		exit 1
-	fi
-fi
-
 function try_remote
 {
 	URL=$1
@@ -277,6 +262,21 @@ fi
 
 if [ $INSTALL -eq 1 ]
 then
+	if [ -z "$VIRTUAL_ENV" ]
+	then
+		warning "You are installing angr outside of a virtualenv. This is NOT"
+		warning "RECOMMENDED. Activate a virtualenv before running this script"
+		warning "or use one of the following options: -e -E -p -P. Please type"
+		warning "\"I know this is a bad idea.\" (without quotes) and press enter"
+		warning "to continue."
+
+		read ans
+		if [ "$ans" != "I know this is a bad idea." ]
+		then
+			exit 1
+		fi
+	fi
+
 	if [ $VERBOSE -eq 1 ]
 	then
 		info "Installing python packages!"
