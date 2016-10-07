@@ -34,6 +34,15 @@ function build_docs
 	cd -
 }
 
+function extract_version
+{
+	[ ! -d $1 ] && echo "$1 does not exist.">2 && return
+	cd $1
+	ver=$(sed -n -e "s/.*version='\(.\+\)'.*/\1/p" setup.py)
+	cd ..
+	echo $ver
+}
+
 export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex binaries}
 
 case $CMD in
@@ -43,8 +52,8 @@ case $CMD in
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
 		./git_all.sh checkout master
-		$0 update_dep $VERSION
 		$0 version $VERSION
+		$0 update_dep
 		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "ticked version number to $VERSION" setup.py
 		./git_all.sh diff origin/master master | cat
 		echo
@@ -94,7 +103,6 @@ case $CMD in
 		;;
 	update_dep)
 		VERSION=$1
-		set -eux
 		shift || true
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
@@ -102,6 +110,12 @@ case $CMD in
 		for i in $MAIN_REPOS
 		do
 			[ ! -e $i/setup.py ] && continue
+
+			simuvex_version=$(extract_version simuvex)
+			claripy_version=$(extract_version claripy)
+
+			[ -z $simuvex_version ] && echo "Cannot determine version of SimuVEX. Skip" && continue
+			[ -z $claripy_version ] && echo "Cannot determine version of claripy. Skip" && continue
 
 			cd $i
 			if [ "$(git show --format="%aN" -s HEAD)" == 'angr release bot' ]
@@ -112,10 +126,13 @@ case $CMD in
 			fi
 
 			echo "Updating dependency version numbers"
-			sed -i -e "s/'simuvex[^']*'/'simuvex>=$VERSION'/g" setup.py
-			sed -i -e "s/'claripy[^']*'/'claripy>=$VERSION'/g" setup.py
-			sed -i -e "s/simuvex[\s\S]*/simuvex>=$VERSION/g" requirements.txt
-			sed -i -e "s/claripy[\s\S]*/claripy>=$VERSION/g" requirements.txt
+			sed -i -e "s/'simuvex[^']*'/'simuvex>=$simuvex_version'/g" setup.py
+			sed -i -e "s/simuvex[\s\S]*/simuvex>=$simuvex_version/g" requirements.txt
+
+			sed -i -e "s/'claripy[^']*'/'claripy>=$claripy_version'/g" setup.py
+			sed -i -e "s/claripy[\s\S]*/claripy>=$claripy_version/g" requirements.txt
+
+			cd ..
 		done
 		;;
 	remote)
