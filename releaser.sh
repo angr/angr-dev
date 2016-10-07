@@ -106,16 +106,11 @@ case $CMD in
 		shift || true
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
-		MAIN_REPOS=(angr )
-		for i in $MAIN_REPOS
+		MAIN_REPOS=( angr )
+		DEP_REPOS=( simuvex claripy cle archinfo pyvex )
+		for i in "${MAIN_REPOS[@]}"
 		do
 			[ ! -e $i/setup.py ] && continue
-
-			simuvex_version=$(extract_version simuvex)
-			claripy_version=$(extract_version claripy)
-
-			[ -z $simuvex_version ] && echo "Cannot determine version of SimuVEX. Skip" && continue
-			[ -z $claripy_version ] && echo "Cannot determine version of claripy. Skip" && continue
 
 			cd $i
 			if [ "$(git show --format="%aN" -s HEAD)" == 'angr release bot' ]
@@ -124,15 +119,21 @@ case $CMD in
 				cd ..
 				continue
 			fi
-
-			echo "Updating dependency version numbers"
-			sed -i -e "s/'simuvex[^']*'/'simuvex>=$simuvex_version'/g" setup.py
-			sed -i -e "s/simuvex[\s\S]*/simuvex>=$simuvex_version/g" requirements.txt
-
-			sed -i -e "s/'claripy[^']*'/'claripy>=$claripy_version'/g" setup.py
-			sed -i -e "s/claripy[\s\S]*/claripy>=$claripy_version/g" requirements.txt
-
 			cd ..
+
+			for j in "${DEP_REPOS[@]}"
+			do
+				version=$(extract_version $j)
+
+				[ -z $version ] && echo "Cannot determine version of $j. Skip" && continue
+
+
+				cd $i
+				echo "Updating dependency version number for $j"
+				sed -i -e "s/'$j[^']*'/'$j>=$version'/g" setup.py
+				sed -i -e "s/$j[\s\S]*/$j>=$version/g" requirements.txt
+				cd ..
+			done
 		done
 		;;
 	remote)
