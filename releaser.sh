@@ -19,10 +19,10 @@ function today_version
 
 function build_docs
 {
-    cd angr-doc
-    git checkout master
-    git push github master
-    cd -
+	cd angr-doc
+	git checkout master
+	git push github master
+	cd -
 
 	make -C angr-doc/api-doc html
 	rm -rf angr.github.io/api-doc
@@ -43,6 +43,7 @@ case $CMD in
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
 		./git_all.sh checkout master
+		$0 update_dep $VERSION
 		$0 version $VERSION
 		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "ticked version number to $VERSION" setup.py
 		./git_all.sh diff origin/master master | cat
@@ -89,6 +90,32 @@ case $CMD in
 			echo "Ticking version number of $i to $VERSION"
 			sed -i -e "s/version=['\"][^'\"]*['\"]/version='$VERSION'/g" setup.py
 			cd ..
+		done
+		;;
+	update_dep)
+		VERSION=$1
+		set -eux
+		shift || true
+		[ -z "$VERSION" ] && VERSION=$(today_version)
+
+		MAIN_REPOS=(angr )
+		for i in $MAIN_REPOS
+		do
+			[ ! -e $i/setup.py ] && continue
+
+			cd $i
+			if [ "$(git show --format="%aN" -s HEAD)" == 'angr release bot' ]
+			then
+				echo "Dependency version number of $i has already been updated."
+				cd ..
+				continue
+			fi
+
+			echo "Updating dependency version numbers"
+			sed -i -e "s/'simuvex[^']*'/'simuvex>=$VERSION'/g" setup.py
+			sed -i -e "s/'claripy[^']*'/'claripy>=$VERSION'/g" setup.py
+			sed -i -e "s/simuvex[\s\S]*/simuvex>=$VERSION/g" requirements.txt
+			sed -i -e "s/claripy[\s\S]*/claripy>=$VERSION/g" requirements.txt
 		done
 		;;
 	remote)
