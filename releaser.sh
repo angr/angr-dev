@@ -19,10 +19,10 @@ function today_version
 
 function build_docs
 {
-    cd angr-doc
-    git checkout master
-    git push github master
-    cd -
+	cd angr-doc
+	git checkout master
+	git push github master
+	cd -
 
 	make -C angr-doc/api-doc html
 	rm -rf angr.github.io/api-doc
@@ -32,6 +32,15 @@ function build_docs
 	git commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "updated api-docs for version $VERSION" api-doc
 	git push origin master
 	cd -
+}
+
+function extract_version
+{
+	[ ! -d $1 ] && echo "$1 does not exist.">2 && return
+	cd $1
+	ver=$(sed -n -e "s/.*version='\(.\+\)'.*/\1/p" setup.py)
+	cd ..
+	echo $ver
 }
 
 export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex binaries}
@@ -44,6 +53,7 @@ case $CMD in
 
 		./git_all.sh checkout master
 		$0 version $VERSION
+		$0 update_dep
 		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "ticked version number to $VERSION" setup.py
 		./git_all.sh diff origin/master master | cat
 		echo
@@ -89,6 +99,41 @@ case $CMD in
 			echo "Ticking version number of $i to $VERSION"
 			sed -i -e "s/version=['\"][^'\"]*['\"]/version='$VERSION'/g" setup.py
 			cd ..
+		done
+		;;
+	update_dep)
+		VERSION=$1
+		shift || true
+		[ -z "$VERSION" ] && VERSION=$(today_version)
+
+		MAIN_REPOS=( angr )
+		DEP_REPOS=( simuvex claripy cle archinfo pyvex )
+		for i in "${MAIN_REPOS[@]}"
+		do
+			[ ! -e $i/setup.py ] && continue
+
+			cd $i
+			if [ "$(git show --format="%aN" -s HEAD)" == 'angr release bot' ]
+			then
+				echo "Dependency version number of $i has already been updated."
+				cd ..
+				continue
+			fi
+			cd ..
+
+			for j in "${DEP_REPOS[@]}"
+			do
+				version=$(extract_version $j)
+
+				[ -z $version ] && echo "Cannot determine version of $j. Skip" && continue
+
+
+				cd $i
+				echo "Updating dependency version number for $j"
+				sed -i -e "s/'$j[^']*'/'$j>=$version'/g" setup.py
+				sed -i -e "s/$j[\s\S]*/$j>=$version/g" requirements.txt
+				cd ..
+			done
 		done
 		;;
 	remote)
