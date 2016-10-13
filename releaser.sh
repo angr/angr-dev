@@ -166,18 +166,7 @@ case $CMD in
 		done
 		;;
 	wheel)
-		for i in $REPOS
-		do
-			[ ! -e $i/setup.py ] && continue
-
-			cd $i
-			python setup.py bdist_wheel
-			WHEEL_EXTENSION=.whl
-			python setup.py rotate -m $WHEEL_EXTENSION -k 1 -d dist
-			twine register dist/*$WHEEL_EXTENSION
-			twine upload dist/*$WHEEL_EXTENSION
-			cd ..
-		done
+		echo "WRONG"
 		;;
 	*)
 		echo "Unknown command."
