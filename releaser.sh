@@ -151,23 +151,17 @@ case $CMD in
 			cd ..
 		done
 		;;
-	register)
-		for i in $REPOS
-		do
-			[ ! -e $i/setup.py ] && continue
-
-			cd $i
-			python setup.py register
-			cd ..
-		done
-		;;
 	sdist)
 		for i in $REPOS
 		do
 			[ ! -e $i/setup.py ] && continue
 
 			cd $i
-			python setup.py sdist upload || true
+			python setup.py sdist
+			SDIST_EXTENSION=.tar.gz
+			python setup.py rotate -m $SDIST_EXTENSION -k 1 -d dist
+			twine register dist/*$SDIST_EXTENSION
+			twine upload dist/*$SDIST_EXTENSION
 			cd ..
 		done
 		;;
@@ -177,7 +171,11 @@ case $CMD in
 			[ ! -e $i/setup.py ] && continue
 
 			cd $i
-			python setup.py bdist_wheel upload || true
+			python setup.py bdist_wheel
+			WHEEL_EXTENSION=.whl
+			python setup.py rotate -m $WHEEL_EXTENSION -k 1 -d dist
+			twine register dist/*$WHEEL_EXTENSION
+			twine upload dist/*$WHEEL_EXTENSION
 			cd ..
 		done
 		;;
