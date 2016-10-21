@@ -27,6 +27,7 @@ function usage
 	exit 1
 }
 
+ARCH_PACKAGES=${ARCH_PACKAGES-python-virtualenvwrapper python2 libxml2 libxslt git libffi cmake libtool glib2 pixman}
 DEBS=${DEBS-virtualenvwrapper python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev}
 REPOS=${REPOS-ana idalink cooldict mulpyplexer capstone unicorn monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angrop angr-doc binaries}
 
@@ -42,6 +43,20 @@ INSTALL=1
 WHEELS=0
 VERBOSE=0
 BRANCH=
+DISTRO_ARCH=0
+
+# distro check
+# If available, use LSB to identify distribution
+if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]; then
+    DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
+# Otherwise, use release info file
+else
+    DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
+fi
+
+if [[ $DISTRO == "arch"* ]]; then
+	DISTRO_ARCH=1
+fi
 
 while getopts "iCwDve:E:p:P:r:b:h" opt
 do
@@ -134,23 +149,33 @@ function error
 	exit 1
 }
 
-if [ "$INSTALL_REQS" -eq 1 ]
-then
+if [ "$INSTALL_REQS" -eq 1 ]; then
 	info Installing dependencies...
-	[ -e /etc/debian_version ] && sudo apt-get install -y $DEBS
-	[ ! -e /etc/debian_version ] && error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
+	if [ $DISTRO_ARCH -eq 1 ]; then # ARCH
+		sudo pacman -S $ARCH_PACKAGES --noconfirm
+	else # DEBIAN / UBUNTU
+		[ -e /etc/debian_version ] && sudo apt-get install -y $DEBS
+		[ ! -e /etc/debian_version ] && error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
+	fi
 fi
 
 info "Checking dependencies..."
-[ -e /etc/debian_version -a $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && echo "Please install the following packages: $DEBS" && exit 1
-[ ! -e /etc/debian_version ] && echo -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
+if [ $DISTRO_ARCH -eq 1 ]; then # ARCH
+	[ $(pacman -Q $ARCH_PACKAGES | wc -l) -ne $(echo $ARCH_PACKAGES | wc -w) ] && echo "Please install the following packages: $ARCH_PACKAGES" && exit 1
+else # DEBIAN / UBUNTU
+	[ -e /etc/debian_version -a $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && echo "Please install the following packages: $DEBS" && exit 1
+	[ ! -e /etc/debian_version ] && echo -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
+fi
 
 set +e
-source /etc/bash_completion.d/virtualenvwrapper
+if [ $DISTRO_ARCH -eq 1 ]; then
+	source /usr/bin/virtualenvwrapper.sh
+else
+	source /etc/bash_completion.d/virtualenvwrapper
+fi
 set -e
 
-if [ -n "$ANGR_VENV" ]
-then
+if [ -n "$ANGR_VENV" ]; then
 	set +e
 	if [ -n "$VIRTUAL_ENV" ]
 	then
@@ -171,7 +196,7 @@ then
 
 	if [ "$USE_PYPY" -eq 1 ]
 	then
-		./pypy_venv.sh $ANGR_VENV
+		source ./pypy_venv.sh $ANGR_VENV
 	else
 		mkvirtualenv --python=$(which python2) $ANGR_VENV
 	fi
