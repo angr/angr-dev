@@ -196,7 +196,7 @@ if [ -n "$ANGR_VENV" ]; then
 
 	if [ "$USE_PYPY" -eq 1 ]
 	then
-		source ./pypy_venv.sh $ANGR_VENV
+		source ./pypy_venv.sh
 	else
 		mkvirtualenv --python=$(which python2) $ANGR_VENV
 	fi

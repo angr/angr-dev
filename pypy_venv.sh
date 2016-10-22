@@ -14,7 +14,7 @@ cd pypy
 
 if [ $DISTRO_ARCH -eq 1 ]; then
     ARCH=$(uname -m)
-    VERSION=${2-pypy-5.4.1-1-$ARCH}
+    VERSION=$"pypy-5.4.1-1-$ARCH"
     # get pypy
     [ ! -e $VERSION.pkg.tar.xz ] && wget https://mirrors.kernel.org/archlinux/community/os/$ARCH/$VERSION.pkg.tar.xz
     if [ ! -e $VERSION ]; then
@@ -25,6 +25,9 @@ else
     # get pypy
     [ ! -e $VERSION ] && mkdir $VERSION && wget https://bitbucket.org/pypy/pypy/downloads/$VERSION.tar.bz2 --local-encoding=utf-8 -O - | tar xj -C $VERSION
 fi
+
+# hackish fix to make pypy actually start
+ln -s $PWD/$VERSION/usr/lib/libpypy-c.so $PWD/$VERSION/opt/pypy/bin/
 
 # virtualenv
 set +e
@@ -38,5 +41,5 @@ cd pyreadline-cffi && cmake CMakeLists.txt && make && make install
 rm -f $VIRTUAL_ENV/lib_pypy/readline.*
 ln -s $VIRTUAL_ENV/site-packages/readline $VIRTUAL_ENV/lib_pypy/readline
 
-echo "installed pypy in $NAME"
-exit 0
+info "Installed pypy in $ANGR_VENV"
+return
