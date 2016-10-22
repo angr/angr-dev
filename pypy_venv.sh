@@ -1,16 +1,20 @@
 #!/bin/bash -e
 
 ### THIS FILE IS SOURCED BY setup.sh in order get its env vars!
-
+PYPY_INSTALL_DIR="pypy"
 DIR=$(dirname $0)
 cd $DIR
 
 #sudo apt-get install cmake libreadline-dev
 
 # setup
-mkdir -p pypy
-cd pypy
+if [ ! -e $PYPY_INSTALL_DIR ]; then
+    mkdir -p $PYPY_INSTALL_DIR
+else
+    rm -rf $PYPY_INSTALL_DIR/*
+fi
 
+cd $PYPY_INSTALL_DIR
 
 if [ $DISTRO_ARCH -eq 1 ]; then
     ARCH=$(uname -m)
@@ -27,7 +31,9 @@ else
 fi
 
 # hackish fix to make pypy actually start
-ln -s $PWD/$VERSION/usr/lib/libpypy-c.so $PWD/$VERSION/opt/pypy/bin/
+if [ ! -e $PWD/$VERSION/opt/pypy/bin/libpypy-c.so ]; then
+    ln -s $PWD/$VERSION/usr/lib/libpypy-c.so $PWD/$VERSION/opt/pypy/bin/
+fi
 
 # virtualenv
 set +e
@@ -41,5 +47,6 @@ cd pyreadline-cffi && cmake CMakeLists.txt && make && make install
 rm -f $VIRTUAL_ENV/lib_pypy/readline.*
 ln -s $VIRTUAL_ENV/site-packages/readline $VIRTUAL_ENV/lib_pypy/readline
 
+cd 
 info "Installed pypy in $ANGR_VENV"
 return
