@@ -47,6 +47,5 @@ cd pyreadline-cffi && cmake CMakeLists.txt && make && make install
 rm -f $VIRTUAL_ENV/lib_pypy/readline.*
 ln -s $VIRTUAL_ENV/site-packages/readline $VIRTUAL_ENV/lib_pypy/readline
 
-cd 
 info "Installed pypy in $ANGR_VENV"
 return
