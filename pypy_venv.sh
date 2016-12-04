@@ -14,7 +14,8 @@ cd pypy
 if [ -f "/etc/arch-release" ]; then
     echo "This is an arch distro"
     ARCH=$(uname -m)
-    VERSION=${2-pypy-5.3.1-1-$ARCH}
+    SUBVERSION=$(pacman -Si pypy | grep "Version\s*:\s*[0-9.\-]*" | grep -o "[0-9.\-]*")
+    VERSION=${2-pypy-$SUBVERSION-$ARCH}
     # get pypy
     [ ! -e $VERSION.pkg.tar.xz ] && wget https://mirrors.kernel.org/archlinux/community/os/$ARCH/$VERSION.pkg.tar.xz
     if [ ! -e $VERSION ]; then
