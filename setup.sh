@@ -11,9 +11,9 @@ function usage
 	echo "    -C		don't do the actual installation (quit after cloning)"
 	echo "    -w		use pre-built packages where available"
 	echo "    -v		verbose (don't redirect installation logging)"
-	echo "    -e ENV	create a cpython environment ENV"
+	echo "    -e ENV	create or reuse a cpython environment ENV"
 	echo "    -E ENV	re-create a cpython environment ENV"
-	echo "    -p ENV	create a pypy environment ENV"
+	echo "    -p ENV	create or reuse a pypy environment ENV"
 	echo "    -P ENV	re-create a pypy environment ENV"
 	echo "    -r REMOTE	use a different remote base (default: https://github.com/angr/)"
 	echo "             	Can be specified multiple times."
@@ -164,12 +164,12 @@ then
 	then
 		info "Removing existing virtual environment $ANGR_VENV..."
 		rmvirtualenv $ANGR_VENV || error "Failed to remote virtualenv $ANGR_VENV."
-	elif lsvirtualenv | grep -q "^$ANGR_VENV$"
-	then
-		error "Virtualenv $ANGR_VENV already exists. Use -E instead of -e if you want to re-create the environment."
 	fi
 
-	if [ "$USE_PYPY" -eq 1 ]
+	if lsvirtualenv | grep -q "^$ANGR_VENV$"
+	then
+		info "Virtualenv $ANGR_VENV already exists, reusing it. Use -E instead of -e if you want to re-create the environment."
+	elif [ "$USE_PYPY" -eq 1 ]
 	then
 		./pypy_venv.sh $ANGR_VENV
 	else
