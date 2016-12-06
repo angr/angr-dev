@@ -291,7 +291,9 @@ then
 	fi
 
 	# remove angr-management if running in pypy or in travis
-	(python --version 2>&1| grep -q PyPy) && TO_INSTALL=${TO_INSTALL// angr-management/}
+	#(python --version 2>&1| grep -q PyPy) && 
+	info "NOTE: removing angr-management until we sort out the pyside packaging"
+	TO_INSTALL=${TO_INSTALL// angr-management/}
 	[ -n "$TRAVIS" ] && TO_INSTALL=${TO_INSTALL// angr-management/}
 
 	if pip install $PIP_OPTIONS -v ${TO_INSTALL// / -e } >> $OUTFILE 2>> $ERRFILE
