@@ -47,6 +47,10 @@ export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex arc
 
 case $CMD in
 	release)
+		if [ -z "$VIRTUAL_ENV" ]; then
+			echo "Must be in the angr virtualenv to do a release!"
+			exit 1
+		fi
 		VERSION=$1
 		shift || true
 		[ -z "$VERSION" ] && VERSION=$(today_version)
@@ -63,7 +67,6 @@ case $CMD in
 		./git_all.sh push origin master
 		./git_all.sh push github master
 		./git_all.sh checkout @{-1}
-		$0 register
 		$0 sdist
 		build_docs
 		#[[ $REPOS == *pyvex* ]] && REPOS=pyvex $0 wheel pyvex
@@ -160,7 +163,7 @@ case $CMD in
 			python setup.py sdist
 			SDIST_EXTENSION=.tar.gz
 			python setup.py rotate -m $SDIST_EXTENSION -k 1 -d dist
-			twine register dist/*$SDIST_EXTENSION
+			twine register dist/*$SDIST_EXTENSION || true
 			twine upload dist/*$SDIST_EXTENSION
 			cd ..
 		done
