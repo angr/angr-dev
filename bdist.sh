@@ -11,7 +11,7 @@ if [ -z "$DEST" ]; then
 fi
 
 if [ -z "$2" ]; then
-	exec "$0" "$DEST" angr-z3 pyvex unicorn simuvex
+	exec "$0" "$DEST" angr-z3 pyvex capstone unicorn simuvex
 fi
 
 mkdir -p $DEST
@@ -34,6 +34,8 @@ while [ "$1" ]; do
 	if [[ "$REPO" == "angr-z3" ]]; then
 		DIST_FOLDER=src/api/python/dist
 	elif [[ "$REPO" == "unicorn" ]]; then
+		DIST_FOLDER=bindings/python/dist
+	elif [[ "$REPO" == "capstone" ]]; then
 		DIST_FOLDER=bindings/python/dist
 	fi
 
