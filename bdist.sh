@@ -49,6 +49,16 @@ while [ "$1" ]; do
 	cd -
 
 EOF
+
+	if [[ "$REPO" == "pyvex" ]]; then
+		cat >> $DEST/build.sh <<EOF
+	cd pyvex
+	mv vex-master vex
+	tar -czf /output/vex-$(date "+%Y.%m.%d").tar.gz vex/libvex.a vex/priv/*.o
+	cd -
+
+EOF
+	fi
 done
 
 chmod +x $DEST/build.sh
