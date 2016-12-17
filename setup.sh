@@ -230,25 +230,25 @@ function clone_repo
 	return 0
 }
 
-function install_wheels
-{
-	#LATEST_Z3=$(ls -tr wheels/angr_only_z3_custom-*)
-	#echo "Installing $LATEST_Z3..." >> $OUTFILE 2>> $ERRFILE
-	#pip install $LATEST_Z3 >> $OUTFILE 2>> $ERRFILE
-
-	LATEST_VEX=$(ls -tr wheels/vex-*)
-	echo "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
-	tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
-	touch vex/*/*.o vex/libvex.a
-
-	#LATEST_QEMU=$(ls -tr wheels/shellphish_qemu-*)
-	#echo "Installing $LATEST_QEMU" >> $OUTFILE 2>> $ERRFILE
-	#pip install $LATEST_QEMU >> $OUTFILE 2>> $ERRFILE
-
-	#LATEST_AFL=$(ls -tr wheels/shellphish_afl-*)
-	#echo "Installing $LATEST_AFL" >> $OUTFILE 2>> $ERRFILE
-	#pip install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
-}
+#function install_wheels
+#{
+#	#LATEST_Z3=$(ls -tr wheels/angr_only_z3_custom-*)
+#	#echo "Installing $LATEST_Z3..." >> $OUTFILE 2>> $ERRFILE
+#	#pip install $LATEST_Z3 >> $OUTFILE 2>> $ERRFILE
+#
+#	LATEST_VEX=$(ls -tr wheels/vex-*)
+#	echo "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
+#	tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
+#	touch vex/*/*.o vex/libvex.a
+#
+#	#LATEST_QEMU=$(ls -tr wheels/shellphish_qemu-*)
+#	#echo "Installing $LATEST_QEMU" >> $OUTFILE 2>> $ERRFILE
+#	#pip install $LATEST_QEMU >> $OUTFILE 2>> $ERRFILE
+#
+#	#LATEST_AFL=$(ls -tr wheels/shellphish_afl-*)
+#	#echo "Installing $LATEST_AFL" >> $OUTFILE 2>> $ERRFILE
+#	#pip install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
+#}
 
 info "Cloning angr components!"
 for r in $REPOS
@@ -289,7 +289,7 @@ then
 
 	if [ $WHEELS -eq 1 ]
 	then
-		install_wheels
+		#install_wheels
 		PIP_OPTIONS="$PIP_OPTIONS --find-links=$PWD/wheels"
 	fi
 

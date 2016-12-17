@@ -55,4 +55,5 @@ chmod +x $DEST/build.sh
 
 sudo docker run -it --rm -v $(realpath $DEST):/output quay.io/pypa/manylinux1_x86_64 /output/build.sh
 sudo docker run -it --rm -v $(realpath $DEST):/output quay.io/pypa/manylinux1_i686 /output/build.sh
+sudo chown $(id -un):$(id -un) $(realpath $DEST)/*
 rm $DEST/build.sh
