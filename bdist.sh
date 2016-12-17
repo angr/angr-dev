@@ -52,10 +52,13 @@ EOF
 
 	if [[ "$REPO" == "pyvex" ]]; then
 		cat >> $DEST/build.sh <<EOF
-	cd pyvex
-	mv vex-master vex
-	tar -czf /output/vex-$(date "+%Y.%m.%d").tar.gz vex/libvex.a vex/priv/*.o
-	cd -
+	if [ "\$(uname -p)" == "x86_64" ]; then
+		echo "Archiving vex static library"
+		cd pyvex
+		mv vex-master vex
+		tar -czf /output/vex-$(date "+%Y.%m.%d").tar.gz vex/libvex.a vex/priv/*.o
+		cd -
+	fi
 
 EOF
 	fi
