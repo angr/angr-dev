@@ -178,6 +178,9 @@ then
 
 	set -e
 	workon $ANGR_VENV || error "Unable to activate the virtual environment."
+
+	# older versions of pip will fail to process the --find-links arg silently
+	pip install -U pip
 fi
 
 function try_remote
