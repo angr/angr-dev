@@ -16,10 +16,17 @@ then
 	nosetests $NOSE_OPTIONS test.py
 elif [ -d "tests" ]
 then
+	echo
+	echo "\e[31m### Running tests for repository $ANGR_REPO\e[0m"
 	nosetests $NOSE_OPTIONS tests/
 else
-	echo "### No tests for repository $ANGR_REPO?"
+	echo
+	echo "\e[31m### No tests for repository $ANGR_REPO?\e[0m"
 fi
 
-[ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ] && ../lint.py
+if [ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]; then
+	echo
+	echo "\e[31m### Running linting for repository $ANGR_REPO\e[0m"
+	../lint.py
+fi
 exit 0
