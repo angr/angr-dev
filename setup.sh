@@ -236,10 +236,10 @@ function install_wheels
 	#echo "Installing $LATEST_Z3..." >> $OUTFILE 2>> $ERRFILE
 	#pip install $LATEST_Z3 >> $OUTFILE 2>> $ERRFILE
 
-	#LATEST_VEX=$(ls -tr wheels/vex-*)
-	#echo "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
-	#tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
-	#touch vex/*/*.o vex/libvex.a
+	LATEST_VEX=$(ls -tr wheels/vex-*)
+	echo "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
+	tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
+	touch vex/*/*.o vex/libvex.a
 
 	#LATEST_QEMU=$(ls -tr wheels/shellphish_qemu-*)
 	#echo "Installing $LATEST_QEMU" >> $OUTFILE 2>> $ERRFILE
