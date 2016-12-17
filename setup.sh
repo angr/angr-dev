@@ -249,8 +249,8 @@ function install_wheels
 	#echo "Installing $LATEST_AFL" >> $OUTFILE 2>> $ERRFILE
 	#pip install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
 
-	echo "Installing unicorn from wheel (there are no direct dependencies on it)"
-	pip install --find-links=$PWD/wheels unicorn
+	echo "Installing unicorn from wheel (pip can't handle find-links with packages not on pypi)"
+	pip install ./wheels/unicorn*
 }
 
 info "Cloning angr components!"
