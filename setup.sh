@@ -250,7 +250,9 @@ function install_wheels
 	#pip install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
 
 	echo "Installing unicorn from wheel (pip can't handle find-links with packages not on pypi)"
-	pip install ./wheels/unicorn*
+	for whl in ./wheels/unicorn*; do
+		pip install $whl || true
+	done
 }
 
 info "Cloning angr components!"
