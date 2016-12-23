@@ -3,7 +3,7 @@
 ./git_all.sh checkout master
 ./git_all.sh checkout $TRAVIS_BRANCH
 
-if [ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]
+if [ -z "$NO_COVERAGE" -a "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]
 then
 	COVERAGE="--with-coverage --cover-package=$ANGR_REPO --cover-erase"
 fi
