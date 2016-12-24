@@ -5,24 +5,13 @@
 
 if [ -z "$NO_COVERAGE" -a "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]
 then
-	COVERAGE="--with-coverage --cover-package=$ANGR_REPO --cover-erase"
+	NOSE_OPTIONS="--with-coverage --cover-package=$ANGR_REPO --cover-erase"
 fi
-
-NOSE_OPTIONS="-v --nologcapture --with-timer $COVERAGE --processes=2 --process-timeout=570 --process-restartworker"
-
+export NOSE_PROCESSTIMEOUT=570
+export NOSE_PROCESSES=2
+export NOSE_OPTIONS="$NOSE_OPTIONS --with-timer"
 cd $ANGR_REPO
-if [ -f "test.py" ]
-then
-	nosetests $NOSE_OPTIONS test.py
-elif [ -d "tests" ]
-then
-	echo
-	echo -e "\e[31m### Running tests for repository $ANGR_REPO\e[0m"
-	nosetests $NOSE_OPTIONS tests/
-else
-	echo
-	echo -e "\e[31m### No tests for repository $ANGR_REPO?\e[0m"
-fi
+../test.sh
 
 if [ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]; then
 	echo
