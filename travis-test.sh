@@ -9,7 +9,7 @@ then
 fi
 export NOSE_PROCESSTIMEOUT=570
 export NOSE_PROCESSES=2
-export NOSE_OPTIONS="$NOSE_OPTIONS --with-timer"
+export NOSE_OPTIONS="-v --nologcapture --with-timer $NOSE_OPTIONS"
 cd $ANGR_REPO
 ../test.sh
 
