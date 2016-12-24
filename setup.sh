@@ -137,8 +137,17 @@ function error
 if [ "$INSTALL_REQS" -eq 1 ]
 then
 	info Installing dependencies...
-	[ -e /etc/debian_version ] && sudo apt-get install -y $DEBS
-	[ ! -e /etc/debian_version ] && error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
+	if [ -e /etc/debian_version ]
+		if ! (dpkg --print-foreign-architectures | grep i386)
+		then
+			echo "Adding i386 architectures..."
+			dpkg --add-architecture i386
+			sudo apt-get update
+		fi
+		sudo apt-get install -y $DEBS
+	else
+		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
+	fi
 fi
 
 info "Checking dependencies..."
