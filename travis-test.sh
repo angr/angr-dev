@@ -10,7 +10,7 @@ fi
 export NOSE_PROCESSTIMEOUT=570
 export NOSE_PROCESSES=2
 export NOSE_OPTIONS="-v --nologcapture --with-timer $NOSE_OPTIONS"
-test.sh $ANGR_REPO
+./test.sh $ANGR_REPO
 
 cd $ANGR_REPO
 if [ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]; then
