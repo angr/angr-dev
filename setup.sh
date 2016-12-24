@@ -138,6 +138,7 @@ if [ "$INSTALL_REQS" -eq 1 ]
 then
 	info Installing dependencies...
 	if [ -e /etc/debian_version ]
+	then
 		if ! (dpkg --print-foreign-architectures | grep i386)
 		then
 			echo "Adding i386 architectures..."
