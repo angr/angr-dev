@@ -10,9 +10,9 @@ fi
 export NOSE_PROCESSTIMEOUT=570
 export NOSE_PROCESSES=2
 export NOSE_OPTIONS="-v --nologcapture --with-timer $NOSE_OPTIONS"
-cd $ANGR_REPO
-../test.sh
+test.sh $ANGR_REPO
 
+cd $ANGR_REPO
 if [ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]; then
 	echo
 	echo -e "\e[31m### Running linting for repository $ANGR_REPO\e[0m"
