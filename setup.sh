@@ -142,7 +142,7 @@ then
 		if ! (dpkg --print-foreign-architectures | grep i386)
 		then
 			echo "Adding i386 architectures..."
-			dpkg --add-architecture i386
+			sudo dpkg --add-architecture i386
 			sudo apt-get update
 		fi
 		sudo apt-get install -y $DEBS
