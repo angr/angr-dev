@@ -24,6 +24,9 @@ then
 		sort -u |
 		egrep -v '^(capstone|pypy|python|qemu|unicorn|shellphish-)'
 	)
+elif [ -d "$1" ]
+then
+	TESTS=$(find "$@" -iname 'test*.py')
 else
 	TESTS="$@"
 fi
