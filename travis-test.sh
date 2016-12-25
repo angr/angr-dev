@@ -5,7 +5,7 @@
 
 if [ -z "$NO_COVERAGE" -a "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]
 then
-	NOSE_OPTIONS="--with-coverage --cover-package=$ANGR_REPO --cover-erase"
+	NOSE_OPTIONS="--with-coverage --cover-package=$ANGR_REPO --cover-erase $NOSE_OPTIONS"
 fi
 export NOSE_PROCESS_TIMEOUT=570
 export NOSE_PROCESSES=2
