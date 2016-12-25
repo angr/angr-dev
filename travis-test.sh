@@ -7,7 +7,7 @@ free
 
 # set stuff up for fuzzing tests - we'll move this somewhere else later
 echo core | sudo tee /proc/sys/kernel/core_pattern > /dev/null
-echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor > /dev/null
+#echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor > /dev/null
 echo 1 | sudo tee /proc/sys/kernel/sched_child_runs_first > /dev/null
 
 ./git_all.sh checkout master
