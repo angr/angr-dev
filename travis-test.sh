@@ -1,5 +1,11 @@
 #!/bin/bash -e
 
+echo "###"
+echo "### Starting CI tests..."
+echo "###"
+echo -n "MEM: "
+free
+
 ./git_all.sh checkout master
 ./git_all.sh checkout $TRAVIS_BRANCH
 
