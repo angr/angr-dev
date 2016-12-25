@@ -3,7 +3,6 @@
 echo "###"
 echo "### Starting CI tests..."
 echo "###"
-echo -n "MEM: "
 free
 
 # set stuff up for fuzzing tests - we'll move this somewhere else later
