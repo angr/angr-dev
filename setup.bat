@@ -5,15 +5,17 @@ if not exist cle git clone https://github.com/angr/cle.git || goto :error
 if not exist pyvex git clone https://github.com/angr/pyvex.git || goto :error
 if not exist vex git clone https://github.com/angr/vex.git || goto :error
 if not exist archinfo git clone https://github.com/angr/archinfo.git || goto :error
-if not exist capstone git clone https://github.com/angr/capstone.git || goto :error
 if not exist angr-doc git clone https://github.com/angr/angr-doc.git || goto :error
 if not exist binaries git clone https://github.com/angr/binaries.git || goto :error
+if not exist wheels git clone https://github.com/angr/wheels.git || goto :error
 
 if ("%1" == "") goto :nocheckout
 call git_all.bat checkout %1
 :nocheckout
 
-pip install -e .\capstone || goto :error
+pip install wheels\capstone-4.0.0-py2-none-win32.whl
+pip install wheels\unicorn-1.0.0-py2.py3-none-win32.whl
+
 pip install -e .\archinfo || goto :error
 pip install -e .\pyvex || goto :error
 pip install -e .\cle || goto :error
