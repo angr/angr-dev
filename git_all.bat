@@ -8,3 +8,4 @@ for /f %%f in ('dir /B /AD') do (
     cd ..
   )
 )
+exit /b 0
