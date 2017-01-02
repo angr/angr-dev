@@ -1,8 +1,5 @@
 #!/bin/bash -e
 
-./git_all.sh checkout master
-./git_all.sh checkout $TRAVIS_BRANCH
-
 if [ -z "$NO_COVERAGE" -a "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]
 then
 	NOSE_OPTIONS="--with-coverage --cover-package=$ANGR_REPO --cover-erase"
