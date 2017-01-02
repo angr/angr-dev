@@ -43,13 +43,8 @@ WHEELS=0
 VERBOSE=0
 BRANCH=
 
-if [ "$TRAVIS" == "true" ] then
-	if [ "$TRAVIS_PULL_REQUEST"!="false" ] then
-		REMOTES=https://github.com/$TRAVIS_REPO_SLUG.git $REMOTES
-		BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
-	else
-		BRANCH=$TRAVIS_BRANCH
-	fi
+if [ "$TRAVIS" == "true"]; then
+	mv $TRAVIS_BUILD_DIR . || true
 fi
 
 while getopts "iCwDve:E:p:P:r:b:h" opt
