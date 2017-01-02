@@ -9,9 +9,21 @@ if not exist angr-doc git clone https://github.com/angr/angr-doc.git || goto :er
 if not exist binaries git clone https://github.com/angr/binaries.git || goto :error
 if not exist wheels git clone https://github.com/angr/wheels.git || goto :error
 
-if ("%1" == "") goto :nocheckout
-call git_all.bat checkout %1
-:nocheckout
+if not "%APPVEYOR%"=="" (
+    cd %APPVEYOR_BUILD_FOLDER%
+    set url=
+    set branch=
+    for /f "usebackq tokens=2 skip=1" %%a in (`git remote -v`) do set url=%%a
+    for /f "usebackq tokens=2" %%a in (`git branch`) do set branch=%%a
+    echo Appveyor status: testing %branch% from %url%
+    :: if "%url:~0,24%"=="https://github.com/angr/"
+    
+    :: call git_all.bat remote add pr_remote https://github.com/%APPVEYOR_REPO_NAME%.git
+    :: call git_all.bat fetch pr_remote
+    call git_all.bat checkout %1
+) else if not "%1" == "" (
+    call git_all.bat checkout %1
+)
 
 pip install wheels\capstone-4.0.0-py2-none-win32.whl
 pip install wheels\unicorn-1.0.0-py2.py3-none-win32.whl
