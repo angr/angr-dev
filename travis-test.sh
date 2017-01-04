@@ -16,11 +16,6 @@ sudo /etc/init.d/mysql stop
 sudo /etc/init.d/postgresql stop || /bin/true
 rm -rf /var/ramfs/*
 
-# check out the correct branch
-./git_all.sh checkout master
-./git_all.sh checkout $TRAVIS_BRANCH
-
-# run the tests
 if [ -z "$NO_COVERAGE" -a "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]
 then
 	NOSE_OPTIONS="--with-coverage --cover-package=$ANGR_REPO --cover-erase $NOSE_OPTIONS"

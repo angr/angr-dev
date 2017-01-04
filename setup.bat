@@ -1,3 +1,10 @@
+set TO_CHECKOUT=%1
+
+if "%APPVEYOR%"=="True" (
+    move %APPVEYOR_BUILD_FOLDER% .
+    set TO_CHECKOUT=
+)
+
 if not exist angr git clone https://github.com/angr/angr.git || goto :error
 if not exist simuvex git clone https://github.com/angr/simuvex.git || goto :error
 if not exist claripy git clone https://github.com/angr/claripy.git || goto :error
@@ -9,11 +16,11 @@ if not exist angr-doc git clone https://github.com/angr/angr-doc.git || goto :er
 if not exist binaries git clone https://github.com/angr/binaries.git || goto :error
 if not exist wheels git clone https://github.com/angr/wheels.git || goto :error
 
-if ("%1" == "") goto :nocheckout
-call git_all.bat checkout %1
-:nocheckout
+if not "%TO_CHECKOUT%" == "" (
+    call git_all.bat checkout %TO_CHECKOUT%
+)
 
-pip install wheels\capstone-4.0-cp27-cp27m-win32.whl
+pip install wheels\capstone-4.0.0-py2-none-win32.whl
 pip install wheels\unicorn-1.0.0-py2.py3-none-win32.whl
 
 pip install -e .\archinfo || goto :error
