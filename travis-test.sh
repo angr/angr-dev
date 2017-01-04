@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 echo "###"
 echo "### Starting CI tests..."
