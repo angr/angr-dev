@@ -14,7 +14,7 @@ echo 1 | sudo tee /proc/sys/kernel/sched_child_runs_first > /dev/null
 
 sudo /etc/init.d/mysql stop
 sudo /etc/init.d/postgresql stop || /bin/true
-rm -rf /var/ramfs/*
+sudo rm -rf /var/ramfs/*
 
 if [ -z "$NO_COVERAGE" -a "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]
 then
