@@ -23,7 +23,7 @@ if [ -f "/etc/arch-release" ]; then
         mv ./opt/pypy ./$VERSION
     fi
 else
-    VERSION=${2-pypy2-v5.3.1-linux64}
+    VERSION=${2-pypy2-v5.6.0-linux64}
 
     # get pypy
     [ ! -e $VERSION ] && wget https://bitbucket.org/pypy/pypy/downloads/$VERSION.tar.bz2 --local-encoding=utf-8 -O - | tar xj
