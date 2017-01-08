@@ -43,8 +43,11 @@ WHEELS=0
 VERBOSE=0
 BRANCH=
 
-if [ "$TRAVIS" == "true"]; then
+if [ "$TRAVIS" == "true" ]; then
 	mv $TRAVIS_BUILD_DIR . || true
+	if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+		BRANCH=$TRAVIS_BRANCH
+	fi
 fi
 
 while getopts "iCwDve:E:p:P:r:b:h" opt

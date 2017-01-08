@@ -2,7 +2,11 @@ set TO_CHECKOUT=%1
 
 if "%APPVEYOR%"=="True" (
     move %APPVEYOR_BUILD_FOLDER% .
-    set TO_CHECKOUT=
+    set TO_CHECKOUT=%APPVEYOR_REPO_BRANCH%
+
+    if "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" (
+        set TO_CHECKOUT=
+    )
 )
 
 if not exist angr git clone https://github.com/angr/angr.git || goto :error
