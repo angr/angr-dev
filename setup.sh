@@ -43,7 +43,7 @@ WHEELS=0
 VERBOSE=0
 BRANCH=
 
-if [ "$TRAVIS" == "true"]; then
+if [ "$TRAVIS" == "true" ]; then
 	mv $TRAVIS_BUILD_DIR . || true
 fi
 
