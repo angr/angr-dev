@@ -24,6 +24,10 @@ function build_docs
 	git push github master
 	cd -
 
+	VERSION=$(extract_version angr)
+	sed -i -e "s/version = ['\"][^'\"]*['\"]/version = '$VERSION'/g" angr-doc/api-doc/source/conf.py
+	sed -i -e "s/release = ['\"][^'\"]*['\"]/release = '$VERSION'/g" angr-doc/api-doc/source/conf.py
+
 	make -C angr-doc/api-doc html
 	rm -rf angr.github.io/api-doc
 	cp -r angr-doc/api-doc/build/html angr.github.io/api-doc
