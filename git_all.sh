@@ -98,7 +98,7 @@ function do_all
 	then
 		red "# Failed:"
 		echo $FAILED
-		[ -n "$RF" ] && exit 1
+		[ -n "$EXIT_FAILURE" ] && exit 1
 	fi
 }
 
@@ -108,7 +108,7 @@ function do_screen
 	screen -S $SESSION -d -m sleep 2
 	for i in $REPOS
 	do
-		screen -S $SESSION -X screen -t $i bash -c "REPOS=$i RF=1 C=0 ./git_all.sh $@ || bash"
+		screen -S $SESSION -X screen -t $i bash -c "REPOS=$i EXIT_FAILURE=1 CONCURRENT=0 ./git_all.sh $@ || bash"
 	done
 	screen -rd $SESSION
 
@@ -116,7 +116,7 @@ function do_screen
 
 [ -z "$REPOS" ] && REPOS=$(ls -d */.git | sed -e "s/\/\.git//")
 
-if [ "$C" == "1" ]
+if [ "$CONCURRENT" == "1" ]
 then
 	do_screen "$@"
 else
