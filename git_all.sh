@@ -38,13 +38,14 @@ function careful_pull
 	git pull >> /tmp/pull-$$ 2>> /tmp/pull-$$
 	r=$?
 
-	if grep -q "ssh_exchange_identification: read: Connection reset by peer" /tmp/pull-$$
+	if grep -q "ssh_exchange_identification:" /tmp/pull-$$
 	then
 		red "Too many concurrent connections to the server. Retrying after sleep."
 		sleep $[$RANDOM % 5]
 		careful_pull
 		return $?
 	else
+		cat /tmp/pull-$$
 		[ $r -eq 0 ] && rm -f /tmp/pull-$$
 		return $r
 	fi
@@ -62,7 +63,7 @@ function fail
 	FAILED="$FAILED $1"
 }
 
-function doit
+function do_one
 {
 	DIR=$1
 	shift
@@ -79,29 +80,45 @@ function doit
 	cd ..
 }
 
-if [ -n "$REPOS" ]
-then
+function do_all
+{
 	for i in $REPOS
 	do
-		doit $i "$@"
+		do_one $i "$@"
 	done
-else
-	for i in */.git/
-	do
-		i=${i/\/.git\//}
-		doit $i "$@"
-	done
-fi
 
-echo ""
-if [ -n "$SUCCESSFUL" ]
+	echo ""
+	if [ -n "$SUCCESSFUL" ]
+	then
+		green "# Succeeded:"
+		echo $SUCCESSFUL
+	fi
+	echo ""
+	if [ -n "$FAILED" ]
+	then
+		red "# Failed:"
+		echo $FAILED
+		[ -n "$RF" ] && exit 1
+	fi
+}
+
+function do_screen
+{
+	SESSION=git-all-$$
+	screen -S $SESSION -d -m sleep 2
+	for i in $REPOS
+	do
+		screen -S $SESSION -X screen -t $i bash -c "REPOS=$i RF=1 C=0 ./git_all.sh $@ || bash"
+	done
+	screen -rd $SESSION
+
+}
+
+[ -z "$REPOS" ] && REPOS=$(ls -d */.git | sed -e "s/\/\.git//")
+
+if [ "$C" == "1" ]
 then
-	green "# Succeeded:"
-	echo $SUCCESSFUL
-fi
-echo ""
-if [ -n "$FAILED" ]
-then
-	red "# Failed:"
-	echo $FAILED
+	do_screen "$@"
+else
+	do_all "$@"
 fi
