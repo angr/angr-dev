@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+VERSION_MAJOR=6
+
 #while getopt "v" opt
 #do
 #	case $opt in
@@ -14,7 +16,7 @@ shift
 
 function today_version
 {
-	echo 5.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/^0*//g" -e "s/\.0*/./g")
+	echo $VERSION_MAJOR.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/^0*//g" -e "s/\.0*/./g")
 }
 
 function build_docs
