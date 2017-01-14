@@ -49,7 +49,7 @@ function extract_version
 	echo $ver
 }
 
-export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex binaries}
+export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex binaries angrop}
 
 case $CMD in
 	release)
@@ -170,7 +170,7 @@ case $CMD in
 			SDIST_EXTENSION=.tar.gz
 			python setup.py rotate -m $SDIST_EXTENSION -k 1 -d dist
 			twine register dist/*$SDIST_EXTENSION || true
-			twine upload dist/*$SDIST_EXTENSION
+			twine upload dist/*$SDIST_EXTENSION || echo "!!!!! FAILED TO UPLOAD $i"
 			cd ..
 		done
 		;;
