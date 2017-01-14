@@ -98,7 +98,11 @@ function do_all
 	then
 		red "# Failed:"
 		echo $FAILED
-		[ -n "$EXIT_FAILURE" ] && exit 1
+		if [ -n "$EXIT_FAILURE" ]
+		then
+			echo "Exiting due to EXIT_FAILURE option..."
+			exit 1
+		fi
 	fi
 }
 
