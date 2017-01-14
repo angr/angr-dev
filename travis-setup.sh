@@ -11,7 +11,7 @@ sudo apt-get update || true
 mv $TRAVIS_BUILD_DIR .
 [ "$TRAVIS_PULL_REQUEST" == "false" ] && BRANCH=$TRAVIS_BRANCH || BRANCH="master"
 ./setup.sh -i -w -v -b $BRANCH -$PY angr tracer fuzzer driller povsim compilerex rex colorguard fidget identifier patcherex
-cd $(dirname $TRAVIS_BUILD_DIR)
+cd $(basename $TRAVIS_BUILD_DIR)
 git checkout $TRAVIS_COMMIT
 cd ..
 
