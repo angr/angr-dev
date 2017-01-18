@@ -34,20 +34,17 @@ center_align() {
 
 function careful_pull
 {
-	rm -f /tmp/pull-$$
-	git pull >> /tmp/pull-$$ 2>> /tmp/pull-$$
-	r=$?
+	git pull 2>&1 | tee /dev/stderr | grep -q "ssh_exchange_identification:"
+	CMD_STATUS=${PIPESTATUS[0]} GREP_MATCH=${PIPESTATUS[2]}
 
-	if grep -q "ssh_exchange_identification:" /tmp/pull-$$
+	if [ "$GREP_MATCH" -eq 0 ]
 	then
 		red "Too many concurrent connections to the server. Retrying after sleep."
 		sleep $[$RANDOM % 5]
 		careful_pull
 		return $?
 	else
-		cat /tmp/pull-$$
-		[ $r -eq 0 ] && rm -f /tmp/pull-$$
-		return $r
+		return $CMD_STATUS
 	fi
 }
 
