@@ -31,6 +31,9 @@ cd $ANGR_REPO
 if [ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]; then
 	echo
 	echo -e "\e[31m### Running linting for repository $ANGR_REPO\e[0m"
+
+	# in weird situations, travis will not properly fetch remote refs. We want to get master.
+	git fetch origin +refs/heads/master:refs/remotes/origin/master
 	../lint.py
 fi
 exit 0
