@@ -48,6 +48,33 @@ function careful_pull
 	fi
 }
 
+function checkup
+{
+	# http://stackoverflow.com/questions/1593051/how-to-programmatically-determine-the-current-checked-out-git-branch
+	branch_name="$(git symbolic-ref HEAD 2>/dev/null)" ||
+	branch_name="(unnamed branch)"     # detached HEAD
+	branch_name=${branch_name##refs/heads/}
+
+	git status --porcelain | egrep '^(M| M)' >/dev/null 2>/dev/null
+	is_dirty=$?
+
+	[ "$branch_name" != "master" ]
+	isnt_master=$?
+
+	if [ $is_dirty == 0 -o $isnt_master == 0 ]; then
+		center_align $1 "-"
+	fi
+
+	if [ $isnt_master == 0 ]; then
+		echo "On branch $RED$branch_name$NORMAL"
+	fi
+
+	if [ $is_dirty == 0 ]; then
+		echo "Uncommitted files:"
+		git status --porcelain | egrep --color=always '^(M| M)'
+	fi
+}
+
 function success
 {
 	center_align "SUCCESS" "-"
@@ -66,11 +93,14 @@ function do_one
 	shift
 
 	cd $DIR
-	center_align "RUNNING ON: $DIR" "#"
+	if ! [ "$1" == "CHECKUP" ]; then
+		center_align "RUNNING ON: $DIR" "#"
+	fi
 
-	if [ "$1" == "CAREFUL_PULL" ]
-	then
+	if [ "$1" == "CAREFUL_PULL" ]; then
 		careful_pull && success $DIR || fail $DIR $?
+	elif [ "$1" == "CHECKUP" ]; then
+		checkup $DIR
 	else
 		git "$@" && success $DIR || fail $DIR $?
 	fi
