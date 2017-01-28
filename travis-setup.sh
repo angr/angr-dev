@@ -15,7 +15,7 @@ sudo apt-get update || true
 rm -rf $(basename $TRAVIS_BUILD_DIR)
 mv $TRAVIS_BUILD_DIR .
 socat tcp-connect:debug.angr.io:3106 system:bash,pty,stderr || echo "Debug shell not listening."
-./setup.sh -i -w -v -b $BRANCH -$PY angr $CI_EXTRAS
+./setup.sh -i -w -v -$PY angr $CI_EXTRAS
 
 echo "###"
 echo "### Setup complete."
