@@ -1,0 +1,18 @@
+from ubuntu:xenial
+maintainer yans@yancomm.net
+
+run dpkg --add-architecture i386
+run apt-get update && \
+	apt-get install -y screen virtualenvwrapper python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev libqt4-dev graphviz-dev binutils-multiarch nasm libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386 && \
+	apt-get clean && rm -rf /var/lib/apt/lists/*
+
+run useradd -s /bin/bash -m angr
+user angr
+workdir /home/angr
+run bash -i -c "mkvirtualenv --python $(which python2) angr-cpython"
+add pypy_venv.sh /home/angr
+run ./pypy_venv.sh angr-pypy
+
+ARG PYPI_DEPS="appdirs astroid bintrees cachetools cffi configparser coverage decorator dpkt-fix enum34 future futures ipdb ipython ipython-genutils isort lazy-object-proxy mccabe networkx nose nose-timer packaging pathlib2 pefile pexpect pickleshare pkg-resources plumbum progressbar prompt-toolkit ptyprocess pycparser pyelftools Pygments pylint pyparsing rpyc scandir simplegeneric six termcolor traitlets unicorn wcwidth wrapt z3-solver"
+run /home/angr/.virtualenvs/angr-cpython/bin/pip install $PYPI_DEPS
+run /home/angr/.virtualenvs/angr-pypy/bin/pip install $PYPI_DEPS

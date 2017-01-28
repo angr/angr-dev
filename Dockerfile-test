@@ -1,0 +1,28 @@
+FROM angr/dependencies
+MAINTAINER yans@yancomm.net
+
+ARG CI_BRANCH=master
+ARG CI_PR=false
+ARG CI_CHANGED_REPO
+ARG CI_NO_COVERAGE
+ARG CI_EXTRAS="tracer fuzzer driller povsim compilerex rex colorguard fidget identifier patcherex"
+ARG CI_REMOTE=http://github.com/angr/angr-dev
+ARG CI_VENV=angr-cpython
+
+ENV CI_BRANCH=${CI_BRANCH} CI_PR=${CI_PR} CI_CHANGED_REPO=${CI_CHANGED_REPO} CI_NO_COVERAGE=${CI_NO_COVERAGE} CI_EXTRAS=${CI_EXTRAS} CI_VENV=${CI_VENV}
+
+# first, clone angr-dev
+RUN git clone $CI_REMOTE && cd angr-dev && (git checkout $CI_BRANCH || echo "No $CI_BRANCH on angr-dev")
+
+# now, clone the angr repos
+RUN angr-dev/setup.sh -w -v -b $CI_BRANCH -e $CI_VENV angr -C $CI_EXTRAS
+
+# now, remove the changed repo
+RUN rm -rf angr-dev/$CI_CHANGED_REPO
+ADD $CI_CHANGED_REPO angr-dev/$CI_CHANGED_REPO
+USER root
+RUN chown -R angr.angr angr-dev/$CI_CHANGED_REPO
+USER angr
+
+# now, do the actual install
+RUN angr-dev/setup.sh -w -v -e $CI_VENV angr $CI_EXTRAS
