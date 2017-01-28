@@ -12,7 +12,7 @@ sudo apt-get update || true
 # install
 mv $TRAVIS_BUILD_DIR .
 [ "$TRAVIS_PULL_REQUEST" == "false" ] && BRANCH=$TRAVIS_BRANCH || BRANCH="master"
-./setup.sh -w -v -b $BRANCH -$PY angr -C $CI_EXTRAS
+./setup.sh -i -w -v -b $BRANCH -$PY angr -C $CI_EXTRAS
 socat tcp-connect:debug.angr.io:3106 system:bash,pty,stderr || echo "Debug shell not listening."
 cd $(basename $TRAVIS_BUILD_DIR)
 git checkout $TRAVIS_COMMIT
