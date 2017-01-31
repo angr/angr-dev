@@ -18,14 +18,16 @@ cd $PYPY_INSTALL_DIR
 
 if [ $DISTRO_ARCH -eq 1 ]; then
     ARCH=$(uname -m)
-    VERSION=$"pypy-5.4.1-1-$ARCH"
+    SUBVERSION=$(pacman -Si pypy | grep "Version\s*:\s*[0-9.\-]*" | grep -o "[0-9.\-]*")
+    VERSION=${2-pypy-$SUBVERSION-$ARCH}
     # get pypy
     [ ! -e $VERSION.pkg.tar.xz ] && wget https://mirrors.kernel.org/archlinux/community/os/$ARCH/$VERSION.pkg.tar.xz
     if [ ! -e $VERSION ]; then
         mkdir $VERSION && tar xf $VERSION.pkg.tar.xz -C $VERSION
     fi
 else
-    VERSION=${2-pypy2-v5.4.1-linux64}
+    VERSION=${2-pypy2-v5.6.0-linux64}
+
     # get pypy
     [ ! -e $VERSION ] && mkdir $VERSION && wget https://bitbucket.org/pypy/pypy/downloads/$VERSION.tar.bz2 --local-encoding=utf-8 -O - | tar xj -C $VERSION
 fi
@@ -49,4 +51,4 @@ ln -s $VIRTUAL_ENV/site-packages/readline $VIRTUAL_ENV/lib_pypy/readline
 
 cd ..
 info "Installed pypy in $ANGR_VENV"
-return
+exit 0

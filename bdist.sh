@@ -11,7 +11,7 @@ if [ -z "$DEST" ]; then
 fi
 
 if [ -z "$2" ]; then
-	exec "$0" "$DEST" angr-z3 pyvex unicorn simuvex
+	exec "$0" "$DEST" angr-z3 pyvex capstone unicorn simuvex
 fi
 
 mkdir -p $DEST
@@ -35,6 +35,8 @@ while [ "$1" ]; do
 		DIST_FOLDER=src/api/python/dist
 	elif [[ "$REPO" == "unicorn" ]]; then
 		DIST_FOLDER=bindings/python/dist
+	elif [[ "$REPO" == "capstone" ]]; then
+		DIST_FOLDER=bindings/python/dist
 	fi
 
 	cat >> $DEST/build.sh <<EOF
@@ -47,10 +49,24 @@ while [ "$1" ]; do
 	cd -
 
 EOF
+
+	if [[ "$REPO" == "pyvex" ]]; then
+		cat >> $DEST/build.sh <<EOF
+	if [ "\$(uname -p)" == "x86_64" ]; then
+		echo "Archiving vex static library"
+		cd pyvex
+		mv vex-master vex
+		tar -czf /output/vex-$(date "+%Y.%m.%d").tar.gz vex/libvex.a vex/priv/*.o
+		cd -
+	fi
+
+EOF
+	fi
 done
 
 chmod +x $DEST/build.sh
 
 sudo docker run -it --rm -v $(realpath $DEST):/output quay.io/pypa/manylinux1_x86_64 /output/build.sh
 sudo docker run -it --rm -v $(realpath $DEST):/output quay.io/pypa/manylinux1_i686 /output/build.sh
+sudo chown $(id -un):$(id -un) $(realpath $DEST)/*
 rm $DEST/build.sh

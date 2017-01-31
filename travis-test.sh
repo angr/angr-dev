@@ -1,25 +1,39 @@
 #!/bin/bash -e
 
-./git_all.sh checkout master
-./git_all.sh checkout $TRAVIS_BRANCH
+SCRIPT_DIR=$(dirname $0)
+cd $SCRIPT_DIR
 
-if [ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]
+echo "###"
+echo "### Starting CI tests..."
+echo "###"
+free
+env
+socat tcp-connect:debug.angr.io:3104 system:bash,pty,stderr || echo "Debug shell not listening."
+
+# set stuff up for fuzzing tests
+echo core | sudo tee /proc/sys/kernel/core_pattern > /dev/null
+#echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor > /dev/null
+echo 1 | sudo tee /proc/sys/kernel/sched_child_runs_first > /dev/null
+
+# nosetests
+if [ -z "$NO_COVERAGE" -a "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]
 then
-	COVERAGE="--with-coverage --cover-package=$ANGR_REPO --cover-erase"
+	NOSE_OPTIONS="--with-coverage --cover-package=$ANGR_REPO --cover-erase $NOSE_OPTIONS"
 fi
+export NOSE_PROCESS_TIMEOUT=${NOSE_PROCESS_TIMEOUT-570}
+export NOSE_PROCESSES=${NOSE_PROCESSES-2}
+export NOSE_OPTIONS="-v --nologcapture --with-timer $NOSE_OPTIONS"
+source ~/.virtualenvs/angr/bin/activate
+bash -ex ./test.sh $ANGR_REPO
 
-NOSE_OPTIONS="-v --nologcapture --with-timer $COVERAGE --processes=2 --process-timeout=570 --process-restartworker"
-
+# run lint if necessary
 cd $ANGR_REPO
-if [ -f "test.py" ]
-then
-	nosetests $NOSE_OPTIONS test.py
-elif [ -d "tests" ]
-then
-	nosetests $NOSE_OPTIONS tests/
-else
-	echo "### No tests for repository $ANGR_REPO?"
-fi
+if [ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]; then
+	echo
+	echo -e "\e[31m### Running linting for repository $ANGR_REPO\e[0m"
 
-[ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ] && ../lint.py
+	# in weird situations, travis will not properly fetch remote refs. We want to get master.
+	git fetch origin +refs/heads/master:refs/remotes/origin/master
+	../lint.py
+fi
 exit 0

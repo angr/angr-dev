@@ -11,9 +11,9 @@ function usage
 	echo "    -C		don't do the actual installation (quit after cloning)"
 	echo "    -w		use pre-built packages where available"
 	echo "    -v		verbose (don't redirect installation logging)"
-	echo "    -e ENV	create a cpython environment ENV"
+	echo "    -e ENV	create or reuse a cpython environment ENV"
 	echo "    -E ENV	re-create a cpython environment ENV"
-	echo "    -p ENV	create a pypy environment ENV"
+	echo "    -p ENV	create or reuse a pypy environment ENV"
 	echo "    -P ENV	re-create a pypy environment ENV"
 	echo "    -r REMOTE	use a different remote base (default: https://github.com/angr/)"
 	echo "             	Can be specified multiple times."
@@ -28,11 +28,11 @@ function usage
 }
 
 ARCH_PACKAGES=${ARCH_PACKAGES-python-virtualenvwrapper python2 libxml2 libxslt git libffi cmake libtool glib2 pixman}
-DEBS=${DEBS-virtualenvwrapper python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev}
-REPOS=${REPOS-ana idalink cooldict mulpyplexer capstone unicorn monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angrop angr-doc binaries}
-ORIGIN_REMOTE=$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s/\/angr-dev.*//")
-REMOTES=${REMOTES-${ORIGIN_REMOTE/\/github.com/\/git:@github.com} https://git:@github.com/zardus https://git:@github.com/rhelmot https://git:@github.com/salls}
+DEBS=${DEBS-virtualenvwrapper python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev libqt4-dev graphviz-dev binutils-multiarch nasm libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386}
+REPOS=${REPOS-ana idalink cooldict mulpyplexer capstone monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angrop angr-doc binaries}
 
+ORIGIN_REMOTE=$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|angr/angr-dev.*||")
+REMOTES=${REMOTES-${ORIGIN_REMOTE}angr ${ORIGIN_REMOTE}shellphish ${ORIGIN_REMOTE}mechaphish https://git:@github.com/zardus https://git:@github.com/rhelmot https://git:@github.com/salls}
 
 INSTALL_REQS=0
 ANGR_VENV=
@@ -111,7 +111,6 @@ done
 if [ $WHEELS -eq 1 ]
 then
 	REPOS="$REPOS wheels"
-	REPOS=${REPOS// unicorn/}
 	REPOS=${REPOS// capstone/}
 fi
 
@@ -152,9 +151,17 @@ if [ "$INSTALL_REQS" -eq 1 ]; then
 	info Installing dependencies...
 	if [ $DISTRO_ARCH -eq 1 ]; then # ARCH
 		sudo pacman -S $ARCH_PACKAGES --noconfirm
-	else # DEBIAN / UBUNTU
-		[ -e /etc/debian_version ] && sudo apt-get install -y $DEBS
-		[ ! -e /etc/debian_version ] && error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
+	elif [ -e /etc/debian_version ]
+	then
+		if ! (dpkg --print-foreign-architectures | grep i386)
+		then
+			echo "Adding i386 architectures..."
+			sudo dpkg --add-architecture i386
+			sudo apt-get update
+		fi
+		sudo apt-get install -y $DEBS
+	else
+		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
 	fi
 fi
 
@@ -188,12 +195,12 @@ if [ -n "$ANGR_VENV" ]; then
 	then
 		info "Removing existing virtual environment $ANGR_VENV..."
 		rmvirtualenv $ANGR_VENV || error "Failed to remote virtualenv $ANGR_VENV."
-	elif lsvirtualenv | grep -q "^$ANGR_VENV$"
-	then
-		error "Virtualenv $ANGR_VENV already exists. Use -E instead of -e if you want to re-create the environment."
 	fi
 
-	if [ "$USE_PYPY" -eq 1 ]
+	if lsvirtualenv | grep -q "^$ANGR_VENV$"
+	then
+		info "Virtualenv $ANGR_VENV already exists, reusing it. Use -E instead of -e if you want to re-create the environment."
+	elif [ "$USE_PYPY" -eq 1 ]
 	then
 		source ./pypy_venv.sh
 	else
@@ -202,6 +209,9 @@ if [ -n "$ANGR_VENV" ]; then
 	
 	set -e
 	workon $ANGR_VENV || error "Unable to activate the virtual environment."
+
+	# older versions of pip will fail to process the --find-links arg silently
+	pip install -U pip
 fi
 
 function try_remote
@@ -315,7 +325,9 @@ then
 	fi
 
 	# remove angr-management if running in pypy or in travis
-	(python --version 2>&1| grep -q PyPy) && TO_INSTALL=${TO_INSTALL// angr-management/}
+	#(python --version 2>&1| grep -q PyPy) && 
+	info "NOTE: removing angr-management until we sort out the pyside packaging"
+	TO_INSTALL=${TO_INSTALL// angr-management/}
 	[ -n "$TRAVIS" ] && TO_INSTALL=${TO_INSTALL// angr-management/}
 
 	if pip install $PIP_OPTIONS -v ${TO_INSTALL// / -e } >> $OUTFILE 2>> $ERRFILE

@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+VERSION_MAJOR=6
+
 #while getopt "v" opt
 #do
 #	case $opt in
@@ -14,7 +16,7 @@ shift
 
 function today_version
 {
-	echo 5.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/^0*//g" -e "s/\.0*/./g")
+	echo $VERSION_MAJOR.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/^0*//g" -e "s/\.0*/./g")
 }
 
 function build_docs
@@ -43,10 +45,14 @@ function extract_version
 	echo $ver
 }
 
-export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex binaries}
+export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex binaries angrop}
 
 case $CMD in
 	release)
+		if [ -z "$VIRTUAL_ENV" ]; then
+			echo "Must be in the angr virtualenv to do a release!"
+			exit 1
+		fi
 		VERSION=$1
 		shift || true
 		[ -z "$VERSION" ] && VERSION=$(today_version)
@@ -63,7 +69,6 @@ case $CMD in
 		./git_all.sh push origin master
 		./git_all.sh push github master
 		./git_all.sh checkout @{-1}
-		$0 register
 		$0 sdist
 		build_docs
 		#[[ $REPOS == *pyvex* ]] && REPOS=pyvex $0 wheel pyvex
@@ -100,6 +105,12 @@ case $CMD in
 			sed -i -e "s/version=['\"][^'\"]*['\"]/version='$VERSION'/g" setup.py
 			cd ..
 		done
+
+        cd angr-doc
+        sed -i -e "s/version = u['\"][^'\"]*['\"]/version = u'$VERSION'/g" api-doc/source/conf.py
+        sed -i -e "s/release = u['\"][^'\"]*['\"]/release = u'$VERSION'/g" api-doc/source/conf.py
+        cd ..
+
 		;;
 	update_dep)
 		VERSION=$1
@@ -160,8 +171,8 @@ case $CMD in
 			python setup.py sdist
 			SDIST_EXTENSION=.tar.gz
 			python setup.py rotate -m $SDIST_EXTENSION -k 1 -d dist
-			twine register dist/*$SDIST_EXTENSION
-			twine upload dist/*$SDIST_EXTENSION
+			twine register dist/*$SDIST_EXTENSION || true
+			twine upload dist/*$SDIST_EXTENSION || echo "!!!!! FAILED TO UPLOAD $i"
 			cd ..
 		done
 		;;
