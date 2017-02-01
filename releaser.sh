@@ -171,7 +171,6 @@ case $CMD in
 			python setup.py sdist
 			SDIST_EXTENSION=.tar.gz
 			python setup.py rotate -m $SDIST_EXTENSION -k 1 -d dist
-			twine register dist/*$SDIST_EXTENSION || true
 			twine upload dist/*$SDIST_EXTENSION || echo "!!!!! FAILED TO UPLOAD $i"
 			cd ..
 		done
