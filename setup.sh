@@ -46,14 +46,16 @@ DISTRO_ARCH=0
 
 # distro check
 # If available, use LSB to identify distribution
-if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]; then
+if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]
+then
     DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
 # Otherwise, use release info file
 else
     DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
 fi
 
-if [[ $DISTRO == "arch"* ]]; then
+if [[ $DISTRO == "arch"* ]]
+then
 	DISTRO_ARCH=1
 fi
 
@@ -147,9 +149,11 @@ function error
 	exit 1
 }
 
-if [ "$INSTALL_REQS" -eq 1 ]; then
+if [ "$INSTALL_REQS" -eq 1 ]
+then
 	info Installing dependencies...
-	if [ $DISTRO_ARCH -eq 1 ]; then # ARCH
+	if [ $DISTRO_ARCH -eq 1 ]
+	then # ARCH
 		sudo pacman -S $ARCH_PACKAGES --noconfirm
 	elif [ -e /etc/debian_version ]
 	then
@@ -166,22 +170,30 @@ if [ "$INSTALL_REQS" -eq 1 ]; then
 fi
 
 info "Checking dependencies..."
-if [ $DISTRO_ARCH -eq 1 ]; then # ARCH
-	[ $(pacman -Q $ARCH_PACKAGES | wc -l) -ne $(echo $ARCH_PACKAGES | wc -w) ] && echo "Please install the following packages: $ARCH_PACKAGES" && exit 1
-else # DEBIAN / UBUNTU
-	[ -e /etc/debian_version -a $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && echo "Please install the following packages: $DEBS" && exit 1
-	[ ! -e /etc/debian_version ] && echo -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
+if [ $DISTRO_ARCH -eq 1 ]
+then # ARCH
+	[ $(pacman -Q $ARCH_PACKAGES | wc -l) -ne $(echo $ARCH_PACKAGES | wc -w) ] && echo "Please install the following packages: $ARCH_PACKAGES"
+	exit 1
+elif [ -e /etc/debian_version ]
+then
+	[ $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && echo "Please install the following packages: $DEBS"
+	exit 1
+else
+	echo -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue."
+	read a
 fi
 
 set +e
-if [ $DISTRO_ARCH -eq 1 ]; then
+if [ $DISTRO_ARCH -eq 1 ]
+then
 	source /usr/bin/virtualenvwrapper.sh
 else
 	source /etc/bash_completion.d/virtualenvwrapper
 fi
 set -e
 
-if [ -n "$ANGR_VENV" ]; then
+if [ -n "$ANGR_VENV" ]
+then
 	set +e
 	if [ -n "$VIRTUAL_ENV" ]
 	then
