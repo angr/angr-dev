@@ -39,5 +39,5 @@ To update angr, simply pull all the git repositories.
 For repositories that have C components (pyvex), you might have to rebuild.
 
 ```bash
-pip install -I -e pyvex
+pip install -e pyvex
 ```
