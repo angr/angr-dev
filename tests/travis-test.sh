@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 SCRIPT_DIR=$(dirname $0)
-cd $SCRIPT_DIR
+cd $SCRIPT_DIR/..
 
 echo "###"
 echo "### Starting CI tests..."
