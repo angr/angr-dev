@@ -21,6 +21,7 @@ function today_version
 
 function build_docs
 {
+	VERSION=$(extract_version angr)
 	cd angr-doc
 	git checkout master
 	git push github master
