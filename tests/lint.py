@@ -110,7 +110,7 @@ def do_in(directory, function, *args, **kwargs):
 
 if __name__ == '__main__':
     pylint_rc = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pylintrc')
-    if not os.path.isfile("lint.py"):
+    if not os.path.isfile("tests/lint.py"):
         # lint the cwd
         sys.exit(0 if compare_lint() else 1)
     elif len(sys.argv) == 1:

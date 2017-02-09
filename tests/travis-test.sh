@@ -24,7 +24,7 @@ export NOSE_PROCESS_TIMEOUT=${NOSE_PROCESS_TIMEOUT-570}
 export NOSE_PROCESSES=${NOSE_PROCESSES-2}
 export NOSE_OPTIONS="-v --nologcapture --with-timer $NOSE_OPTIONS"
 source ~/.virtualenvs/angr/bin/activate
-bash -ex ./test.sh $ANGR_REPO
+bash -ex ./tests/test.sh $ANGR_REPO
 
 # run lint if necessary
 cd $ANGR_REPO
@@ -34,6 +34,6 @@ if [ "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]; then
 
 	# in weird situations, travis will not properly fetch remote refs. We want to get master.
 	git fetch origin +refs/heads/master:refs/remotes/origin/master
-	../lint.py
+	../tests/lint.py
 fi
 exit 0
