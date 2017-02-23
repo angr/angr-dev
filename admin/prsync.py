@@ -62,7 +62,7 @@ if __name__ == '__main__':
     s_do_push = False
     if '-p' in sys.argv:
         s_do_push = True
-        sys.argv.remove('-n')
+        sys.argv.remove('-p')
 
     if len(sys.argv) > 1:
         main(sys.argv[1], do_push=s_do_push)
