@@ -93,7 +93,7 @@ function do_one
 	shift
 
 	cd $DIR
-	if ! [ "$1" == "CHECKUP" ]; then
+	if ! [ "$1" == "CHECKUP" -o "$PREPEND" == "1" ]; then
 		center_align "RUNNING ON: $DIR" "#"
 	fi
 
@@ -101,6 +101,8 @@ function do_one
 		careful_pull && success $DIR || fail $DIR $?
 	elif [ "$1" == "CHECKUP" ]; then
 		checkup $DIR
+	elif [ "$PREPEND" == "1" ]; then
+		git "$@" | sed -e "s/^/$DIR: /"
 	else
 		git "$@" && success $DIR || fail $DIR $?
 	fi
@@ -114,15 +116,15 @@ function do_all
 		do_one $i "$@"
 	done
 
-	echo ""
 	if [ -n "$SUCCESSFUL" ]
 	then
+		echo ""
 		green "# Succeeded:"
 		echo $SUCCESSFUL
 	fi
-	echo ""
 	if [ -n "$FAILED" ]
 	then
+		echo ""
 		red "# Failed:"
 		echo $FAILED
 		if [ -n "$EXIT_FAILURE" ]
