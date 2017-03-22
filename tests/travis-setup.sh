@@ -11,11 +11,16 @@ sudo apt-get update || true
 
 # install
 [ "$TRAVIS_PULL_REQUEST" == "false" ] && BRANCH=$TRAVIS_BRANCH || BRANCH="master"
-./setup.sh -i -w -v -b $BRANCH -$PY angr -C $CI_EXTRAS
+./setup.sh -i -w -b $BRANCH -$PY angr -C $CI_EXTRAS
+
+echo "###"
+echo "### Clone complete."
+echo "###"
+
 rm -rf $(basename $TRAVIS_BUILD_DIR)
 mv $TRAVIS_BUILD_DIR .
 socat tcp-connect:debug.angr.io:3106 system:bash,pty,stderr || echo "Debug shell not listening."
-./setup.sh -i -w -v -$PY angr $CI_EXTRAS
+./setup.sh -i -w -$PY angr $CI_EXTRAS
 
 echo "###"
 echo "### Setup complete."
