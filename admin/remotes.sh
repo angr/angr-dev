@@ -63,9 +63,9 @@ angr/binaries
 angr/archinfo
 angr/angr.github.io
 angr/cle
-angr/identifier
 angr/wheels
 angr/fidget
+cgc/identifier
 cgc/driller
 cgc/fuzzer
 cgc/rex
@@ -106,17 +106,26 @@ function add_remotes
 		dir=$(basename $repo)
 		if [ ! -e $dir ]
 		then
-			echo "DNE: $repo"
+			echo "### DOES NOT EXIST: $repo"
 			continue
 		fi
 
-		cd $dir
-		git remote | grep -q $name && cd .. && continue
-		git remote add $name $base_url$repo
-		git fetch $name
-		cd ..
+		git -C $dir remote | grep -q $name && echo "### ALREADY DONE: $repo" && continue
+
+		echo "### DOING: $repo"
+		git -C $dir remote add $name $base_url$repo
+		git -C $dir fetch $name >/dev/null
 	done
 }
 
 add_remotes github git@github.com: "$GITHUB_REPOS"
 add_remotes gitlab git@git.seclab.cs.ucsb.edu: "$GITLAB_REPOS"
+
+for REPO in */.git
+do
+	REPO=$(dirname $REPO)
+	GITHUB_URL=$(git -C $REPO remote get-url github 2>/dev/null) || continue
+	GITLAB_URL=$(git -C $REPO remote get-url gitlab 2>/dev/null) || continue
+	git -C $REPO remote add both $GITHUB_URL
+	git -C $REPO remote set-url --add --push both $GITLAB_URL
+done
