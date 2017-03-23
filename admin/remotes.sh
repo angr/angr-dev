@@ -124,6 +124,7 @@ add_remotes gitlab git@git.seclab.cs.ucsb.edu: "$GITLAB_REPOS"
 for REPO in */.git
 do
 	REPO=$(dirname $REPO)
+	git -C $REPO remote | grep -q both && echo "### BOTH ALREADY DONE: $REPO" && continue
 	GITHUB_URL=$(git -C $REPO remote get-url github 2>/dev/null) || continue
 	GITLAB_URL=$(git -C $REPO remote get-url gitlab 2>/dev/null) || continue
 	git -C $REPO remote add both $GITHUB_URL
