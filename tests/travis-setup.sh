@@ -4,7 +4,7 @@ echo "###"
 echo "### Starting CI setup..."
 echo "###"
 
-CI_EXTRAS=${CI_EXTRAS-tracer fuzzer driller povsim compilerex rex colorguard fidget identifier patcherex}
+CI_EXTRAS=${CI_EXTRAS-tracer fuzzer driller povsim compilerex rex colorguard fidget identifier patcherex angr-bf}
 
 # update apt
 sudo apt-get update || true
