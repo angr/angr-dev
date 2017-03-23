@@ -127,5 +127,6 @@ do
 	GITHUB_URL=$(git -C $REPO remote get-url github 2>/dev/null) || continue
 	GITLAB_URL=$(git -C $REPO remote get-url gitlab 2>/dev/null) || continue
 	git -C $REPO remote add both $GITHUB_URL
+	git -C $REPO remote set-url --add --push both $GITHUB_URL
 	git -C $REPO remote set-url --add --push both $GITLAB_URL
 done
