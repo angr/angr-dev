@@ -7,7 +7,8 @@ echo "###"
 CI_EXTRAS=${CI_EXTRAS-tracer fuzzer driller povsim compilerex rex colorguard fidget identifier patcherex angr-bf}
 
 # update apt
-sudo apt-get update || true
+echo "Updating apt..."
+sudo apt-get update >/dev/null || true
 
 # install
 [ "$TRAVIS_PULL_REQUEST" == "false" ] && BRANCH=$TRAVIS_BRANCH || BRANCH="master"
