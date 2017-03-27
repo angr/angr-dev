@@ -51,7 +51,7 @@ zardus/cooldict
 
 GITLAB_REPOS="
 angr/claripy
-angr/tracer
+cgc/tracer
 angr/simuvex
 angr/pyvex
 angr/angr-management
