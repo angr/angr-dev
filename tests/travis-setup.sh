@@ -19,8 +19,7 @@ echo "###"
 
 rm -rf $(basename $TRAVIS_BUILD_DIR)
 mv $TRAVIS_BUILD_DIR .
-# listen with: socat TCP-l:3106,reuseaddr FILE:`tty`,raw,echo=0
-socat tcp-connect:debug.angr.io:3106 exec:'bash -li',pty,stderr,setsid,sigint,sane || echo "Debug shell not listening."
+./tests/shell.sh debug.angr.io 3106
 ./setup.sh -i -w -$PY angr $CI_EXTRAS
 
 echo "###"
