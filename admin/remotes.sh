@@ -61,7 +61,6 @@ angr/vex
 angr/angr
 angr/binaries
 angr/archinfo
-angr/angr.github.io
 angr/cle
 angr/wheels
 angr/fidget
