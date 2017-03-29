@@ -39,11 +39,12 @@ ANGR_VENV=
 USE_PYPY=
 RMVENV=0
 INSTALL=1
+CONCURRENT_CLONE=0
 WHEELS=0
 VERBOSE=0
 BRANCH=
 
-while getopts "iCwDve:E:p:P:r:b:h" opt
+while getopts "iCcwDve:E:p:P:r:b:h" opt
 do
 	case $opt in
 		i)
@@ -78,6 +79,9 @@ do
 			;;
 		C)
 			INSTALL=0
+			;;
+		c)
+			CONCURRENT_CLONE=1
 			;;
 		w)
 			WHEELS=1
@@ -196,18 +200,18 @@ function try_remote
 {
 	URL=$1
 	debug "Trying to clone from $URL"
-	rm -f /tmp/clone-$$
-	git clone $URL >> /tmp/clone-$$ 2>> /tmp/clone-$$
+	rm -f $CLONE_LOG
+	git clone $URL >> $CLONE_LOG 2>> $CLONE_LOG
 	r=$?
 
-	if grep -q -E "(ssh_exchange_identification: read: Connection reset by peer|ssh_exchange_identification: Connection closed by remote host)" /tmp/clone-$$
+	if grep -q -E "(ssh_exchange_identification: read: Connection reset by peer|ssh_exchange_identification: Connection closed by remote host)" $CLONE_LOG
 	then
 		warning "Too many concurrent connections to the server. Retrying after sleep."
 		sleep $[$RANDOM % 5]
 		try_remote $URL
 		return $?
 	else
-		[ $r -eq 0 ] && rm -f /tmp/clone-$$
+		[ $r -eq 0 ] && rm -f $CLONE_LOG
 		return $r
 	fi
 }
@@ -215,6 +219,7 @@ function try_remote
 function clone_repo
 {
 	NAME=$1
+	CLONE_LOG=/tmp/clone-$BASHPID
 	if [ -e $NAME ]
 	then
 		info "Skipping $NAME -- already cloned. Use ./git_all.sh pull for update."
@@ -225,14 +230,14 @@ function clone_repo
 	for r in $REMOTES
 	do
 		URL="$r/$NAME"
-		try_remote $URL && debug "Success!" && break
+		try_remote $URL && debug "Success - $NAME cloned!" && break
 	done
 
 	if [ ! -e $NAME ]
 	then
 		error "Failed to clone $NAME. Error was:"
-		cat /tmp/clone-$$
-		rm -f /tmp/clone-$$
+		cat $CLONE_LOG
+		rm -f $CLONE_LOG
 		return 1
 	fi
 
@@ -260,11 +265,34 @@ function install_wheels
 }
 
 info "Cloning angr components!"
-for r in $REPOS
-do
-	clone_repo $r || exit 1
-	[ -e "$NAME/setup.py" ] && TO_INSTALL="$TO_INSTALL $NAME"
-done
+if [ $CONCURRENT_CLONE -eq 0 ]
+then
+	for r in $REPOS
+	do
+		clone_repo $r || exit 1
+		[ -e "$NAME/setup.py" ] && TO_INSTALL="$TO_INSTALL $NAME"
+	done
+else
+	declare -A CLONE_PROCS
+	for r in $REPOS
+	do
+		clone_repo $r &
+		CLONE_PROCS[$r]=$!
+	done
+
+	for r in $REPOS
+	do
+		#echo "WAITING FOR: $r (PID ${CLONE_PROCS[$r]})"
+		if wait ${CLONE_PROCS[$r]}
+		then
+			#echo "... SUCCESS"
+			[ -e "$NAME/setup.py" ] && TO_INSTALL="$TO_INSTALL $NAME"
+		else
+			#echo "... FAIL"
+			exit 1
+		fi
+	done
+fi
 
 if [ -n "$BRANCH" ]
 then
