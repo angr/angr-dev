@@ -47,7 +47,7 @@ WHEELS=0
 VERBOSE=0
 BRANCH=
 
-while getopts "iCcwDve:E:p:P:r:b:h" opt
+while getopts "iCcwDvse:E:p:P:r:b:h" opt
 do
 	case $opt in
 		i)
@@ -91,6 +91,9 @@ do
 			;;
 		D)
 			REPOS=""
+			;;
+		s)
+			GIT_OPTIONS="$GIT_OPTIONS --depth 1 --no-single-branch"
 			;;
 		\?)
 			usage
@@ -216,7 +219,7 @@ function try_remote
 	URL=$1
 	debug "Trying to clone from $URL"
 	rm -f $CLONE_LOG
-	git clone $URL >> $CLONE_LOG 2>> $CLONE_LOG
+	git clone $GIT_OPTIONS $URL >> $CLONE_LOG 2>> $CLONE_LOG
 	r=$?
 
 	if grep -q -E "(ssh_exchange_identification: read: Connection reset by peer|ssh_exchange_identification: Connection closed by remote host)" $CLONE_LOG
