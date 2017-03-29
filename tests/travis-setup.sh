@@ -11,7 +11,7 @@ sudo apt-get update || true
 
 # install
 [ "$TRAVIS_PULL_REQUEST" == "false" ] && BRANCH=$TRAVIS_BRANCH || BRANCH="master"
-./setup.sh -i -w -b $BRANCH -$PY angr -C $CI_EXTRAS
+./setup.sh -i -w -b $BRANCH -$PY angr -c -C $CI_EXTRAS
 
 echo "###"
 echo "### Clone complete."
