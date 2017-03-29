@@ -112,8 +112,8 @@ then
 	OUTFILE=/dev/stdout
 	ERRFILE=/dev/stderr
 else
-	OUTFILE=/tmp/pip-$$
-	ERRFILE=/tmp/pip-$$
+	OUTFILE=/tmp/setup-$$
+	ERRFILE=/tmp/setup-$$
 	touch $OUTFILE
 fi
 
@@ -345,31 +345,28 @@ then
 	TO_INSTALL=${TO_INSTALL// angr-management/}
 	[ -n "$TRAVIS" ] && TO_INSTALL=${TO_INSTALL// angr-management/}
 
-    for PACKAGE in $TO_INSTALL; do
-        if pip install $PIP_OPTIONS -v -e $PACKAGE >> $OUTFILE 2>> $ERRFILE; then
-            info "Installed $PACKAGE."
-        else
-            error "$PACKAGE failed to install. Check $OUTFILE for details, or read it here:"
-            exit 1
-        fi
-    done
-
-    [ $VERBOSE -eq 1 ] || rm -f $OUTFILE
+    	for PACKAGE in $TO_INSTALL; do
+        	if pip install $PIP_OPTIONS -v -e $PACKAGE >> $OUTFILE 2>> $ERRFILE; then
+            		info "Installed $PACKAGE."
+        	else
+            		error "$PACKAGE failed to install. Check $OUTFILE for details, or read it here:"
+            		exit 1
+        	fi
+    	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
 	if pip install ipython pylint ipdb nose nose-timer coverage sphinx sphinx_rtd_theme recommonmark >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
-		[ $VERBOSE -eq 1 ] || rm -f $OUTFILE
 	else
 		error "Something failed to install. Check $OUTFILE for details, or read it here:"
 		exit 1
 	fi
-fi
 
-echo ''
-info "All done! Execute \"workon $ANGR_VENV\" to use your new angr virtual"
-info "environment. Any changes you make in the repositories will reflect"
-info "immediately in the virtual environment, with the exception of things"
-info "requiring compilation (i.e., pyvex). For those, you will need to rerun"
-info "the install after changes (i.e., \"pip install -e pyvex\")."
+	echo ''
+	info "All done! Execute \"workon $ANGR_VENV\" to use your new angr virtual"
+	info "environment. Any changes you make in the repositories will reflect"
+	info "immediately in the virtual environment, with the exception of things"
+	info "requiring compilation (i.e., pyvex). For those, you will need to rerun"
+	info "the install after changes (i.e., \"pip install -e pyvex\")."
+fi
