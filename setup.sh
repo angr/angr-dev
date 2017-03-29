@@ -164,10 +164,9 @@ info "Checking dependencies..."
 [ ! -e /etc/debian_version ] && echo -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
 
 info "Enabling virtualenvwrapper."
-which pip
-pip install virtualenvwrapper #>>$OUTFILE 2>>$ERRFILE
+pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 set +e
-source /etc/bash_completion.d/virtualenvwrapper #>>$OUTFILE 2>>$ERRFILE
+source /etc/bash_completion.d/virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 set -e
 
 if [ -n "$ANGR_VENV" ]
