@@ -26,11 +26,16 @@ fi
 ./tests/shell.sh debug.angr.io 3106
 ./setup.sh -i -w -$PY angr $CI_EXTRAS
 
+( cat /tmp/setup-* | nc debug.angr.io 3107 ) || echo "debug.angr.io:3107 wasn't listening for build logs..."
+
 echo "###"
 echo "### Setup complete."
 echo "###"
 ./git_all.sh show -s
 
+echo "###"
+echo "### Cleaning up environment."
+echo "###"
 # clean up the environment (thanks to https://github.com/dbsrgits/dbix-class/blob/3c26d329/maint/travis-ci_scripts/10_before_install.bash#L5-L15)
 sudo /etc/init.d/mysql stop
 sudo /etc/init.d/postgresql stop || /bin/true
