@@ -18,8 +18,11 @@ echo "###"
 echo "### Clone complete."
 echo "###"
 
-rm -rf $(basename $TRAVIS_BUILD_DIR)
-mv $TRAVIS_BUILD_DIR .
+if [ $(basename $TRAVIS_BUILD_DIR) != "angr-dev" ]
+then
+	rm -rf $(basename $TRAVIS_BUILD_DIR)
+	mv $TRAVIS_BUILD_DIR .
+fi
 ./tests/shell.sh debug.angr.io 3106
 ./setup.sh -i -w -$PY angr $CI_EXTRAS
 
