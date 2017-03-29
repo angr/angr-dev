@@ -287,9 +287,8 @@ function install_wheels
 function pip_install
 {
         debug "pip-installing: $@."
-        if pip install $PIP_OPTIONS -v $@ >>$OUTFILE 2>>$ERRFILE; then
-            	debug "... success"
-        else
+        if ! pip install $PIP_OPTIONS -v $@ >>$OUTFILE 2>>$ERRFILE
+        then
             	error "pip failure ($@). Check $OUTFILE for details, or read it here:"
             	exit 1
         fi
@@ -372,7 +371,6 @@ then
             	info "Installing $PACKAGE."
             	[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
             	pip_install -e $PACKAGE
-            	debug "... installed $PACKAGE (and any dependencies)."
     	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
