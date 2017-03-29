@@ -27,12 +27,12 @@ function usage
 	exit 1
 }
 
+ARCH_PACKAGES=${ARCH_PACKAGES-python-virtualenvwrapper python2 libxml2 libxslt git libffi cmake libtool glib2 pixman}
 DEBS=${DEBS-virtualenvwrapper python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev libqt4-dev graphviz-dev binutils-multiarch nasm libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386}
 REPOS=${REPOS-ana idalink cooldict mulpyplexer capstone monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angrop angr-doc binaries}
 
 ORIGIN_REMOTE=$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|angr/angr-dev.*||")
 REMOTES=${REMOTES-${ORIGIN_REMOTE}angr ${ORIGIN_REMOTE}shellphish ${ORIGIN_REMOTE}mechaphish https://git:@github.com/zardus https://git:@github.com/rhelmot https://git:@github.com/salls}
-
 
 INSTALL_REQS=0
 ANGR_VENV=
@@ -43,6 +43,22 @@ CONCURRENT_CLONE=0
 WHEELS=0
 VERBOSE=0
 BRANCH=
+DISTRO_ARCH=0
+
+# distro check
+# If available, use LSB to identify distribution
+if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]
+then
+    DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
+# Otherwise, use release info file
+else
+    DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
+fi
+
+if [[ $DISTRO == "arch"* ]]
+then
+	DISTRO_ARCH=1
+fi
 
 while getopts "iCcwDve:E:p:P:r:b:h" opt
 do
@@ -140,7 +156,10 @@ function error
 if [ "$INSTALL_REQS" -eq 1 ]
 then
 	info Installing dependencies...
-	if [ -e /etc/debian_version ]
+	if [ $DISTRO_ARCH -eq 1 ]
+	then # ARCH
+		sudo pacman -S $ARCH_PACKAGES --noconfirm
+	elif [ -e /etc/debian_version ]
 	then
 		if ! (dpkg --print-foreign-architectures | grep i386)
 		then
@@ -155,11 +174,26 @@ then
 fi
 
 info "Checking dependencies..."
-[ -e /etc/debian_version -a $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && echo "Please install the following packages: $DEBS" && exit 1
-[ ! -e /etc/debian_version ] && echo -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
+if [ $DISTRO_ARCH -eq 1 ]
+then # ARCH
+	[ $(pacman -Q $ARCH_PACKAGES | wc -l) -ne $(echo $ARCH_PACKAGES | wc -w) ] && echo "Please install the following packages: $ARCH_PACKAGES"
+	exit 1
+elif [ -e /etc/debian_version ]
+then
+	[ $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && echo "Please install the following packages: $DEBS"
+	exit 1
+else
+	echo -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue."
+	read a
+fi
 
 set +e
-source /etc/bash_completion.d/virtualenvwrapper
+if [ $DISTRO_ARCH -eq 1 ]
+then
+	source /usr/bin/virtualenvwrapper.sh
+else
+	source /etc/bash_completion.d/virtualenvwrapper
+fi
 set -e
 
 if [ -n "$ANGR_VENV" ]
@@ -184,11 +218,11 @@ then
 		info "Virtualenv $ANGR_VENV already exists, reusing it. Use -E instead of -e if you want to re-create the environment."
 	elif [ "$USE_PYPY" -eq 1 ]
 	then
-		./pypy_venv.sh $ANGR_VENV
+		source ./pypy_venv.sh
 	else
 		mkvirtualenv --python=$(which python2) $ANGR_VENV
 	fi
-
+	
 	set -e
 	workon $ANGR_VENV || error "Unable to activate the virtual environment."
 
