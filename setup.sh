@@ -121,25 +121,25 @@ fi
 
 function info
 {
-	echo "$(tput setaf 4 2>/dev/null)[+] $@$(tput sgr0 2>/dev/null)"
+	echo "$(tput setaf 4 2>/dev/null)[+] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
 	[ $VERBOSE -eq 0 ] && echo "[+] $@" >> $OUTFILE
 }
 
 function warning
 {
-	echo "$(tput setaf 3 2>/dev/null)[!] $@$(tput sgr0 2>/dev/null)"
+	echo "$(tput setaf 3 2>/dev/null)[!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
 	[ $VERBOSE -eq 0 ] && echo "[!] $@" >> $OUTFILE
 }
 
 function debug
 {
-	echo "$(tput setaf 6 2>/dev/null)[-] $@$(tput sgr0 2>/dev/null)"
+	echo "$(tput setaf 6 2>/dev/null)[-] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
 	[ $VERBOSE -eq 0 ] && echo "[-] $@" >> $OUTFILE
 }
 
 function error
 {
-	echo "$(tput setaf 1 2>/dev/null)[!!] $@$(tput sgr0 2>/dev/null)" >&2
+	echo "$(tput setaf 1 2>/dev/null)[!!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)" >&2
 	[ $VERBOSE -eq 0 ] && echo "[!!] $@" >> $ERRFILE
 	cat $OUTFILE
 	[ $OUTFILE != $ERRFILE ] && cat $ERRFILE
