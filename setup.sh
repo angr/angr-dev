@@ -28,7 +28,10 @@ function usage
 }
 
 DEBS=${DEBS-virtualenvwrapper python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev libqt4-dev graphviz-dev binutils-multiarch nasm libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386}
-REPOS=${REPOS-ana idalink cooldict mulpyplexer capstone monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angrop angr-doc binaries}
+REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angrop angr-doc binaries}
+declare -A EXTRA_DEPS
+EXTRA_DEPS["simuvex"]="unicorn"
+EXTRA_DEPS["pyvex"]="--pre capstone"
 
 ORIGIN_REMOTE=$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|angr/angr-dev.*||")
 REMOTES=${REMOTES-${ORIGIN_REMOTE}angr ${ORIGIN_REMOTE}shellphish ${ORIGIN_REMOTE}mechaphish https://git:@github.com/zardus https://git:@github.com/rhelmot https://git:@github.com/salls}
@@ -101,7 +104,6 @@ done
 if [ $WHEELS -eq 1 ]
 then
 	REPOS="$REPOS wheels"
-	REPOS=${REPOS// capstone/}
 fi
 
 EXTRA_REPOS=${@:$OPTIND:$OPTIND+100}
@@ -160,8 +162,8 @@ then
 fi
 
 info "Checking dependencies..."
-[ -e /etc/debian_version -a $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && echo "Please install the following packages: $DEBS" && exit 1
-[ ! -e /etc/debian_version ] && echo -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
+[ -e /etc/debian_version -a $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && error "Please install the following packages: $DEBS" && exit 1
+[ ! -e /etc/debian_version ] && warning -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
 
 info "Enabling virtualenvwrapper."
 pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
@@ -260,7 +262,7 @@ function install_wheels
 	#pip install $LATEST_Z3 >> $OUTFILE 2>> $ERRFILE
 
 	LATEST_VEX=$(ls -tr wheels/vex-*)
-	echo "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
+	debug "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
 	tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
 	touch vex/*/*.o vex/libvex.a
 
@@ -271,6 +273,17 @@ function install_wheels
 	#LATEST_AFL=$(ls -tr wheels/shellphish_afl-*)
 	#echo "Installing $LATEST_AFL" >> $OUTFILE 2>> $ERRFILE
 	#pip install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
+}
+
+function pip_install
+{
+        debug "pip-installing: $@."
+        if pip install $PIP_OPTIONS -v $@ >>$OUTFILE 2>>$ERRFILE; then
+            	debug "... success"
+        else
+            	error "pip failure ($@). Check $OUTFILE for details, or read it here:"
+            	exit 1
+        fi
 }
 
 info "Cloning angr components!"
@@ -295,7 +308,7 @@ else
 		if wait ${CLONE_PROCS[$r]}
 		then
 			#echo "... SUCCESS"
-			[ -e "$NAME/setup.py" ] && TO_INSTALL="$TO_INSTALL $NAME"
+			[ -e "$r/setup.py" ] && TO_INSTALL="$TO_INSTALL $r"
 		else
 			#echo "... FAIL"
 			exit 1
@@ -343,15 +356,14 @@ then
 	#(python --version 2>&1| grep -q PyPy) && 
 	info "NOTE: removing angr-management until we sort out the pyside packaging"
 	TO_INSTALL=${TO_INSTALL// angr-management/}
+	info "Install list: $TO_INSTALL"
 	[ -n "$TRAVIS" ] && TO_INSTALL=${TO_INSTALL// angr-management/}
 
     	for PACKAGE in $TO_INSTALL; do
-        	if pip install $PIP_OPTIONS -v -e $PACKAGE >> $OUTFILE 2>> $ERRFILE; then
-            		info "Installed $PACKAGE."
-        	else
-            		error "$PACKAGE failed to install. Check $OUTFILE for details, or read it here:"
-            		exit 1
-        	fi
+            	info "Installing $PACKAGE."
+            	[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
+            	pip_install -e $PACKAGE
+            	debug "... installed $PACKAGE (and any dependencies)."
     	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
