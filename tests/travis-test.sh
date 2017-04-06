@@ -22,7 +22,7 @@ then
 fi
 export NOSE_PROCESS_TIMEOUT=${NOSE_PROCESS_TIMEOUT-570}
 export NOSE_PROCESSES=${NOSE_PROCESSES-2}
-export NOSE_OPTIONS="-v --nologcapture --with-timer $NOSE_OPTIONS"
+export NOSE_OPTIONS="-v --nologcapture --with-timer --with-flaky --max-runs=3 $NOSE_OPTIONS"
 source ~/.virtualenvs/angr/bin/activate
 bash -ex ./tests/test.sh $ANGR_REPO
 
