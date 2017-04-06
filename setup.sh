@@ -374,7 +374,7 @@ then
     	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
-	if pip install ipython pylint ipdb nose nose-timer coverage sphinx sphinx_rtd_theme recommonmark >> $OUTFILE 2>> $ERRFILE
+	if pip install ipython pylint ipdb nose nose-timer coverage flaky sphinx sphinx_rtd_theme recommonmark >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
 	else
