@@ -1,8 +1,7 @@
-language: python
-python: 2.7
 sudo: required
 dist: xenial
 env:
   - PY="e"
-install: (sudo apt-get update || true) && bash -e ./setup.sh -i -w -v -$PY angr
+  - PY="p"
+install: tests/travis-setup.sh
 script: source ~/.virtualenvs/angr/bin/activate && python -c 'import angr; print "angr imports!"'

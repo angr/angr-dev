@@ -78,11 +78,11 @@ case $CMD in
 		build_docs
 		;;
 	sync)
+		admin/remotes.sh
 		./git_all.sh checkout master
-		./git_all.sh pull origin master
+		./git_all.sh pull gitlab master
 		./git_all.sh pull github master
-		./git_all.sh push github master
-		./git_all.sh push origin master
+		./git_all.sh push both
 		./git_all.sh checkout @{-1}
 		;;
 	version)
@@ -146,21 +146,6 @@ case $CMD in
 				sed -i -e "s/$j[\s\S]*/$j>=$version/g" requirements.txt
 				cd ..
 			done
-		done
-		;;
-	remote)
-		NAME=$1
-		shift
-
-		PREFIX=$1
-		shift
-
-		for i in $REPOS
-		do
-			cd $i
-			git remote rm $NAME || echo "no remote $NAME set for $i"
-			git remote add $NAME $PREFIX/$i
-			cd ..
 		done
 		;;
 	sdist)

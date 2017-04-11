@@ -9,13 +9,15 @@ function usage
 	echo
 	echo "    -i		install required packages"
 	echo "    -C		don't do the actual installation (quit after cloning)"
+	echo "    -c		clone repositories concurrently in the background"
+	echo "    -s            Use shallow clones (pull just the latest commit from each branch)."
 	echo "    -w		use pre-built packages where available"
 	echo "    -v		verbose (don't redirect installation logging)"
 	echo "    -e ENV	create or reuse a cpython environment ENV"
 	echo "    -E ENV	re-create a cpython environment ENV"
 	echo "    -p ENV	create or reuse a pypy environment ENV"
 	echo "    -P ENV	re-create a pypy environment ENV"
-	echo "    -r REMOTE	use a different remote base (default: https://github.com/angr/)"
+	echo "    -r REMOTE	use a different remote base (default: https://github.com/)"
 	echo "             	Can be specified multiple times."
 	echo "    -b BRANCH     Check out a given branch across all the repositories."
 	echo "    -D            Ignore the default repo list."
@@ -28,9 +30,12 @@ function usage
 }
 
 DEBS=${DEBS-virtualenvwrapper python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev libqt4-dev graphviz-dev binutils-multiarch nasm libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386}
-REPOS=${REPOS-ana idalink cooldict mulpyplexer capstone monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angrop angr-doc binaries}
+REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angrop angr-doc binaries}
+declare -A EXTRA_DEPS
+EXTRA_DEPS["simuvex"]="unicorn"
+EXTRA_DEPS["pyvex"]="--pre capstone"
 
-ORIGIN_REMOTE=$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|angr/angr-dev.*||")
+ORIGIN_REMOTE=${ORIGIN_REMOTE-$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|angr/angr-dev.*||")}
 REMOTES=${REMOTES-${ORIGIN_REMOTE}angr ${ORIGIN_REMOTE}shellphish ${ORIGIN_REMOTE}mechaphish https://git:@github.com/zardus https://git:@github.com/rhelmot https://git:@github.com/salls}
 
 
@@ -39,11 +44,12 @@ ANGR_VENV=
 USE_PYPY=
 RMVENV=0
 INSTALL=1
+CONCURRENT_CLONE=0
 WHEELS=0
 VERBOSE=0
 BRANCH=
 
-while getopts "iCwDve:E:p:P:r:b:h" opt
+while getopts "iCcwDvse:E:p:P:r:b:h" opt
 do
 	case $opt in
 		i)
@@ -79,11 +85,17 @@ do
 		C)
 			INSTALL=0
 			;;
+		c)
+			CONCURRENT_CLONE=1
+			;;
 		w)
 			WHEELS=1
 			;;
 		D)
 			REPOS=""
+			;;
+		s)
+			GIT_OPTIONS="$GIT_OPTIONS --depth 1 --no-single-branch"
 			;;
 		\?)
 			usage
@@ -97,7 +109,6 @@ done
 if [ $WHEELS -eq 1 ]
 then
 	REPOS="$REPOS wheels"
-	REPOS=${REPOS// capstone/}
 fi
 
 EXTRA_REPOS=${@:$OPTIND:$OPTIND+100}
@@ -108,54 +119,65 @@ then
 	OUTFILE=/dev/stdout
 	ERRFILE=/dev/stderr
 else
-	OUTFILE=/tmp/pip-$$
-	ERRFILE=/tmp/pip-$$
+	OUTFILE=/tmp/setup-$$
+	ERRFILE=/tmp/setup-$$
+	touch $OUTFILE
 fi
 
 function info
 {
-	echo "$(tput setaf 4 2>/dev/null)[+] $@$(tput sgr0 2>/dev/null)"
+	echo "$(tput setaf 4 2>/dev/null)[+] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
+	[ $VERBOSE -eq 0 ] && echo "[+] $@" >> $OUTFILE
 }
 
 function warning
 {
-	echo "$(tput setaf 3 2>/dev/null)[!] $@$(tput sgr0 2>/dev/null)"
+	echo "$(tput setaf 3 2>/dev/null)[!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
+	[ $VERBOSE -eq 0 ] && echo "[!] $@" >> $OUTFILE
 }
 
 function debug
 {
-	echo "$(tput setaf 6 2>/dev/null)[-] $@$(tput sgr0 2>/dev/null)"
+	echo "$(tput setaf 6 2>/dev/null)[-] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
+	[ $VERBOSE -eq 0 ] && echo "[-] $@" >> $OUTFILE
 }
 
 function error
 {
-	echo "$(tput setaf 1 2>/dev/null)[!!] $@$(tput sgr0 2>/dev/null)" >&2
+	echo "$(tput setaf 1 2>/dev/null)[!!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)" >&2
+	[ $VERBOSE -eq 0 ] && echo "[!!] $@" >> $ERRFILE
+	cat $OUTFILE
+	[ $OUTFILE != $ERRFILE ] && cat $ERRFILE
 	exit 1
 }
 
+trap 'error "An error occurred on line $LINENO. Saved output:"' ERR
+
 if [ "$INSTALL_REQS" -eq 1 ]
 then
-	info Installing dependencies...
 	if [ -e /etc/debian_version ]
 	then
-		if ! (dpkg --print-foreign-architectures | grep i386)
+		if ! (dpkg --print-foreign-architectures | grep -q i386)
 		then
-			echo "Adding i386 architectures..."
-			sudo dpkg --add-architecture i386
-			sudo apt-get update
+			info "Adding i386 architectures..."
+			sudo dpkg --add-architecture i386 >>$OUTFILE 2>>$ERRFILE
+			sudo apt-get update >>$OUTFILE 2>>$ERRFILE
 		fi
-		sudo apt-get install -y $DEBS
+		info "Installing dependencies..."
+		sudo apt-get install -y $DEBS >>$OUTFILE 2>>$ERRFILE
 	else
 		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
 	fi
 fi
 
 info "Checking dependencies..."
-[ -e /etc/debian_version -a $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && echo "Please install the following packages: $DEBS" && exit 1
-[ ! -e /etc/debian_version ] && echo -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
+[ -e /etc/debian_version -a $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && error "Please install the following packages: $DEBS" && exit 1
+[ ! -e /etc/debian_version ] && warning -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
 
+info "Enabling virtualenvwrapper."
+pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 set +e
-source /etc/bash_completion.d/virtualenvwrapper
+source /etc/bash_completion.d/virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 set -e
 
 if [ -n "$ANGR_VENV" ]
@@ -180,9 +202,11 @@ then
 		info "Virtualenv $ANGR_VENV already exists, reusing it. Use -E instead of -e if you want to re-create the environment."
 	elif [ "$USE_PYPY" -eq 1 ]
 	then
-		./pypy_venv.sh $ANGR_VENV
+		info "Creating pypy virtualenv $ANGR_VENV..."
+		./pypy_venv.sh $ANGR_VENV >>$OUTFILE 2>>$ERRFILE
 	else
-		mkvirtualenv --python=$(which python2) $ANGR_VENV
+		info "Creating cpython virtualenv $ANGR_VENV..."
+		mkvirtualenv --python=$(which python2) $ANGR_VENV >>$OUTFILE 2>>$ERRFILE
 	fi
 
 	set -e
@@ -196,18 +220,18 @@ function try_remote
 {
 	URL=$1
 	debug "Trying to clone from $URL"
-	rm -f /tmp/clone-$$
-	git clone $URL >> /tmp/clone-$$ 2>> /tmp/clone-$$
+	rm -f $CLONE_LOG
+	git clone $GIT_OPTIONS $URL >> $CLONE_LOG 2>> $CLONE_LOG
 	r=$?
 
-	if grep -q -E "(ssh_exchange_identification: read: Connection reset by peer|ssh_exchange_identification: Connection closed by remote host)" /tmp/clone-$$
+	if grep -q -E "(ssh_exchange_identification: read: Connection reset by peer|ssh_exchange_identification: Connection closed by remote host)" $CLONE_LOG
 	then
 		warning "Too many concurrent connections to the server. Retrying after sleep."
 		sleep $[$RANDOM % 5]
 		try_remote $URL
 		return $?
 	else
-		[ $r -eq 0 ] && rm -f /tmp/clone-$$
+		[ $r -eq 0 ] && rm -f $CLONE_LOG
 		return $r
 	fi
 }
@@ -215,6 +239,7 @@ function try_remote
 function clone_repo
 {
 	NAME=$1
+	CLONE_LOG=/tmp/clone-$BASHPID
 	if [ -e $NAME ]
 	then
 		info "Skipping $NAME -- already cloned. Use ./git_all.sh pull for update."
@@ -225,14 +250,14 @@ function clone_repo
 	for r in $REMOTES
 	do
 		URL="$r/$NAME"
-		try_remote $URL && debug "Success!" && break
+		try_remote $URL && debug "Success - $NAME cloned!" && break
 	done
 
 	if [ ! -e $NAME ]
 	then
 		error "Failed to clone $NAME. Error was:"
-		cat /tmp/clone-$$
-		rm -f /tmp/clone-$$
+		cat $CLONE_LOG
+		rm -f $CLONE_LOG
 		return 1
 	fi
 
@@ -246,7 +271,7 @@ function install_wheels
 	#pip install $LATEST_Z3 >> $OUTFILE 2>> $ERRFILE
 
 	LATEST_VEX=$(ls -tr wheels/vex-*)
-	echo "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
+	debug "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
 	tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
 	touch vex/*/*.o vex/libvex.a
 
@@ -259,17 +284,50 @@ function install_wheels
 	#pip install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
 }
 
+function pip_install
+{
+        debug "pip-installing: $@."
+        if ! pip install $PIP_OPTIONS -v $@ >>$OUTFILE 2>>$ERRFILE
+        then
+            	error "pip failure ($@). Check $OUTFILE for details, or read it here:"
+            	exit 1
+        fi
+}
+
 info "Cloning angr components!"
-for r in $REPOS
-do
-	clone_repo $r || exit 1
-	[ -e "$NAME/setup.py" ] && TO_INSTALL="$TO_INSTALL $NAME"
-done
+if [ $CONCURRENT_CLONE -eq 0 ]
+then
+	for r in $REPOS
+	do
+		clone_repo $r || exit 1
+		[ -e "$NAME/setup.py" ] && TO_INSTALL="$TO_INSTALL $NAME"
+	done
+else
+	declare -A CLONE_PROCS
+	for r in $REPOS
+	do
+		clone_repo $r &
+		CLONE_PROCS[$r]=$!
+	done
+
+	for r in $REPOS
+	do
+		#echo "WAITING FOR: $r (PID ${CLONE_PROCS[$r]})"
+		if wait ${CLONE_PROCS[$r]}
+		then
+			#echo "... SUCCESS"
+			[ -e "$r/setup.py" ] && TO_INSTALL="$TO_INSTALL $r"
+		else
+			#echo "... FAIL"
+			exit 1
+		fi
+	done
+fi
 
 if [ -n "$BRANCH" ]
 then
 	info "Checking out branch $BRANCH."
-	./git_all.sh checkout $BRANCH
+	./git_all.sh checkout $BRANCH >> $OUTFILE 2>> $ERRFILE
 fi
 
 if [ $INSTALL -eq 1 ]
@@ -306,33 +364,28 @@ then
 	#(python --version 2>&1| grep -q PyPy) && 
 	info "NOTE: removing angr-management until we sort out the pyside packaging"
 	TO_INSTALL=${TO_INSTALL// angr-management/}
+	info "Install list: $TO_INSTALL"
 	[ -n "$TRAVIS" ] && TO_INSTALL=${TO_INSTALL// angr-management/}
 
-	if pip install $PIP_OPTIONS -v ${TO_INSTALL// / -e } >> $OUTFILE 2>> $ERRFILE
-	then
-		info "Success!"
-		[ $VERBOSE -eq 1 ] || rm -f $OUTFILE
-	else
-		error "Something failed to install. Check $OUTFILE for details, or read it here:"
-		cat $OUTFILE
-		exit 1
-	fi
+    	for PACKAGE in $TO_INSTALL; do
+            	info "Installing $PACKAGE."
+            	[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
+            	pip_install -e $PACKAGE
+    	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
-	if pip install ipython pylint ipdb nose nose-timer coverage sphinx sphinx_rtd_theme recommonmark >> $OUTFILE 2>> $ERRFILE
+	if pip install ipython pylint ipdb nose nose-timer coverage flaky sphinx sphinx_rtd_theme recommonmark >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
-		[ $VERBOSE -eq 1 ] || rm -f $OUTFILE
 	else
 		error "Something failed to install. Check $OUTFILE for details, or read it here:"
-		cat $OUTFILE
 		exit 1
 	fi
-fi
 
-echo ''
-info "All done! Execute \"workon $ANGR_VENV\" to use your new angr virtual"
-info "environment. Any changes you make in the repositories will reflect"
-info "immediately in the virtual environment, with the exception of things"
-info "requiring compilation (i.e., pyvex). For those, you will need to rerun"
-info "the install after changes (i.e., \"pip install -e pyvex\")."
+	echo ''
+	info "All done! Execute \"workon $ANGR_VENV\" to use your new angr virtual"
+	info "environment. Any changes you make in the repositories will reflect"
+	info "immediately in the virtual environment, with the exception of things"
+	info "requiring compilation (i.e., pyvex). For those, you will need to rerun"
+	info "the install after changes (i.e., \"pip install -e pyvex\")."
+fi
