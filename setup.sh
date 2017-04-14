@@ -145,9 +145,12 @@ function debug
 function error
 {
 	echo "$(tput setaf 1 2>/dev/null)[!!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)" >&2
-	[ $VERBOSE -eq 0 ] && echo "[!!] $@" >> $ERRFILE
-	cat $OUTFILE
-	[ $OUTFILE != $ERRFILE ] && cat $ERRFILE
+	if [ $VERBOSE -eq 0 ]
+	then
+		echo "[!!] $@" >> $ERRFILE
+		cat $OUTFILE
+		[ $OUTFILE != $ERRFILE ] && cat $ERRFILE
+	fi
 	exit 1
 }
 
