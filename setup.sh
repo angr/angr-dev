@@ -127,19 +127,19 @@ fi
 function info
 {
 	echo "$(tput setaf 4 2>/dev/null)[+] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
-	[ $VERBOSE -eq 0 ] && echo "[+] $@" >> $OUTFILE
+	if [ $VERBOSE -eq 0 ]; then echo "[+] $@"; fi >> $OUTFILE
 }
 
 function warning
 {
 	echo "$(tput setaf 3 2>/dev/null)[!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
-	[ $VERBOSE -eq 0 ] && echo "[!] $@" >> $OUTFILE
+	if [ $VERBOSE -eq 0 ]; then echo "[!] $@"; fi >> $OUTFILE
 }
 
 function debug
 {
 	echo "$(tput setaf 6 2>/dev/null)[-] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
-	[ $VERBOSE -eq 0 ] && echo "[-] $@" >> $OUTFILE
+	if [ $VERBOSE -eq 0 ]; then echo "[-] $@"; fi >> $OUTFILE
 }
 
 function error
@@ -149,7 +149,7 @@ function error
 	then
 		echo "[!!] $@" >> $ERRFILE
 		cat $OUTFILE
-		[ $OUTFILE != $ERRFILE ] && cat $ERRFILE
+		[ $OUTFILE == $ERRFILE ] || cat $ERRFILE
 	fi
 	exit 1
 }
