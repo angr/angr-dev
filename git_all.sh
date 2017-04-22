@@ -90,6 +90,7 @@ function do_one
 		RETURN_CODE=$?
 	elif [ "$1" == "CHECKUP" ]; then
 		checkup $DIR
+        RETURN_CODE=0
 	elif [ "$PREPEND" == "1" ]; then
 		git "$@" 2>&1| sed -e "s/^/$DIR: /"
 		RETURN_CODE=${PIPESTATUS[0]}
