@@ -30,6 +30,8 @@ function usage
 }
 
 DEBS=${DEBS-virtualenvwrapper python-pip python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev libqt4-dev graphviz-dev binutils-multiarch nasm libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386}
+ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python2-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt4 graphviz binutils binutils nasm lib32-glibc lib32-gcc-libs lib32-libstdc++5 lib32-zlib}
+ARCHCOMDEBS=${ARCHCOMDEBS-lib32-libtinfo}
 REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angrop angr-doc binaries}
 declare -A EXTRA_DEPS
 EXTRA_DEPS["simuvex"]="unicorn"
@@ -168,20 +170,41 @@ then
 		fi
 		info "Installing dependencies..."
 		sudo apt-get install -y $DEBS >>$OUTFILE 2>>$ERRFILE
+	elif [ -e /etc/pacman.conf ]
+	then
+		if ! grep --quiet "^\[multilib\]" /etc/pacman.conf;
+		then
+			info "Adding i386 architectures..."
+			sudo sed 's/^\(#\[multilib\]\)/\[multilib\]/' </etc/pacman.conf >/tmp/pacman.conf
+			sudo sed '/^\[multilib\]/{n;s/^#//}' </tmp/pacman.conf >/etc/pacman.conf
+			sudo pacman -Syu >>$OUTFILE 2>>$ERRFILE
+		fi
+		info "Installing dependencies..."
+		sudo pacman -S --needed $ARCHDEBS >>$OUTFILE 2>>$ERRFILE
 	else
 		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
 	fi
 fi
 
 info "Checking dependencies..."
-[ -e /etc/debian_version -a $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && error "Please install the following packages: $DEBS" && exit 1
-[ ! -e /etc/debian_version ] && warning -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
+[ -e /etc/debian_version ] && [ $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && error "Please install the following packages: $DEBS" && exit 1
+[ -e /etc/pacman.conf ] && [ $(pacman -Qi $ARCHDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages: $ARCHDEBS" && exit 1
+[ -e /etc/pacman.conf ] && [ $(pacman -Qi $ARCHCOMDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages from AUR (yaourt -S <package_name>)): $ARCHCOMDEBS" && exit 1
+[ ! -e /etc/debian_version ] && [ ! -e /etc/pacman.conf ] && warning -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
 
 info "Enabling virtualenvwrapper."
-pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
-set +e
-source /etc/bash_completion.d/virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
-set -e
+if [ -e /etc/pacman.conf ]
+then
+	sudo pacman -S --needed python-virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
+	set +e
+	source /usr/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
+	set -e
+else
+	pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
+	set +e
+	source /etc/bash_completion.d/virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
+	set -e
+fi
 
 if [ -n "$ANGR_VENV" ]
 then
