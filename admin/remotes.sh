@@ -15,7 +15,6 @@ angr/binaries
 angr/archinfo
 angr/angr.github.io
 angr/cle
-angr/identifier
 angr/wheels
 angr/fidget
 shellphish/driller
@@ -64,7 +63,6 @@ angr/archinfo
 angr/cle
 angr/wheels
 angr/fidget
-cgc/identifier
 cgc/driller
 cgc/fuzzer
 cgc/rex
