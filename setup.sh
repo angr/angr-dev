@@ -180,7 +180,7 @@ then
 			sudo pacman -Syu >>$OUTFILE 2>>$ERRFILE
 		fi
 		info "Installing dependencies..."
-		sudo pacman -S --needed $ARCHDEBS >>$OUTFILE 2>>$ERRFILE
+		sudo pacman -S --noconfirm --needed $ARCHDEBS >>$OUTFILE 2>>$ERRFILE
 	else
 		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
 	fi
