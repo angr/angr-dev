@@ -32,9 +32,9 @@ function usage
 DEBS=${DEBS-virtualenvwrapper python-pip python2.7-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev libqt4-dev graphviz-dev binutils-multiarch nasm libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386}
 ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python2-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt4 graphviz binutils binutils nasm lib32-glibc lib32-gcc-libs lib32-libstdc++5 lib32-zlib}
 ARCHCOMDEBS=${ARCHCOMDEBS-lib32-libtinfo}
-REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy simuvex angr angr-management angrop angr-doc binaries}
+REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy angr simuvex angr-management angrop angr-doc binaries}
 declare -A EXTRA_DEPS
-EXTRA_DEPS["simuvex"]="unicorn"
+EXTRA_DEPS["angr"]="unicorn"
 EXTRA_DEPS["pyvex"]="--pre capstone"
 
 ORIGIN_REMOTE=${ORIGIN_REMOTE-$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|[^/:]*/angr-dev.*||")}
