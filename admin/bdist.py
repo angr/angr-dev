@@ -12,7 +12,7 @@ import os
 # TODO: make this whole thing usable from the command line. make some provision for windows somehow.
 
 DEST_DIR = 'bdist'
-GIT_ROOT = 'git@github.com:angr'
+GIT_ROOT = 'https://github.com/angr'
 
 DEFAULT_CHDIR = '.'
 DEFAULT_RUN_CMD = 'python setup.py bdist_wheel sdist && pip install dist/*.whl'
@@ -40,8 +40,9 @@ def main():
             raise
 
     run('bdist', [
-        Target('capstone', chdir='bindings/python', tar_target='https://github.com/aquynh/capstone/archive/3.0.5-rc2.tar.gz', dir_name='capstone-3.0.5-rc2'),
-        Target('unicorn', chdir='bindings/python', tar_target='https://github.com/unicorn-engine/unicorn/archive/1.0.tar.gz', dir_name='unicorn-1.0')
+        #Target('capstone', chdir='bindings/python', tar_target='https://github.com/aquynh/capstone/archive/3.0.5-rc2.tar.gz', dir_name='capstone-3.0.5-rc2'),
+        #Target('unicorn', chdir='bindings/python', tar_target='https://github.com/unicorn-engine/unicorn/archive/1.0.tar.gz', dir_name='unicorn-1.0')
+        Target('unicorn', chdir='bindings/python', git_target='https://github.com/rhelmot/unicorn.git', git_branch='fix/x86_eflags_cc_op')
     ])
 
 def run(output_dir, targets):
@@ -69,6 +70,7 @@ class Target(object):
             chdir=DEFAULT_CHDIR,
             run_cmd=DEFAULT_RUN_CMD,
             copy_cmd=DEFAULT_COPY_CMD,
+            git_branch=None,
             dl_cmd=None,
             dir_name=None,
             git_target=None,
@@ -81,6 +83,7 @@ class Target(object):
         self.copy_cmd = copy_cmd
         self.dl_cmd = dl_cmd
         self.dir_name = dir_name
+        self.git_branch = git_branch
 
         if git_target is not None:
             self.set_git_target(git_target)
@@ -113,9 +116,11 @@ class Target(object):
         assert self.dl_cmd is not None
         assert self.name is not None
         assert self.dir_name is not None
-        output.write('echo "\\e[32mWorking on %s\\e[0m"\n' % self.name)
+        output.write('echo -e "\\e[32mWorking on %s\\e[0m"\n' % self.name)
         output.write(self.dl_cmd + '\n')
         output.write('cd "%s"\n' % os.path.join(self.dir_name, self.chdir))
+        if self.git_branch is not None:
+            output.write('git checkout "%s"\n' % self.git_branch)
         output.write(self.run_cmd + '\n')
         output.write(self.copy_cmd + '\n')
         output.write('cd -\n\n')
