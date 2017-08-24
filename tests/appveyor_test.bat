@@ -5,12 +5,12 @@ if "%1" == "" goto :end
 echo RUNNING TESTS FOR %1
 cd %1 || exit /b 1
 
-env set NOSE_PROCESS_RESTARTWORKER=1
+set NOSE_OPTIONS=-v --nologcapture --processes 2 --process-restartworker --process-timeout 600 --with-timer --with-flaky --max-runs 3
 
 if exist tests (
-  nosetests -v --nologcapture tests || set result=1 && goto :continue
+  nosetests %NOSE_OPTIONS% tests || set result=1 && goto :continue
 ) else if exist test.py (
-  nosetests -v --nologcapture test.py || set result=1 && goto :continue
+  nosetests %NOSE_OPTIONS% test.py || set result=1 && goto :continue
 ) else (
   echo Unknown test configuration && set result=1 && goto :continue
 )
