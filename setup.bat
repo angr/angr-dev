@@ -34,7 +34,7 @@ pip install -e .\claripy || goto :error
 pip install -e .\simuvex || goto :error
 pip install -e .\angr || goto :error
 
-pip install nose monkeyhex ipdb || goto :error
+pip install nose flaky monkeyhex ipdb || goto :error
 
 echo "Developement install success!"
 exit /b 0
