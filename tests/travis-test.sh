@@ -16,6 +16,7 @@ echo core | sudo tee /proc/sys/kernel/core_pattern > /dev/null
 echo 1 | sudo tee /proc/sys/kernel/sched_child_runs_first > /dev/null
 
 # nosetests
+NO_COVERAGE=1   # fuck you!
 if [ -z "$NO_COVERAGE" -a "$(basename $TRAVIS_REPO_SLUG)" == "$ANGR_REPO" ]
 then
 	NOSE_OPTIONS="--with-coverage --cover-package=$ANGR_REPO --cover-erase $NOSE_OPTIONS"
