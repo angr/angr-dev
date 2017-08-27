@@ -202,7 +202,7 @@ then
 else
 	pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 	set +e
-	source /etc/bash_completion.d/virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
+	source /usr/local/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
 	set -e
 fi
 
