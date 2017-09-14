@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-VERSION_MAJOR=6
+VERSION_MAJOR=7
 
 #while getopt "v" opt
 #do
@@ -22,6 +22,10 @@ function today_version
 function build_docs
 {
 	VERSION=$(extract_version angr)
+	cd pyvex
+	python setup.py build
+	cd -
+
 	cd angr-doc
 	git checkout master
 	git push github master
@@ -61,14 +65,13 @@ case $CMD in
 		./git_all.sh checkout master
 		$0 version $VERSION
 		$0 update_dep
-		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "ticked version number to $VERSION" setup.py
+		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "ticked version number to $VERSION" setup.py requirements.txt
 		./git_all.sh diff origin/master master | cat
 		echo
 		echo -n "Does the diff look good (y|n)? "
 		read a
 		[ "$a" == "y" ] || exit 1
-		./git_all.sh push origin master
-		./git_all.sh push github master
+		./git_all.sh push both master
 		./git_all.sh checkout @{-1}
 		$0 sdist
 		build_docs
@@ -110,6 +113,7 @@ case $CMD in
         cd angr-doc
         sed -i -e "s/version = u['\"][^'\"]*['\"]/version = u'$VERSION'/g" api-doc/source/conf.py
         sed -i -e "s/release = u['\"][^'\"]*['\"]/release = u'$VERSION'/g" api-doc/source/conf.py
+	git commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "updated api-docs for version $VERSION" api-doc
         cd ..
 
 		;;
@@ -118,9 +122,8 @@ case $CMD in
 		shift || true
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
-		MAIN_REPOS=( angr )
-		DEP_REPOS=( simuvex claripy cle archinfo pyvex )
-		for i in "${MAIN_REPOS[@]}"
+		REPO_LIST=( angr simuvex angr-management angrop cle pyvex archinfo claripy )
+		for i in "${REPO_LIST[@]}"
 		do
 			[ ! -e $i/setup.py ] && continue
 
@@ -133,17 +136,17 @@ case $CMD in
 			fi
 			cd ..
 
-			for j in "${DEP_REPOS[@]}"
+			for j in "${REPO_LIST[@]}"
 			do
+				[ "$i" == "$j" ] && continue
+
 				version=$(extract_version $j)
-
 				[ -z $version ] && echo "Cannot determine version of $j. Skip" && continue
-
 
 				cd $i
 				echo "Updating dependency version number for $j"
-				sed -i -e "s/'$j[^']*'/'$j>=$version'/g" setup.py
-				sed -i -e "s/$j[\s\S]*/$j>=$version/g" requirements.txt
+				sed -i -e "s/'$j\(\(>=[^']*\)\?\)',\$/'$j>=$version',/" setup.py
+				sed -i -e "s/$j\(\(>=.*\)\?\)\$/$j>=$version/" requirements.txt
 				cd ..
 			done
 		done
