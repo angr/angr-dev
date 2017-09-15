@@ -27,7 +27,7 @@ def main():
         #Target('capstone', chdir='bindings/python', tar_target='https://github.com/aquynh/capstone/archive/3.0.5-rc2.tar.gz', dir_name='capstone-3.0.5-rc2'),
         #Target('unicorn', chdir='bindings/python', tar_target='https://github.com/unicorn-engine/unicorn/archive/1.0.tar.gz', dir_name='unicorn-1.0'),
         #Target('unicorn', chdir='bindings/python', git_target='https://github.com/rhelmot/unicorn.git', git_branch='fix/x86_eflags_cc_op'),
-        Target('pyvex', git_target='https://github.com/angr/pyvex.git'),
+        Target('pyvex', git_target='https://github.com/angr/pyvex.git', do_install=True),
         Target('angr', git_target='https://github.com/angr/angr.git'),
     ])
 
@@ -41,7 +41,8 @@ class Target(object):
             dir_name=None,
             git_target=None,
             tar_target=None,
-            zip_target=None):
+            zip_target=None,
+            do_install=False):
 
         if chdir is None: chdir = DEFAULT_CHDIR
         if run_cmd is None: run_cmd = DEFAULT_RUN_CMD
@@ -54,6 +55,7 @@ class Target(object):
         self.dl_cmd = dl_cmd
         self.dir_name = dir_name
         self.git_branch = git_branch
+        self.do_install = do_install
 
         if git_target is not None:
             self.set_git_target(git_target)
@@ -92,6 +94,8 @@ class Target(object):
         if self.git_branch is not None:
             build_fp.write('git checkout "%s"\n' % self.git_branch)
         build_fp.write(self.run_cmd + '\n')
+        if self.do_install:
+            build_fp.write(DEFAULT_INSTALL_CMD + '\n')
         build_fp.write(self.copy_cmd % destination + '\n')
         build_fp.write('popd\n\n')
 
@@ -135,7 +139,8 @@ def run_linux(output_dir, targets):
 if sys.platform == 'win32':
     run = run_windows
     DEFAULT_CHDIR = '.'
-    DEFAULT_RUN_CMD = 'python setup.py bdist_wheel && pip install dist\\*.whl'
+    DEFAULT_RUN_CMD = 'python setup.py bdist_wheel'
+    DEFAULT_INSTALL_CMD = 'pip install dist\\*.whl'
     DEFAULT_COPY_CMD = 'copy dist\\* %s'
 
     COMMAND_BASE = """\
@@ -146,7 +151,8 @@ call build_env\\Scripts\\activate.bat
 else:
     run = run_linux
     DEFAULT_CHDIR = '.'
-    DEFAULT_RUN_CMD = 'python setup.py bdist_wheel && pip install dist/*.whl'
+    DEFAULT_RUN_CMD = 'python setup.py bdist_wheel'
+    DEFAULT_INSTALL_CMD = 'pip install dist/*.whl'
     DEFAULT_COPY_CMD = 'cp dist/* %s'
 
     COMMAND_BASE = """\

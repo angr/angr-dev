@@ -24,12 +24,12 @@ function build_docs
 	VERSION=$(extract_version angr)
 	cd pyvex
 	python setup.py build
-	cd -
+	cd - >/dev/null
 
 	cd angr-doc
 	git checkout master
 	git push github master
-	cd -
+	cd - >/dev/null
 
 	make -C angr-doc/api-doc html
 	rm -rf angr.github.io/api-doc
@@ -38,7 +38,7 @@ function build_docs
 	cd angr.github.io
 	git commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "updated api-docs for version $VERSION" api-doc
 	git push origin master
-	cd -
+	cd - >/dev/null
 }
 
 function extract_version
@@ -50,12 +50,31 @@ function extract_version
 	echo $ver
 }
 
+function check_uncommitted
+{
+	out=0
+	for repo in $REPOS; do
+		cd $repo
+		if ! git diff-index --quiet HEAD --; then
+			echo "Untracked changes in $repo"
+			out=$((out + 1))
+		fi
+		cd - >/dev/null
+	done
+	return $out
+}
+
 export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex binaries angrop}
 
 case $CMD in
 	release)
 		if [ -z "$VIRTUAL_ENV" ]; then
 			echo "Must be in the angr virtualenv to do a release!"
+			exit 1
+		fi
+		if ! check_uncommitted; then
+			echo ""
+			echo "Commit or stash your changes!"
 			exit 1
 		fi
 		VERSION=$1
@@ -65,12 +84,24 @@ case $CMD in
 		./git_all.sh checkout master
 		$0 version $VERSION
 		$0 update_dep
-		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "ticked version number to $VERSION" setup.py requirements.txt
-		./git_all.sh diff origin/master master | cat
+		MESSAGE="ticked version number to $VERSION"
+		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "$MESSAGE" setup.py requirements.txt
+		./git_all.sh diff --color=always origin/master master | cat
 		echo
 		echo -n "Does the diff look good (y|n)? "
 		read a
-		[ "$a" == "y" ] || exit 1
+		if [[ ! "$a" == "y" ]]; then
+			# roll back
+			for repo in $REPOS angr-doc; do
+				cd $repo
+				if [[ "$(git show -s --oneline)" == *"$MESSAGE"* ]]; then
+					git reset --hard HEAD~
+				fi
+				cd - >/dev/null
+
+			done
+			exit 1
+		fi
 		./git_all.sh push both master
 		./git_all.sh checkout @{-1}
 		$0 sdist
@@ -110,11 +141,11 @@ case $CMD in
 			cd ..
 		done
 
-        cd angr-doc
-        sed -i -e "s/version = u['\"][^'\"]*['\"]/version = u'$VERSION'/g" api-doc/source/conf.py
-        sed -i -e "s/release = u['\"][^'\"]*['\"]/release = u'$VERSION'/g" api-doc/source/conf.py
-	git commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "updated api-docs for version $VERSION" api-doc
-        cd ..
+		cd angr-doc
+		sed -i -e "s/version = u['\"][^'\"]*['\"]/version = u'$VERSION'/g" api-doc/source/conf.py
+		sed -i -e "s/release = u['\"][^'\"]*['\"]/release = u'$VERSION'/g" api-doc/source/conf.py
+		git commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "updated api-docs for version $VERSION" api-doc
+		cd ..
 
 		;;
 	update_dep)
