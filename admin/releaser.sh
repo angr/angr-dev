@@ -144,7 +144,7 @@ case $CMD in
 		cd angr-doc
 		sed -i -e "s/version = u['\"][^'\"]*['\"]/version = u'$VERSION'/g" api-doc/source/conf.py
 		sed -i -e "s/release = u['\"][^'\"]*['\"]/release = u'$VERSION'/g" api-doc/source/conf.py
-		git commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "updated api-docs for version $VERSION" api-doc
+		git commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "updated api-docs for version $VERSION" api-doc || true
 		cd ..
 
 		;;
