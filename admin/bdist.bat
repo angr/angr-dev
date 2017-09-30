@@ -17,7 +17,7 @@ if "%1" == "angr-z3" set INDIR=src\api\python\dist
 
 cd %1
 
-:: 				# These paths are hardcoded for Andrew's laptope
+:: 				# These paths are hardcoded for Audrey's laptop
 if exist build rmdir /Q /S build
 cmd /c call "%appdir%..\..\VC\vcvarsall.bat" x64 ^&^& call D:\Programs\Python2x64\Python.exe setup.py bdist_wheel
 if exist build rmdir /Q /S build
