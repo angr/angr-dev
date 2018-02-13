@@ -22,17 +22,24 @@ if [ -f "/etc/arch-release" ]; then
         tar xf $VERSION.pkg.tar.xz
         mv ./opt/pypy ./$VERSION
     fi
+
+    set +e
+    source /usr/bin/virtualenvwrapper.sh
+    set -e
 else
     VERSION=${2-pypy2-v5.6.0-linux64}
 
     # get pypy
     [ ! -e $VERSION ] && wget https://bitbucket.org/pypy/pypy/downloads/$VERSION.tar.bz2 --local-encoding=utf-8 -O - | tar xj
+
+    set +e
+    source /etc/bash_completion.d/virtualenvwrapper
+    set -e
 fi
 
 
 # virtualenv
 set +e
-source /etc/bash_completion.d/virtualenvwrapper
 mkvirtualenv -p $PWD/$VERSION/bin/pypy $NAME
 set -e
 pip install -U setuptools
