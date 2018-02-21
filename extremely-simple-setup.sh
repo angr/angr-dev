@@ -12,14 +12,14 @@ fi
 
 ## BEGIN VERY COMPLICATED INSTALL PROCEDURE
 
-git clone git@github.com:angr/archinfo.git
-git clone git@github.com:angr/vex.git
-git clone git@github.com:angr/pyvex.git
-git clone git@github.com:angr/claripy.git
-git clone git@github.com:angr/cle.git
-git clone git@github.com:angr/angr.git
-git clone git@github.com:angr/angr-doc.git
-git clone git@github.com:angr/binaries.git
+git clone https://github.com/angr/archinfo.git
+git clone https://github.com/angr/vex.git
+git clone https://github.com/angr/pyvex.git
+git clone https://github.com/angr/claripy.git
+git clone https://github.com/angr/cle.git
+git clone https://github.com/angr/angr.git
+git clone https://github.com/angr/angr-doc.git
+git clone https://github.com/angr/binaries.git
 
 set -e
 
@@ -45,15 +45,15 @@ fi
 
 # BEGIN EVEN MORE COMPLICATED INSTALL PROCEDURE
 
-git clone git@github.com:angr/wheels.git
-git clone git@github.com:mechaphish/colorguard.git
-git clone git@github.com:mechaphish/compilerex.git
-git clone git@github.com:shellphish/driller.git
-git clone git@github.com:shellphish/fuzzer.git
-git clone git@github.com:mechaphish/povsim.git
-git clone git@github.com:shellphish/rex.git
-git clone git@github.com:angr/tracer.git
-git clone git@github.com:salls/angrop.git
+git clone https://github.com/angr/wheels.git
+git clone https://github.com/mechaphish/colorguard.git
+git clone https://github.com/mechaphish/compilerex.git
+git clone https://github.com/shellphish/driller.git
+git clone https://github.com/shellphish/fuzzer.git
+git clone https://github.com/mechaphish/povsim.git
+git clone https://github.com/shellphish/rex.git
+git clone https://github.com/angr/tracer.git
+git clone https://github.com/salls/angrop.git
 
 set -e
 
