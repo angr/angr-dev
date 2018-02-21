@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function blame()
 {
 	PROJ=$1
