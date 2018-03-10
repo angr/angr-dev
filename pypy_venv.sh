@@ -27,10 +27,11 @@ if [ -f "/etc/arch-release" ]; then
     source /usr/bin/virtualenvwrapper.sh
     set -e
 else
-    VERSION=${2-pypy2-v5.6.0-linux64}
+    BEST_VERSION=$(curl https://bitbucket.org/pypy/pypy/downloads/ | egrep -o 'href="/pypy/pypy/downloads/[^"]+' | cut -c 28- | grep linux64 | grep pypy2 | head -n 1)
+    DOWNLOAD_URL=https://bitbucket.org/pypy/pypy/downloads/$BEST_VERSION
 
     # get pypy
-    [ ! -e $VERSION ] && wget https://bitbucket.org/pypy/pypy/downloads/$VERSION.tar.bz2 --local-encoding=utf-8 -O - | tar xj
+    wget $DOWNLOAD_URL --local-encoding=utf-8 -O - | tar xj
 
     set +e
     source /etc/bash_completion.d/virtualenvwrapper
@@ -40,7 +41,7 @@ fi
 
 # virtualenv
 set +e
-mkvirtualenv -p $PWD/$VERSION/bin/pypy $NAME
+mkvirtualenv -p $PWD/pypy2-*/bin/pypy $NAME
 set -e
 pip install -U setuptools
 
