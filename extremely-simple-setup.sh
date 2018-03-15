@@ -32,6 +32,7 @@ pip install -e ./angr
 ## END VERY COMPLICATED INSTALL PROCEDURE
 
 pip install nose ipython ipdb
+pip install -I --no-use-wheel keystone-engine
 
 set +e
 

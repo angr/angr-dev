@@ -400,6 +400,7 @@ then
     	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
+	pip install -I --no-use-wheel keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
 	if pip install ipython pylint ipdb nose nose-timer coverage flaky sphinx sphinx_rtd_theme recommonmark 'requests[security]' >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
