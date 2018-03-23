@@ -27,7 +27,7 @@ if [ -f "/etc/arch-release" ]; then
     source /usr/bin/virtualenvwrapper.sh
     set -e
 else
-    BEST_VERSION=$(curl https://bitbucket.org/pypy/pypy/downloads/ | egrep -o 'href="/pypy/pypy/downloads/[^"]+' | cut -c 28- | grep linux64 | grep pypy2 | head -n 1)
+    BEST_VERSION=$(wget https://bitbucket.org/pypy/pypy/downloads/ -O - | egrep -o 'href="/pypy/pypy/downloads/[^"]+' | cut -c 28- | grep linux64 | grep pypy2 | head -n 1)
     DOWNLOAD_URL=https://bitbucket.org/pypy/pypy/downloads/$BEST_VERSION
 
     # get pypy
