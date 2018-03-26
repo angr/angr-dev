@@ -34,9 +34,9 @@ pip install -e .\angr || goto :error
 
 pip install nose flaky monkeyhex ipdb || goto :error
 
-echo "Developement install success!"
+echo "Development install success!"
 exit /b 0
 
 :error
-echo "Developement install failed!"
+echo "Development install failed!"
 exit /b 1
