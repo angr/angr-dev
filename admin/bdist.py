@@ -29,6 +29,7 @@ def main():
         #Target('unicorn', chdir='bindings/python', git_target='https://github.com/rhelmot/unicorn.git', git_branch='fix/x86_eflags_cc_op'),
         Target('pyvex', git_target='https://github.com/angr/pyvex.git', do_install=True),
         Target('angr', git_target='https://github.com/angr/angr.git'),
+        #Target('keystone-engine', tar_target='https://files.pythonhosted.org/packages/9a/fc/ed0d3f46921bfaa612d9e8ce8313f99f4149ecf6635659510220c994cb72/keystone-engine-0.9.1-3.tar.gz', dir_name='keystone-engine-0.9.1-3'),
     ])
 
 class Target(object):
@@ -79,10 +80,11 @@ class Target(object):
 
     def set_tar_target(self, target):
         aname = os.path.basename(target)
-        self.dl_cmd = 'wget -O "%s" "%s" && tar -xf "%s"' % (aname, target, aname)
+        self.dl_cmd = 'curl -o "%s" "%s" && tar -xf "%s"' % (aname, target, aname)
 
     def set_zip_target(self, target):
-        self.dl_cmd = 'wget "%s" && unzip "%s"' % (target, os.path.basename(target))
+        aname = os.path.basename(target)
+        self.dl_cmd = 'curl -o "%s" "%s" && unzip "%s"' % (aname, target, aname)
 
     def run(self, build_fp, destination):
         assert self.dl_cmd is not None
@@ -130,9 +132,9 @@ def run_linux(output_dir, targets):
 
     os.chmod(output_file, 0777)
     os.system('''
-    sudo docker run -it --rm -v "%s:/output" quay.io/pypa/manylinux1_x86_64 /output/build.sh
-    sudo docker run -it --rm -v "%s:/output" quay.io/pypa/manylinux1_i686 /output/build.sh
-    sudo chown $(id -un):$(id -un) %s/*
+    docker run -it --rm -v "%s:/output" quay.io/pypa/manylinux1_x86_64 /output/build.sh
+    docker run -it --rm -v "%s:/output" quay.io/pypa/manylinux1_i686 /output/build.sh
+    chown $(id -un):$(id -un) %s/*
     ''' % (output_dir, output_dir, output_dir))
     #os.unlink(output_file)
 
