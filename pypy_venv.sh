@@ -6,6 +6,11 @@ cd $DIR
 
 #sudo apt-get install cmake libreadline-dev
 
+if [ -z "$NAME"]; then
+	echo "use this script with ./pypy_venv <NAME>"
+	exit
+fi
+
 # setup
 mkdir -p pypy
 cd pypy
