@@ -32,7 +32,7 @@ TESTPYPI=$1
 shift || true
 [ -z "$TESTPYPI" ] && TESTPYPI="no"
 
-[ ! -z $TESTPYPI ] && echo "Using the TestPyPI for testing."
+[ $TESTPYPI == "yes" ] && echo "Using the TestPyPI for testing."
 
 function today_version
 {
