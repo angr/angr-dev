@@ -11,10 +11,26 @@ VERSION_MAJOR=7
 #	esac
 #done
 
+
 CMD=$1
 shift
+
+# If you want to enable TestPyPI, please make sure you have the following
+# setup in your .pypirc:
+#
+# [distutils]
+# index-servers=
+#     pypi
+#     testpypi
+#
+# [testpypi]
+# repository: https://test.pypi.org/legacy/
+# username: your testpypi username
+# password: your testpypi password
+#
 TESTPYPI=$1
-shift
+shift || true
+[ -z "$TESTPYPI" ] && TESTPYPI="no"
 
 [ ! -z $TESTPYPI ] && echo "Using the TestPyPI for testing."
 
@@ -87,7 +103,7 @@ case $CMD in
 
 		./git_all.sh checkout master
 		$0 version $VERSION
-		$0 update_dep
+        $0 update_dep $TESTPYPI
 		MESSAGE="ticked version number to $VERSION"
 		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "$MESSAGE" setup.py requirements.txt
 		./git_all.sh diff --color=always origin/master master | cat
@@ -108,7 +124,7 @@ case $CMD in
 		fi
 		./git_all.sh push both master
 		./git_all.sh checkout @{-1}
-		$0 sdist
+		$0 sdist $TESTPYPI
 		build_docs
 		#[[ $REPOS == *pyvex* ]] && REPOS=pyvex $0 wheel pyvex
 		;;
@@ -187,10 +203,10 @@ case $CMD in
 		done
 		;;
 	sdist)
-        if [ ! -z $TESTPYPI ]
+        if [ "$TESTPYPI" == "yes" ]
         then
             # Use TestPyPI
-            PYPI_REPO_URL="--repository-url https://test.pypi.org/legacy/"
+            PYPI_REPO_URL="--repository testpypi"
         else
             # Use the default PyPI
             PYPI_REPO_URL=""
