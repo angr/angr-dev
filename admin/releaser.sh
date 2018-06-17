@@ -210,6 +210,12 @@ case $CMD in
         else
             # Use the default PyPI
             PYPI_REPO_URL=""
+            echo -n "You are about to release angr to PyPI (not TestPyPI). Proceed? (y|n)? "
+            read a
+            if [[ ! "$a" == "y" ]]; then
+                echo "Aborted."
+                exit 1
+            fi
         fi
 		for i in $REPOS
 		do
