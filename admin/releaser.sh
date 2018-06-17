@@ -13,6 +13,10 @@ VERSION_MAJOR=7
 
 CMD=$1
 shift
+TESTPYPI=$1
+shift
+
+[ ! -z $TESTPYPI ] && echo "Using the TestPyPI for testing."
 
 function today_version
 {
@@ -64,7 +68,7 @@ function check_uncommitted
 	return $out
 }
 
-export REPOS=${REPOS-angr-management angr-doc angr simuvex claripy cle pyvex archinfo vex binaries angrop}
+export REPOS=${REPOS-angr-management angr-doc angr claripy cle pyvex archinfo vex binaries angrop ailment}
 
 case $CMD in
 	release)
@@ -153,7 +157,7 @@ case $CMD in
 		shift || true
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
-		REPO_LIST=( angr simuvex angr-management angrop cle pyvex archinfo claripy )
+		REPO_LIST=( angr angr-management angrop cle pyvex archinfo claripy ailment )
 		for i in "${REPO_LIST[@]}"
 		do
 			[ ! -e $i/setup.py ] && continue
@@ -183,6 +187,14 @@ case $CMD in
 		done
 		;;
 	sdist)
+        if [ ! -z $TESTPYPI ]
+        then
+            # Use TestPyPI
+            PYPI_REPO_URL="--repository-url https://test.pypi.org/legacy/"
+        else
+            # Use the default PyPI
+            PYPI_REPO_URL=""
+        fi
 		for i in $REPOS
 		do
 			[ ! -e $i/setup.py ] && continue
@@ -191,7 +203,7 @@ case $CMD in
 			python setup.py sdist
 			SDIST_EXTENSION=.tar.gz
 			python setup.py rotate -m $SDIST_EXTENSION -k 1 -d dist
-			twine upload dist/*$SDIST_EXTENSION || echo "!!!!! FAILED TO UPLOAD $i"
+			twine upload $PYPI_REPO_URL dist/*$SDIST_EXTENSION || echo "!!!!! FAILED TO UPLOAD $i"
 			cd ..
 		done
 		;;
