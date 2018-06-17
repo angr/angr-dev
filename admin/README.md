@@ -1,5 +1,5 @@
 
-## Create a virtual environment for angr release
+## Creating a virtual environment for angr release
 
 ```
 mkvirtualenv angr-release
@@ -7,7 +7,7 @@ pip install -U pip setuptools
 pip install twin sphinx sphinx_rtd_theme recommonmark
 ```
 
-## Release to PyPI or TestPyPI
+## Releasing to PyPI/TestPyPI
 
 - Make sure you are in a virtual environment with angr installed.
 
