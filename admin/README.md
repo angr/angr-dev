@@ -28,6 +28,14 @@ ailment, angr, angr-dev, angr-doc, angr.github.io, angr-management, angrop, arch
 ./angr-dev/admin/releaser.sh release yes
 ```
 
+- We may then create a new virtual environment `angr-release-test` and try pip installing angr from TestPyPI.
+
+```
+mkvirtualenv angr-release-test
+pip install -U pip setuptools
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple angr
+```
+
 - After everything is tested, now you can release to PyPI.
 
 ```
