@@ -10,6 +10,7 @@ if "%APPVEYOR%"=="True" (
 )
 
 if not exist angr git clone https://github.com/angr/angr.git || goto :error
+if not exist ailment git clone https://github.com/angr/ailment.git || goto :error
 if not exist claripy git clone https://github.com/angr/claripy.git || goto :error
 if not exist cle git clone https://github.com/angr/cle.git || goto :error
 if not exist pyvex git clone https://github.com/angr/pyvex.git || goto :error
@@ -30,6 +31,7 @@ pip install -e .\archinfo || goto :error
 pip install -e .\pyvex || goto :error
 pip install -e .\cle || goto :error
 pip install -e .\claripy || goto :error
+pip install -e .\ailment || goto :error
 pip install -e .\angr || goto :error
 
 pip install nose flaky monkeyhex ipdb || goto :error
