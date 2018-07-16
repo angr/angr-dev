@@ -19,6 +19,11 @@ $ workon angr
 [1] import angr
 ```
 
+If you are working on macOS, you have to run the fix_macOS.sh script while in your virtualenv to fix the native libraries in angr. This is necessary, since macOS introduced restrictions for relative paths in dynamic libraries.
+```bash
+./fix_macOS.sh
+```
+
 ## Install (docker)
 
 Alternatively, you can use the dockerfile:
