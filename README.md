@@ -54,7 +54,11 @@ pip install -e ./pyvex && pip install -e ./simuvex
 No.
 This is because GitHub does not differentiate between "a non-existent repo" and "a private repo" (which they should not), and we cannot correctly handle this in our script right now.
 
-Here are two solutions:
+Here are some solutions:
+
+- Pass -n
+
+or
 
 - Check out angr-dev using `git@github.com:angr/angr-dev.git` instead of https.
 This requires you to have a GitHub account.
