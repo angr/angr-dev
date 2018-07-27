@@ -13,6 +13,7 @@ function usage
 	echo "    -s            Use shallow clones (pull just the latest commit from each branch)."
 	echo "    -w		use pre-built packages where available"
 	echo "    -v		verbose (don't redirect installation logging)"
+	echo "    -n		Do not ask for repository usernames and passwords."
 	echo "    -e ENV	create or reuse a cpython environment ENV"
 	echo "    -E ENV	re-create a cpython environment ENV"
 	echo "    -p ENV	create or reuse a pypy environment ENV"
@@ -51,7 +52,7 @@ WHEELS=0
 VERBOSE=0
 BRANCH=
 
-while getopts "iCcwDvse:E:p:P:r:b:h" opt
+while getopts "iCcwDvnse:E:p:P:r:b:h" opt
 do
 	case $opt in
 		i)
@@ -95,6 +96,9 @@ do
 			;;
 		D)
 			REPOS=""
+			;;
+		n)
+			export GIT_ASKPASS="true"
 			;;
 		s)
 			GIT_OPTIONS="$GIT_OPTIONS --depth 1 --no-single-branch"
