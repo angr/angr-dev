@@ -108,6 +108,9 @@ do
 	esac
 done
 
+# Hacky way to prevent http username/password prompts (ssh should not be affected)
+export GIT_ASKPASS=true
+
 if [ $WHEELS -eq 1 ]
 then
 	REPOS="$REPOS wheels"
