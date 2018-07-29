@@ -27,14 +27,17 @@ def main():
         #Target('capstone', chdir='bindings/python', tar_target='https://github.com/aquynh/capstone/archive/3.0.5-rc2.tar.gz', dir_name='capstone-3.0.5-rc2'),
         #Target('unicorn', chdir='bindings/python', tar_target='https://github.com/unicorn-engine/unicorn/archive/1.0.tar.gz', dir_name='unicorn-1.0'),
         #Target('unicorn', chdir='bindings/python', git_target='https://github.com/rhelmot/unicorn.git', git_branch='fix/x86_eflags_cc_op'),
-        Target('pyvex', git_target='https://github.com/angr/pyvex.git', do_install=True),
-        Target('angr', git_target='https://github.com/angr/angr.git'),
-        #Target('keystone-engine', tar_target='https://files.pythonhosted.org/packages/9a/fc/ed0d3f46921bfaa612d9e8ce8313f99f4149ecf6635659510220c994cb72/keystone-engine-0.9.1-3.tar.gz', dir_name='keystone-engine-0.9.1-3'),
+        #Target('pyvex', git_target='https://github.com/angr/pyvex.git', do_install=True),
+        #Target('angr', git_target='https://github.com/angr/angr.git'),
+        #Target('keystone-engine', chdir='bindings/python', tar_target='https://files.pythonhosted.org/packages/9a/fc/ed0d3f46921bfaa612d9e8ce8313f99f4149ecf6635659510220c994cb72/keystone-engine-0.9.1-3.tar.gz', dir_name='keystone-engine-0.9.1-3'),
+        #Target('z3-solver', git_target='https://github.com/angr/angr-z3.git', chdir='src/api/python', env={'Z3_VERSION_SUFFIX': '.post1'}),
+        Target('z3-solver', zip_target='https://github.com/angr/angr-z3/archive/master.zip', dir_name='angr-z3-master', chdir='src/api/python', env={'Z3_VERSION_SUFFIX': '.post1'}),
     ])
 
 class Target(object):
     def __init__(self, name,
             chdir=None,
+            env=None,
             run_cmd=None,
             copy_cmd=None,
             git_branch=None,
@@ -46,11 +49,13 @@ class Target(object):
             do_install=False):
 
         if chdir is None: chdir = DEFAULT_CHDIR
+        if env is None: env = {}
         if run_cmd is None: run_cmd = DEFAULT_RUN_CMD
         if copy_cmd is None: copy_cmd = DEFAULT_COPY_CMD
 
         self.name = name
         self.chdir = chdir
+        self.env = env
         self.run_cmd = run_cmd
         self.copy_cmd = copy_cmd
         self.dl_cmd = dl_cmd
@@ -59,6 +64,7 @@ class Target(object):
         self.do_install = do_install
 
         if git_target is not None:
+            raise Exception("UNFORTUNATE ERROR: The version of git in this docker image is too old to work with modern TLS protocols. please use a zip or tarball target instead. (though feel free to remove this assertion and see if the issue has magically been fixed..!")
             self.set_git_target(git_target)
         if tar_target is not None:
             self.set_tar_target(tar_target)
@@ -80,17 +86,19 @@ class Target(object):
 
     def set_tar_target(self, target):
         aname = os.path.basename(target)
-        self.dl_cmd = 'curl -o "%s" "%s" && tar -xf "%s"' % (aname, target, aname)
+        self.dl_cmd = 'curl -L -o "%s" "%s" && tar -xf "%s"' % (aname, target, aname)
 
     def set_zip_target(self, target):
         aname = os.path.basename(target)
-        self.dl_cmd = 'curl -o "%s" "%s" && unzip "%s"' % (aname, target, aname)
+        self.dl_cmd = 'curl -L -o "%s" "%s" && unzip "%s"' % (aname, target, aname)
 
     def run(self, build_fp, destination):
         assert self.dl_cmd is not None
         assert self.name is not None
         assert self.dir_name is not None
         build_fp.write('echo -e "\\e[32mWorking on %s\\e[0m"\n' % self.name)
+        for k, v in self.env.items():
+            build_fp.write('export %s=%s\n' % (k, v))
         build_fp.write(self.dl_cmd + '\n')
         build_fp.write('pushd "%s"\n' % os.path.join(self.dir_name, self.chdir))
         if self.git_branch is not None:
@@ -100,6 +108,10 @@ class Target(object):
             build_fp.write(DEFAULT_INSTALL_CMD + '\n')
         build_fp.write(self.copy_cmd % destination + '\n')
         build_fp.write('popd\n\n')
+
+    @property
+    def docker_env_str(self):
+        return ''.join('-e %s=%s ' % (k, v) for k, v in self.env)
 
 def run_windows(output_dir, targets):
     output_dir = os.path.realpath(output_dir)
@@ -132,9 +144,9 @@ def run_linux(output_dir, targets):
 
     os.chmod(output_file, 0777)
     os.system('''
-    docker run -it --rm -v "%s:/output" quay.io/pypa/manylinux1_x86_64 /output/build.sh
-    docker run -it --rm -v "%s:/output" quay.io/pypa/manylinux1_i686 /output/build.sh
-    chown $(id -un):$(id -un) %s/*
+    sudo docker run -it --rm -v "%s:/output" quay.io/pypa/manylinux1_x86_64 /output/build.sh
+    sudo docker run -it --rm -v "%s:/output" quay.io/pypa/manylinux1_i686 /output/build.sh
+    sudo chown $(id -un):$(id -un) %s/*
     ''' % (output_dir, output_dir, output_dir))
     #os.unlink(output_file)
 
