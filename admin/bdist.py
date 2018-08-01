@@ -139,13 +139,19 @@ class Target(object):
 
 def run_windows(output_dir, targets):
     output_dir = os.path.realpath(output_dir)
+    try:
+        path32 = os.environ['PYTHON_32']
+        path64 = os.environ['PYTHON_64']
+    except KeyError:
+        print("Please set the PYTHON_32 and PYTHON_64 environment variables to the paths to 32- and 64-bit python executables")
+        sys.exit(1)
 
-    for arch in ['x86', 'amd64']:
+    for arch, interp in [('x86', path32), ('amd64', path64)]:
         arch_dir = os.path.join(output_dir, arch)
         mkdir(arch_dir)
         build_script = os.path.join(arch_dir, 'build.bat')
         fp = open(build_script, 'w')
-        fp.write(COMMAND_BASE % arch)
+        fp.write(COMMAND_BASE % (arch, interp))
 
         for target in targets:
             target.run(fp, output_dir)
@@ -178,12 +184,12 @@ if sys.platform == 'win32':
     run = run_windows
     DEFAULT_CHDIR = '.'
     DEFAULT_RUN_CMD = 'python setup.py bdist_wheel'
-    DEFAULT_INSTALL_CMD = 'pip install dist\\*.whl'
-    DEFAULT_COPY_CMD = 'copy dist\\* %s'
+    DEFAULT_INSTALL_CMD = 'for %%f in (dist\\*.whl) DO pip install %%f'
+    DEFAULT_COPY_CMD = 'for %%%%f in (dist\\*) DO copy %%%%f %s'
 
     COMMAND_BASE = """\
 call VsDevCmd -arch=%s
-virtualenv build_env
+virtualenv build_env --python="%s"
 call build_env\\Scripts\\activate.bat
 """
 else:
