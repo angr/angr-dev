@@ -2,7 +2,7 @@
 
 import os
 import sys
-
+import requests
 
 # THE GIST IS
 # create a new environment (docker, virtualenv, ...)
@@ -31,7 +31,9 @@ def main():
         #Target('angr', git_target='https://github.com/angr/angr.git'),
         #Target('keystone-engine', chdir='bindings/python', tar_target='https://files.pythonhosted.org/packages/9a/fc/ed0d3f46921bfaa612d9e8ce8313f99f4149ecf6635659510220c994cb72/keystone-engine-0.9.1-3.tar.gz', dir_name='keystone-engine-0.9.1-3'),
         #Target('z3-solver', git_target='https://github.com/angr/angr-z3.git', chdir='src/api/python', env={'Z3_VERSION_SUFFIX': '.post1'}),
-        Target('z3-solver', zip_target='https://github.com/angr/angr-z3/archive/master.zip', dir_name='angr-z3-master', chdir='src/api/python', env={'Z3_VERSION_SUFFIX': '.post1'}),
+        #Target('z3-solver', zip_target='https://github.com/angr/angr-z3/archive/master.zip', dir_name='angr-z3-master', chdir='src/api/python', env={'Z3_VERSION_SUFFIX': '.post1'}),
+        Target('pyvex', pypi_target='pyvex', do_install=True),
+        Target('angr', pypi_target='angr'),
     ])
 
 class Target(object):
@@ -43,6 +45,7 @@ class Target(object):
             git_branch=None,
             dl_cmd=None,
             dir_name=None,
+            pypi_target=None,
             git_target=None,
             tar_target=None,
             zip_target=None,
@@ -66,6 +69,10 @@ class Target(object):
         if git_target is not None:
             raise Exception("UNFORTUNATE ERROR: The version of git in this docker image is too old to work with modern TLS protocols. please use a zip or tarball target instead. (though feel free to remove this assertion and see if the issue has magically been fixed..!")
             self.set_git_target(git_target)
+
+        if pypi_target is not None:
+            tar_target, zip_target = self.extract_pypi_target(pypi_target)
+
         if tar_target is not None:
             self.set_tar_target(tar_target)
         if zip_target is not None:
@@ -91,6 +98,23 @@ class Target(object):
     def set_zip_target(self, target):
         aname = os.path.basename(target)
         self.dl_cmd = 'curl -L -o "%s" "%s" && unzip "%s"' % (aname, target, aname)
+
+    def extract_pypi_target(self, target):
+        r = requests.get('https://pypi.org/simple/%s/' % target).text
+        url_with_fragment = [x for x in r.split('"') if 'files.pythonhosted.org' in x and '.whl' not in x and '.egg' not in x][-1]
+        url = url_with_fragment.split('#')[0]
+
+        if url.endswith('.tar.gz'):
+            self.dir_name = url.split('/')[-1][:-7]
+            return url, None
+        elif url.endswith('.tar') or url.endswith('.tgz'):
+            self.dir_name = url.split('/')[-1][:-4]
+            return url, None
+        elif url.endswith('.zip'):
+            self.dir_name = url.split('/')[-1][:-4]
+            return None, url
+        else:
+            raise ValueError('Extracted pypi link with unknown suffix')
 
     def run(self, build_fp, destination):
         assert self.dl_cmd is not None
