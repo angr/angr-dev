@@ -235,7 +235,7 @@ then
 		./pypy_venv.sh $ANGR_VENV >>$OUTFILE 2>>$ERRFILE
 	else
 		info "Creating cpython virtualenv $ANGR_VENV..."
-		mkvirtualenv --python=$(which python2) $ANGR_VENV >>$OUTFILE 2>>$ERRFILE
+		mkvirtualenv --python=$(which python3) $ANGR_VENV >>$OUTFILE 2>>$ERRFILE
 	fi
 
 	set -e
