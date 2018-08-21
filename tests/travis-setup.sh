@@ -4,7 +4,7 @@ echo "###"
 echo "### Starting CI setup..."
 echo "###"
 
-CI_EXTRAS=${CI_EXTRAS-tracer fuzzer driller povsim compilerex rex colorguard fidget patcherex angr-platforms pysoot}
+CI_EXTRAS=${CI_EXTRAS-tracer fuzzer driller povsim compilerex rex colorguard fidget patcherex angr-platforms pysoot heaphopper}
 
 # update apt
 echo "Updating apt..."
