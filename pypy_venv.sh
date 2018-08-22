@@ -46,7 +46,7 @@ fi
 
 # virtualenv
 set +e
-mkvirtualenv -p $PWD/pypy2-*/bin/pypy $NAME
+mkvirtualenv -p $PWD/pypy3-*/bin/pypy $NAME
 set -e
 pip install -U setuptools
 
