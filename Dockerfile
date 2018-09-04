@@ -1,4 +1,4 @@
-from ubuntu:xenial
+from ubuntu:bionic
 maintainer yans@yancomm.net
 
 run dpkg --add-architecture i386
