@@ -58,6 +58,11 @@ def compare_lint():
     tolint = [ f for f in changed_files if f.endswith(".py") ]
     print("Changed files: %s" % (tolint,))
 
+    if len(tolint) > 50:
+        print("")
+        print("...You know what, I trust you")
+        return True
+
     new_results = lint_files(tolint)
     subprocess.check_call("git checkout origin/master".split())
     try:
