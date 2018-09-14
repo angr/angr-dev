@@ -41,10 +41,10 @@ To update angr, simply pull all the git repositories.
 ./git_all.sh pull
 ```
 
-For repositories that have C components (pyvex), you might have to rebuild.
+For repositories that have C components, you might have to rebuild.
 
 ```bash
-pip install -e ./pyvex && pip install -e ./simuvex
+pip install -e ./pyvex && pip install -e ./angr
 ```
 
 ## Issues
