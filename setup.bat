@@ -26,6 +26,7 @@ if not "%TO_CHECKOUT%" == "" (
 
 pip install wheels\capstone-4.0.0-py2-none-win32.whl
 pip install unicorn
+pip install cffi
 
 pip install -e .\archinfo || goto :error
 pip install -e .\pyvex || goto :error
