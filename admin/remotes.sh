@@ -17,10 +17,10 @@ angr/angr.github.io
 angr/cle
 angr/wheels
 angr/fidget
+angr/patcherex
 shellphish/driller
 shellphish/fuzzer
 shellphish/rex
-shellphish/patcherex
 shellphish/shellphish-qemu
 shellphish/shellphish-afl
 shellphish/driller-afl
