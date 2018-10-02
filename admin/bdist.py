@@ -203,11 +203,11 @@ else:
 #!/bin/bash -ex
 
 function python() {
-    /opt/python/cp27-cp27mu/bin/python "$@"
+    /opt/python/cp35-cp35m/bin/python "$@"
 }
 
 function pip() {
-    /opt/python/cp27-cp27mu/bin/pip "$@"
+    /opt/python/cp35-cp35m/bin/pip "$@"
 }
 
 yum install -y libffi libffi-devel
