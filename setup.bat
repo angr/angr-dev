@@ -1,6 +1,10 @@
 set TO_CHECKOUT=%1
 
 if "%APPVEYOR%"=="True" (
+    pip install virtualenv
+    virtualenv -p C:\Python35\python.exe env
+    call env\scripts\activate.bat
+
     move %APPVEYOR_BUILD_FOLDER% .
     set TO_CHECKOUT=%APPVEYOR_REPO_BRANCH%
 
@@ -24,7 +28,6 @@ if not "%TO_CHECKOUT%" == "" (
     call git_all.bat checkout %TO_CHECKOUT%
 )
 
-pip install wheels\capstone-4.0.0-py2-none-win32.whl
 pip install unicorn
 pip install cffi
 
