@@ -185,7 +185,7 @@ if sys.platform == 'win32':
     DEFAULT_CHDIR = '.'
     DEFAULT_RUN_CMD = 'python setup.py bdist_wheel'
     DEFAULT_INSTALL_CMD = 'for %%f in (dist\\*.whl) DO pip install %%f'
-    DEFAULT_COPY_CMD = 'for %%%%f in (dist\\*) DO copy %%%%f %s'
+    DEFAULT_COPY_CMD = 'for %%%%f in (dist\\*) DO copy "%%%%f" "%s"'
 
     COMMAND_BASE = """\
 call VsDevCmd -arch=%s
