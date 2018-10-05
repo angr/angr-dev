@@ -51,6 +51,10 @@ function build_docs
 	git push github master
 	cd - >/dev/null
 
+	cd angr.github.io
+	git pull
+	cd - >/dev/null
+
 	make -C angr-doc/api-doc html
 	rm -rf angr.github.io/api-doc
 	cp -r angr-doc/api-doc/build/html angr.github.io/api-doc
@@ -196,8 +200,8 @@ case $CMD in
 
 				cd $i
 				echo "Updating dependency version number for $j"
-				sed -i -e "s/'$j\(\(>=[^']*\)\?\)',\$/'$j==$version',/" setup.py
-				sed -i -e "s/$j\(\(>=.*\)\?\)\$/$j==$version/" requirements.txt
+				sed -i -e "s/'$j\(\(==[^']*\)\?\)',\$/'$j==$version',/" setup.py
+				sed -i -e "s/$j\(\(==.*\)\?\)\$/$j==$version/" requirements.txt
 				cd ..
 			done
 		done
