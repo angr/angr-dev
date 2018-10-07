@@ -41,28 +41,14 @@ To update angr, simply pull all the git repositories.
 ./git_all.sh pull
 ```
 
-For repositories that have C components (pyvex), you might have to rebuild.
+For repositories that have C components, you might have to rebuild.
 
 ```bash
-pip install -e ./pyvex && pip install -e ./simuvex
+pip install -e ./pyvex && pip install -e ./angr
 ```
 
 ## Issues
 
-### Git keeps asking me for username and password. Are you trying to steal them from me?
+### I want to use my github username and password via https
 
-No.
-This is because GitHub does not differentiate between "a non-existent repo" and "a private repo" (which they should not), and we cannot correctly handle this in our script right now.
-
-Here are two solutions:
-
-- Check out angr-dev using `git@github.com:angr/angr-dev.git` instead of https.
-This requires you to have a GitHub account.
-
-or
-
-- Run the following command instead:
-```
-setsid sh -c 'tty; ps -jp "$$"; ./angr-dev/setup.sh <your arguments go here>' < /dev/null
-```
-
+Comment out the `GIT_ASKPASS=true` line. Or, just use ssh.

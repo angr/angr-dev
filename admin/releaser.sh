@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-VERSION_MAJOR=7
+VERSION_MAJOR=8
 
 #while getopt "v" opt
 #do
@@ -36,7 +36,7 @@ shift || true
 
 function today_version
 {
-	echo $VERSION_MAJOR.$(($(date +%y)-10)).$(date +%m.%d | sed -e "s/^0*//g" -e "s/\.0*/./g")
+	echo $VERSION_MAJOR$(date +.%y.%m.%d | sed -e "s/\.0*/./g")
 }
 
 function build_docs
@@ -51,13 +51,17 @@ function build_docs
 	git push github master
 	cd - >/dev/null
 
+	cd angr.github.io
+	git pull
+	cd - >/dev/null
+
 	make -C angr-doc/api-doc html
 	rm -rf angr.github.io/api-doc
 	cp -r angr-doc/api-doc/build/html angr.github.io/api-doc
 
 	cd angr.github.io
 	git commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "updated api-docs for version $VERSION" api-doc
-	git push origin master
+	git push github master
 	cd - >/dev/null
 }
 
@@ -103,10 +107,10 @@ case $CMD in
 
 		./git_all.sh checkout master
 		$0 version $VERSION
-        $0 update_dep $TESTPYPI
+		$0 update_dep $TESTPYPI
 		MESSAGE="ticked version number to $VERSION"
 		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "$MESSAGE" setup.py requirements.txt
-		./git_all.sh diff --color=always origin/master master | cat
+		./git_all.sh diff --color=always github/master master | cat
 		echo
 		echo -n "Does the diff look good (y|n)? "
 		read a
@@ -149,12 +153,12 @@ case $CMD in
 			[ ! -e $i/setup.py ] && continue
 
 			cd $i
-			if [ "$(git show --format="%aN" -s HEAD)" == 'angr release bot' ]
-			then
-				echo "Skipping $i -- no changes"
-				cd ..
-				continue
-			fi
+			#if [ "$(git show --format="%aN" -s HEAD)" == 'angr release bot' ]
+			#then
+			#	echo "Skipping $i -- no changes"
+			#	cd ..
+			#	continue
+			#fi
 
 			echo "Ticking version number of $i to $VERSION"
 			sed -i -e "s/version=['\"][^'\"]*['\"]/version='$VERSION'/g" setup.py
@@ -178,14 +182,14 @@ case $CMD in
 		do
 			[ ! -e $i/setup.py ] && continue
 
-			cd $i
-			if [ "$(git show --format="%aN" -s HEAD)" == 'angr release bot' ]
-			then
-				echo "Dependency version number of $i has already been updated."
-				cd ..
-				continue
-			fi
-			cd ..
+			#cd $i
+			#if [ "$(git show --format="%aN" -s HEAD)" == 'angr release bot' ]
+			#then
+			#	echo "Dependency version number of $i has already been updated."
+			#	cd ..
+			#	continue
+			#fi
+			#cd ..
 
 			for j in "${REPO_LIST[@]}"
 			do
@@ -196,8 +200,8 @@ case $CMD in
 
 				cd $i
 				echo "Updating dependency version number for $j"
-				sed -i -e "s/'$j\(\(>=[^']*\)\?\)',\$/'$j>=$version',/" setup.py
-				sed -i -e "s/$j\(\(>=.*\)\?\)\$/$j>=$version/" requirements.txt
+				sed -i -e "s/'$j\(\(==[^']*\)\?\)',\$/'$j==$version',/" setup.py
+				sed -i -e "s/$j\(\(==.*\)\?\)\$/$j==$version/" requirements.txt
 				cd ..
 			done
 		done

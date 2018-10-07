@@ -1,5 +1,7 @@
 set result=0
 
+call env\scripts\activate.bat
+
 :top
 if "%1" == "" goto :end
 echo RUNNING TESTS FOR %1
