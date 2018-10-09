@@ -33,10 +33,13 @@ function usage
 DEBS=${DEBS-virtualenvwrapper python3-pip python3-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev libqt4-dev binutils-multiarch nasm libssl-dev libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386}
 ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python3-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt4 binutils binutils nasm lib32-glibc lib32-gcc-libs lib32-libstdc++5 lib32-zlib}
 ARCHCOMDEBS=${ARCHCOMDEBS-lib32-libtinfo}
-REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment}
+REPOS=${REPOS-ana idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment angr-targets}
 declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="unicorn"
 EXTRA_DEPS["pyvex"]="--pre capstone"
+
+declare -A EXTRA_PIP_OPTIONS
+EXTRA_PIP_OPTIONS["angr-targets"]="--process-dependency-links"
 
 ORIGIN_REMOTE=${ORIGIN_REMOTE-$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|[^/:]*/angr-dev.*||")}
 REMOTES=${REMOTES-${ORIGIN_REMOTE}angr ${ORIGIN_REMOTE}shellphish ${ORIGIN_REMOTE}mechaphish https://git:@github.com/zardus https://git:@github.com/rhelmot https://git:@github.com/salls}
@@ -399,8 +402,8 @@ then
 
     	for PACKAGE in $TO_INSTALL; do
             	info "Installing $PACKAGE."
-            	[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
-            	pip_install -e $PACKAGE
+            	[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}    	
+		pip_install ${EXTRA_PIP_OPTIONS[$PACKAGE]} -e $PACKAGE
     	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
