@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
+set -e
 
 SCRIPT_DIR=$(dirname $0)
 cd $SCRIPT_DIR
@@ -203,7 +204,7 @@ then
 	source /usr/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
 	set -e
 else
-	pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
+	python -m pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 	set +e
 	source /etc/bash_completion.d/virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 	set -e
