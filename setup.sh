@@ -312,6 +312,10 @@ function install_wheels
 	#LATEST_AFL=$(ls -tr wheels/shellphish_afl-*)
 	#echo "Installing $LATEST_AFL" >> $OUTFILE 2>> $ERRFILE
 	#pip install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
+
+	LATEST_KEYSTONE=$(ls -tr wheels/keystone_engine-*)
+	echo "Installing $LATEST_KEYSTONE" >> $OUTFILE 2>> $ERRFILE
+	pip install $LATEST_KEYSTONE >> $OUTFILE 2>> $ERRFILE
 }
 
 function pip_install
@@ -404,7 +408,7 @@ then
     	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
-	pip install -I --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
+	pip install --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
 	if pip install ipython pylint ipdb nose nose-timer coverage flaky sphinx sphinx_rtd_theme recommonmark 'requests[security]' >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
