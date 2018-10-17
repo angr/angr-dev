@@ -394,6 +394,12 @@ then
 		PIP_OPTIONS="$PIP_OPTIONS --find-links=$PWD/wheels"
 	fi
 
+	python2=$(which python2)
+	if [ $? -eq 0 ]
+	then
+		export UNICORN_QEMU_FLAGS="--python=$python2 $UNICORN_QEMU_FLAGS"
+	fi
+
 	# remove angr-management if running in pypy or in travis
 	#(python --version 2>&1| grep -q PyPy) && 
 	info "NOTE: removing angr-management until we sort out the pyside packaging"
