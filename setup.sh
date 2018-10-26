@@ -204,7 +204,7 @@ then
 	source /usr/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
 	set -e
 else
-	python -m pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
+	python3 -m pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 	set +e
 	source /etc/bash_completion.d/virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 	set -e
