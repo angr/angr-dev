@@ -394,6 +394,10 @@ then
 		PIP_OPTIONS="$PIP_OPTIONS --find-links=$PWD/wheels"
 	fi
 
+	# --process-dependency-links is required to install avatar2, which is
+	# required by angr-targets
+	PIP_OPTIONS="$PIP_OPTIONS --process-dependency-links"
+
 	python2=$(which python2)
 	if [ $? -eq 0 ]
 	then
