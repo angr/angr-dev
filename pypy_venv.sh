@@ -46,15 +46,9 @@ fi
 
 # virtualenv
 set +e
-mkvirtualenv -p $PWD/pypy3-*/bin/pypy3 $NAME
+mkvirtualenv -p "$PWD/pypy3-*/bin/pypy3" $NAME
 set -e
 pip install -U setuptools
-
-# readline
-[ ! -e pyreadline-cffi ] && git clone https://github.com/yuyichao/pyreadline-cffi.git
-cd pyreadline-cffi && cmake CMakeLists.txt && make && make install
-rm -f $VIRTUAL_ENV/lib_pypy/readline.*
-ln -s $VIRTUAL_ENV/site-packages/readline $VIRTUAL_ENV/lib_pypy/readline
 
 echo "installed pypy in $NAME"
 exit 0
