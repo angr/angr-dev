@@ -6,7 +6,7 @@ cd $DIR
 
 #sudo apt-get install cmake libreadline-dev
 
-if [ -z "$NAME"]; then
+if [ -z "$NAME" ]; then
 	echo "use this script with ./pypy_venv <NAME>"
 	exit
 fi
@@ -46,7 +46,7 @@ fi
 
 # virtualenv
 set +e
-mkvirtualenv -p "$PWD/pypy3-*/bin/pypy3" $NAME
+mkvirtualenv -p "$PWD/"pypy3-*/bin/pypy3 $NAME
 set -e
 pip install -U setuptools
 
