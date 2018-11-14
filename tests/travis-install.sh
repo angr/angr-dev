@@ -4,7 +4,7 @@ echo "###"
 echo "### Cloning angr-dev..."
 echo "###"
 
-sudo apt-get update && sudo apt-get install -y socat
+sudo apt-get update && sudo apt-get install -y socat gdbserver
 
 cd
 git clone -q https://github.com/angr/angr-dev && cd angr-dev
