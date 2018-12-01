@@ -109,7 +109,7 @@ case $CMD in
 		$0 version $VERSION
 		$0 update_dep $TESTPYPI
 		MESSAGE="ticked version number to $VERSION"
-		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "$MESSAGE" setup.py requirements.txt
+		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "$MESSAGE" setup.py
 		./git_all.sh diff --color=always github/master master | cat
 		echo
 		echo -n "Does the diff look good (y|n)? "
@@ -201,7 +201,6 @@ case $CMD in
 				cd $i
 				echo "Updating dependency version number for $j"
 				sed -i -e "s/'$j\(\(==[^']*\)\?\)',\$/'$j==$version',/" setup.py
-				sed -i -e "s/$j\(\(==.*\)\?\)\$/$j==$version/" requirements.txt
 				cd ..
 			done
 		done
