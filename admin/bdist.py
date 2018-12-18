@@ -24,7 +24,7 @@ def main():
     mkdir('bdist')
 
     run('bdist', [
-        #Target('capstone', chdir='bindings/python', tar_target='https://github.com/aquynh/capstone/archive/3.0.5-rc2.tar.gz', dir_name='capstone-3.0.5-rc2'),
+        #Target('capstone', chdir='bindings/python', tar_target='https://github.com/aquynh/capstone/archive/4.0.tar.gz', dir_name='capstone-4.0'),
         #Target('unicorn', chdir='bindings/python', tar_target='https://github.com/unicorn-engine/unicorn/archive/1.0.tar.gz', dir_name='unicorn-1.0'),
         #Target('unicorn', chdir='bindings/python', git_target='https://github.com/rhelmot/unicorn.git', git_branch='fix/x86_eflags_cc_op'),
         #Target('pyvex', git_target='https://github.com/angr/pyvex.git', do_install=True),
@@ -32,8 +32,9 @@ def main():
         #Target('keystone-engine', chdir='bindings/python', tar_target='https://files.pythonhosted.org/packages/9a/fc/ed0d3f46921bfaa612d9e8ce8313f99f4149ecf6635659510220c994cb72/keystone-engine-0.9.1-3.tar.gz', dir_name='keystone-engine-0.9.1-3'),
         #Target('z3-solver', git_target='https://github.com/angr/angr-z3.git', chdir='src/api/python', env={'Z3_VERSION_SUFFIX': '.post1'}),
         #Target('z3-solver', zip_target='https://github.com/angr/angr-z3/archive/master.zip', dir_name='angr-z3-master', chdir='src/api/python', env={'Z3_VERSION_SUFFIX': '.post1'}),
-        Target('pyvex', pypi_target='pyvex', do_install=True),
-        Target('angr', pypi_target='angr'),
+        #Target('pyvex', pypi_target='pyvex', do_install=True),
+        #Target('angr', pypi_target='angr'),
+        Target('capstone', pypi_target='capstone'),
     ])
 
 class Target(object):
