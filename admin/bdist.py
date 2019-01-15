@@ -173,7 +173,7 @@ def run_linux(output_dir, targets):
 
     output.close()
 
-    os.chmod(output_file, 0777)
+    os.chmod(output_file, 0o777)
     os.system('''
     sudo docker run -it --rm -v "%s:/output" quay.io/pypa/manylinux1_x86_64 /output/build.sh
     sudo docker run -it --rm -v "%s:/output" quay.io/pypa/manylinux1_i686 /output/build.sh
