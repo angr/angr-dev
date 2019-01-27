@@ -206,7 +206,14 @@ then
 else
 	python3 -m pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 	set +e
-	source /etc/bash_completion.d/virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
+	if [ -f /etc/bash_completion.d/virtualenvwrapper ]
+	then
+		source /etc/bash_completion.d/virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
+	elif [ -f /usr/local/bin/virtualenvwrapper.sh ]
+	then
+		export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+		source /usr/local/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
+	fi
 	set -e
 fi
 
@@ -394,7 +401,7 @@ then
 		PIP_OPTIONS="$PIP_OPTIONS --find-links=$PWD/wheels"
 	fi
 
-	python2=$(which python2)
+	python2=$(which python2 || which python)
 	if [ $? -eq 0 ]
 	then
 		export UNICORN_QEMU_FLAGS="--python=$python2 $UNICORN_QEMU_FLAGS"
