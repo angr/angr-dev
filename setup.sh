@@ -30,7 +30,24 @@ function usage
 	exit 1
 }
 
+# We must do this check before the `declare`, because MacOS ships with bash version 3
+[ "$(uname)" == "Darwin" ] && IS_MACOS=1 || IS_MACOS=0
+
+if ((BASH_VERSINFO[0] < 4));
+then
+	echo "This script requires bash version >= 4.0, and you have bash verison $BASH_VERSION." >&2
+	if [ $IS_MACOS -eq 1 ];
+	then
+		echo -e "To install a newer bash version, use homebrew https://brew.sh/:\nbrew install bash\nYou don't need to link it or change the shell, it just needs to be installed." >&2
+	else
+		echo "Install a bash version >= 4.0 using your favorite package manager." >&2
+	fi
+	exit 1;
+fi
+
+
 DEBS=${DEBS-virtualenvwrapper python3-pip python3-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386}
+HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm capstone unicorn}
 ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python3-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt4 binutils binutils nasm lib32-glibc lib32-gcc-libs lib32-libstdc++5 lib32-zlib}
 ARCHCOMDEBS=${ARCHCOMDEBS-lib32-libtinfo}
 REPOS=${REPOS-idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment}
@@ -51,6 +68,7 @@ CONCURRENT_CLONE=0
 WHEELS=0
 VERBOSE=0
 BRANCH=
+
 
 while getopts "iCcwDvse:E:p:P:r:b:h" opt
 do
@@ -132,25 +150,25 @@ fi
 
 function info
 {
-	echo "$(tput setaf 4 2>/dev/null)[+] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
+	echo -e "$(tput setaf 4 2>/dev/null)[+] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
 	if [ $VERBOSE -eq 0 ]; then echo "[+] $@"; fi >> $OUTFILE
 }
 
 function warning
 {
-	echo "$(tput setaf 3 2>/dev/null)[!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
+	echo -e "$(tput setaf 3 2>/dev/null)[!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
 	if [ $VERBOSE -eq 0 ]; then echo "[!] $@"; fi >> $OUTFILE
 }
 
 function debug
 {
-	echo "$(tput setaf 6 2>/dev/null)[-] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
+	echo -e "$(tput setaf 6 2>/dev/null)[-] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
 	if [ $VERBOSE -eq 0 ]; then echo "[-] $@"; fi >> $OUTFILE
 }
 
 function error
 {
-	echo "$(tput setaf 1 2>/dev/null)[!!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)" >&2
+	echo -e "$(tput setaf 1 2>/dev/null)[!!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)" >&2
 	if [ $VERBOSE -eq 0 ]
 	then
 		echo "[!!] $@" >> $ERRFILE
@@ -185,16 +203,34 @@ then
 		fi
 		info "Installing dependencies..."
 		sudo pacman -S --noconfirm --needed $ARCHDEBS >>$OUTFILE 2>>$ERRFILE
+	elif [ $IS_MACOS -eq 1 ]
+	then
+		if ! which brew > /dev/null;
+		then
+			error "Your system doesn't have homebrew installed, I don't know how to install the dependencies.\nPlease install homebrew: https://brew.sh/\nOr install the equivalent of these homebrew packages: $HOMEBREW_DEBS."
+		fi
+		brew install $HOMEBREW_DEBS >>$OUTFILE 2>>$ERRFILE
 	else
 		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
 	fi
 fi
 
 info "Checking dependencies..."
-[ -e /etc/debian_version ] && [ $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && error "Please install the following packages: $DEBS" && exit 1
-[ -e /etc/pacman.conf ] && [ $(pacman -Qi $ARCHDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages: $ARCHDEBS" && exit 1
-[ -e /etc/pacman.conf ] && [ $(pacman -Qi $ARCHCOMDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages from AUR (yaourt -S <package_name>)): $ARCHCOMDEBS" && exit 1
-[ ! -e /etc/debian_version ] && [ ! -e /etc/pacman.conf ] && warning -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
+if [ -e /etc/debian_version ]
+then
+	[ $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && error "Please install the following packages: $DEBS"
+elif [ -e /etc/pacman.conf ]
+then
+	[ $(pacman -Qi $ARCHDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages: $ARCHDEBS"
+elif [ -e /etc/pacman.conf ]
+then
+	[ $(pacman -Qi $ARCHCOMDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages from AUR (yaourt -S <package_name>)): $ARCHCOMDEBS"
+elif [ $IS_MACOS -eq 1 ]
+then
+	[ $(brew ls --versions $HOMEBREW_DEBS | wc -l) -ne $(echo $HOMEBREW_DEBS | wc -w) ] && error "Please install the following packages from homebrew: $HOMEBREW_DEBS"
+else
+	warning -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
+fi
 
 info "Enabling virtualenvwrapper."
 if [ -e /etc/pacman.conf ]
@@ -401,10 +437,23 @@ then
 		PIP_OPTIONS="$PIP_OPTIONS --find-links=$PWD/wheels"
 	fi
 
-	python2=$(which python2 || which python)
-	if [ $? -eq 0 ]
+	# the angr environment on macos hides the python2 from us, so we'll used the installed version in /usr/bin/python
+	if [ $IS_MACOS -eq 1 ]
+	then
+		python2=/usr/bin/python
+	else
+		python2=$(which python2)
+	fi
+	if [ ! -z "$python2" ]
 	then
 		export UNICORN_QEMU_FLAGS="--python=$python2 $UNICORN_QEMU_FLAGS"
+	fi
+
+	# capstone and/or unicorn need this environment variables for MacOS
+	# https://github.com/trailofbits/manticore/issues/110#issuecomment-438262142
+	if [ $IS_MACOS -eq 1 ]
+	then
+		export MACOS_UNIVERSAL=no
 	fi
 
 	# remove angr-management if running in pypy or in travis
@@ -414,14 +463,25 @@ then
 	info "Install list: $TO_INSTALL"
 	[ -n "$TRAVIS" ] && TO_INSTALL=${TO_INSTALL// angr-management/}
 
-    	for PACKAGE in $TO_INSTALL; do
-            	info "Installing $PACKAGE."
-            	[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
-            	pip_install -e $PACKAGE
-    	done
+    for PACKAGE in $TO_INSTALL
+	do
+        info "Installing $PACKAGE."
+        [ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
+        pip_install -e $PACKAGE
+    done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
-	pip install --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
+	if ! pip install --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
+	then
+		# keystone-engine fails to install on mac os, but there's a workaround, let's try that
+		# https://github.com/keystone-engine/keypatch/issues/57
+		git clone https://github.com/fjh658/keystone-engine.git >> $OUTFILE 2>> $ERRFILE || error "Unable to clone fixed keystone-engine repo."
+		cd keystone-engine
+		git submodule update --init --recursive || error "Unable to update keystone-engine submodules."
+		cd -
+		pip_install -e keystone-engine
+		pip show keystone-engine >> $OUTFILE 2>> $ERRFILE || error "Unable to install keystone-engine."
+	fi
 	if pip install ipython pylint ipdb nose nose-timer coverage flaky sphinx sphinx_rtd_theme recommonmark 'requests[security]' >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
@@ -436,4 +496,10 @@ then
 	info "immediately in the virtual environment, with the exception of things"
 	info "requiring compilation (i.e., pyvex). For those, you will need to rerun"
 	info "the install after changes (i.e., \"pip install -e pyvex\")."
+	if [ $IS_MACOS -eq 1 ]
+	then
+		info "You'll need to setup your virtualenv correctly on MacOS."
+		info "Here's what I use:"
+		info "\`export VIRTUALENVWRAPPER_PYTHON=$(which python3); source /usr/local/bin/virtualenvwrapper.sh\`"
+	fi
 fi
