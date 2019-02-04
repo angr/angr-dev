@@ -4,7 +4,7 @@
 ```
 mkvirtualenv angr-release
 pip install -U pip setuptools
-pip install twin sphinx sphinx_rtd_theme recommonmark
+pip install twine sphinx sphinx_rtd_theme recommonmark
 ```
 
 ## Releasing to PyPI/TestPyPI
