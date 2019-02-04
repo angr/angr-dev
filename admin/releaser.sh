@@ -29,7 +29,13 @@ shift
 # password: your testpypi password
 #
 TESTPYPI=$1
-shift || true
+if [ ! -z "$TESTPYPI" ]; then
+	if [[ "$TESTPYPI" == "yes" ]] || [[ "$TESTPYPI" == "no" ]]; then
+		shift || true
+	else
+		TESTPYPI=""
+	fi
+fi
 [ -z "$TESTPYPI" ] && TESTPYPI="no"
 
 [ $TESTPYPI == "yes" ] && echo "Using the TestPyPI for testing."
@@ -106,8 +112,8 @@ case $CMD in
 		[ -z "$VERSION" ] && VERSION=$(today_version)
 
 		./git_all.sh checkout master
-		$0 version $VERSION
-		$0 update_dep $TESTPYPI
+		$0 version $TESTPYPI $VERSION
+		$0 update_dep $TESTPYPI $VERSION
 		MESSAGE="ticked version number to $VERSION"
 		ANGRDOC_MESSAGE="updated api-docs for version $VERSION"
 		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "$MESSAGE" setup.py
