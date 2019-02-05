@@ -222,8 +222,6 @@ then
 elif [ -e /etc/pacman.conf ]
 then
 	[ $(pacman -Qi $ARCHDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages: $ARCHDEBS"
-elif [ -e /etc/pacman.conf ]
-then
 	[ $(pacman -Qi $ARCHCOMDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages from AUR (yaourt -S <package_name>)): $ARCHCOMDEBS"
 elif [ $IS_MACOS -eq 1 ]
 then
@@ -463,12 +461,11 @@ then
 	info "Install list: $TO_INSTALL"
 	[ -n "$TRAVIS" ] && TO_INSTALL=${TO_INSTALL// angr-management/}
 
-    for PACKAGE in $TO_INSTALL
-	do
-        info "Installing $PACKAGE."
-        [ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
-        pip_install -e $PACKAGE
-    done
+    	for PACKAGE in $TO_INSTALL; do
+            	info "Installing $PACKAGE."
+            	[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
+            	pip_install -e $PACKAGE
+    	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
 	if ! pip install --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
