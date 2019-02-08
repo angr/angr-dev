@@ -50,7 +50,7 @@ DEBS=${DEBS-virtualenvwrapper python3-pip python3-dev build-essential libxml2-de
 HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm capstone unicorn}
 ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python3-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt4 binutils binutils nasm lib32-glibc lib32-gcc-libs lib32-libstdc++5 lib32-zlib}
 ARCHCOMDEBS=${ARCHCOMDEBS-lib32-libtinfo}
-REPOS=${REPOS-idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment}
+REPOS=${REPOS-idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment angr-targets}
 declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="unicorn"
 EXTRA_DEPS["pyvex"]="--pre capstone"
