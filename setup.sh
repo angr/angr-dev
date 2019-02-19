@@ -46,11 +46,11 @@ then
 fi
 
 
-DEBS=${DEBS-virtualenvwrapper python3-pip python3-dev python3-setuptools build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386}
+DEBS=${DEBS-virtualenvwrapper python3-pip python3-dev python3-setuptools build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386 openjdk-8-jdk}
 HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm capstone unicorn}
 ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python3-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt4 binutils binutils nasm lib32-glibc lib32-gcc-libs lib32-libstdc++5 lib32-zlib}
 ARCHCOMDEBS=${ARCHCOMDEBS-lib32-libtinfo}
-REPOS=${REPOS-idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment}
+REPOS=${REPOS-idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment pysoot}
 declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="unicorn"
 EXTRA_DEPS["pyvex"]="--pre capstone"
