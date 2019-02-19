@@ -479,7 +479,7 @@ then
 		pip_install -e keystone-engine
 		pip3 show keystone-engine >> $OUTFILE 2>> $ERRFILE || error "Unable to install keystone-engine."
 	fi
-	if pip3 install ipython pylint ipdb nose nose-timer coverage flaky sphinx sphinx_rtd_theme recommonmark 'requests[security]' >> $OUTFILE 2>> $ERRFILE
+	if pip3 install ipython pylint ipdb nose nose-timer coverage flaky sphinx sphinx_rtd_theme recommonmark cvc4-solver 'requests[security]' >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
 	else
