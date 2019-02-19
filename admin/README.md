@@ -4,7 +4,7 @@
 ```
 mkvirtualenv angr-release
 pip install -U pip setuptools
-pip install twin sphinx sphinx_rtd_theme recommonmark
+pip install twine sphinx sphinx_rtd_theme recommonmark
 ```
 
 ## Releasing to PyPI/TestPyPI
@@ -15,7 +15,7 @@ pip install twin sphinx sphinx_rtd_theme recommonmark
 Make sure the following repos exist:
 
 ```
-ailment, angr, angr-dev, angr-doc, angr.github.io, angr-management, angrop, archinfo, binaries, claripy, cle, pyvvex, vex
+ailment, angr, angr-dev, angr-doc, angr.github.io, angr-management, angrop, archinfo, binaries, claripy, cle, pyvex, vex
 ```
 
 - Make sure `git_all.sh` is at `~/angr-release`.

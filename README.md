@@ -19,6 +19,10 @@ $ workon angr
 [1] import angr
 ```
 
+### MacOS
+
+Mojave seems to be working with the current version, so this fixing might not be necessary. Will need to verify.
+
 If you are working on macOS, you have to run the fix_macOS.sh script while in your virtualenv to fix the native libraries in angr. This is necessary, since macOS introduced restrictions for relative paths in dynamic libraries.
 ```bash
 ./fix_macOS.sh
