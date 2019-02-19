@@ -284,7 +284,7 @@ then
 	workon $ANGR_VENV || error "Unable to activate the virtual environment."
 
 	# older versions of pip will fail to process the --find-links arg silently
-	pip install -U pip
+	pip3 install -U pip
 fi
 
 function try_remote
@@ -339,7 +339,7 @@ function install_wheels
 {
 	#LATEST_Z3=$(ls -tr wheels/angr_only_z3_custom-*)
 	#echo "Installing $LATEST_Z3..." >> $OUTFILE 2>> $ERRFILE
-	#pip install $LATEST_Z3 >> $OUTFILE 2>> $ERRFILE
+	#pip3 install $LATEST_Z3 >> $OUTFILE 2>> $ERRFILE
 
 	LATEST_VEX=$(ls -tr wheels/vex-*)
 	debug "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
@@ -348,21 +348,21 @@ function install_wheels
 
 	#LATEST_QEMU=$(ls -tr wheels/shellphish_qemu-*)
 	#echo "Installing $LATEST_QEMU" >> $OUTFILE 2>> $ERRFILE
-	#pip install $LATEST_QEMU >> $OUTFILE 2>> $ERRFILE
+	#pip3 install $LATEST_QEMU >> $OUTFILE 2>> $ERRFILE
 
 	#LATEST_AFL=$(ls -tr wheels/shellphish_afl-*)
 	#echo "Installing $LATEST_AFL" >> $OUTFILE 2>> $ERRFILE
-	#pip install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
+	#pip3 install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
 
 	LATEST_KEYSTONE=$(ls -tr wheels/keystone_engine-*)
 	echo "Installing $LATEST_KEYSTONE" >> $OUTFILE 2>> $ERRFILE
-	pip install $LATEST_KEYSTONE >> $OUTFILE 2>> $ERRFILE
+	pip3 install $LATEST_KEYSTONE >> $OUTFILE 2>> $ERRFILE
 }
 
 function pip_install
 {
         debug "pip-installing: $@."
-        if ! pip install $PIP_OPTIONS -v $@ >>$OUTFILE 2>>$ERRFILE
+        if ! pip3 install $PIP_OPTIONS -v $@ >>$OUTFILE 2>>$ERRFILE
         then
             	error "pip failure ($@). Check $OUTFILE for details, or read it here:"
             	exit 1
@@ -468,7 +468,7 @@ then
     	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
-	if ! pip install --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
+	if ! pip3 install --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
 	then
 		# keystone-engine fails to install on mac os, but there's a workaround, let's try that
 		# https://github.com/keystone-engine/keypatch/issues/57
@@ -477,9 +477,9 @@ then
 		git submodule update --init --recursive || error "Unable to update keystone-engine submodules."
 		cd -
 		pip_install -e keystone-engine
-		pip show keystone-engine >> $OUTFILE 2>> $ERRFILE || error "Unable to install keystone-engine."
+		pip3 show keystone-engine >> $OUTFILE 2>> $ERRFILE || error "Unable to install keystone-engine."
 	fi
-	if pip install ipython pylint ipdb nose nose-timer coverage flaky sphinx sphinx_rtd_theme recommonmark 'requests[security]' >> $OUTFILE 2>> $ERRFILE
+	if pip3 install ipython pylint ipdb nose nose-timer coverage flaky sphinx sphinx_rtd_theme recommonmark 'requests[security]' >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
 	else
