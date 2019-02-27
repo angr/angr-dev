@@ -4,7 +4,7 @@ echo "###"
 echo "### Starting CI setup..."
 echo "###"
 
-CI_EXTRAS=${tracer fuzzer driller povsim compilerex rex colorguard fidget patcherex angr-platforms pysoot heaphopper angr-targets archr}
+CI_EXTRAS=${CI_EXTRAS-tracer fuzzer driller povsim compilerex rex colorguard fidget patcherex angr-platforms pysoot heaphopper angr-targets archr}
 
 # update apt
 echo "Updating apt..."
@@ -13,7 +13,8 @@ sudo apt-get update >/dev/null || true
 # install
 [ "$TRAVIS_PULL_REQUEST" == "false" ] && BRANCH=$TRAVIS_BRANCH || BRANCH="master"
 export VIRTUALENVWRAPPER_PYTHON=$(which python)
-./setup.sh -i -w -b master -$PY angr -s -c -C $CI_EXTRAS
+echo $CI_EXTRAS
+./setup.sh -i -w -b master -$PY angr -s -c #-C $CI_EXTRAS
 
 echo "###"
 echo "### Clone complete."
