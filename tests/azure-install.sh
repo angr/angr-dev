@@ -10,5 +10,7 @@ cd
 git clone -q https://github.com/angr/angr-dev && cd angr-dev
 # Restore it later
 # git checkout ${Build.SourceBranchName} || echo "No branch ${Build.SourceBranchName} in angr-dev. Using default test scripts."
+git checkout wip/azure
+
 ./tests/shell.sh debug.angr.io 3105
 ./tests/azure-setup.sh
