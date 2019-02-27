@@ -13,7 +13,6 @@ sudo apt-get update >/dev/null || true
 # install
 [ "$TRAVIS_PULL_REQUEST" == "false" ] && BRANCH=$TRAVIS_BRANCH || BRANCH="master"
 export VIRTUALENVWRAPPER_PYTHON=$(which python)
-echo $CI_EXTRAS
 ./setup.sh -i -w -b master -$PY angr -s -c -C $CI_EXTRAS
 
 echo "###"

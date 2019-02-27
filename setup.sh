@@ -136,8 +136,6 @@ then
 fi
 
 EXTRA_REPOS=${@:$OPTIND:$OPTIND+100}
-echo "EXTRA_REPOS: $EXTRA_REPOS"
-EXTRA_REPOS=""  # clear it for now
 REPOS="$REPOS $EXTRA_REPOS"
 
 if [ $VERBOSE -eq 1 ]
