@@ -14,7 +14,7 @@ sudo apt-get update >/dev/null || true
 [ "$TRAVIS_PULL_REQUEST" == "false" ] && BRANCH=$TRAVIS_BRANCH || BRANCH="master"
 export VIRTUALENVWRAPPER_PYTHON=$(which python)
 echo $CI_EXTRAS
-./setup.sh -i -w -b master -$PY angr -s -c #-C $CI_EXTRAS
+./setup.sh -i -w -b master -$PY angr -s -c -C $CI_EXTRAS
 
 echo "###"
 echo "### Clone complete."
