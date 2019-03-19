@@ -50,6 +50,7 @@ DEBS=${DEBS-virtualenvwrapper python3-pip python3-dev python3-setuptools build-e
 HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm capstone unicorn}
 ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python3-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt4 binutils binutils nasm lib32-glibc lib32-gcc-libs lib32-libstdc++5 lib32-zlib}
 ARCHCOMDEBS=${ARCHCOMDEBS-lib32-libtinfo}
+RPMS=${RPMS-gcc gcc-c++ make python3-virtualenvwrapper python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel python2 glibc.i686 libgcc.i686 libstdc++.i686 ncurses-compat-libs.i686 zlib.i686 java-1.8.0-openjdk-devel}
 REPOS=${REPOS-idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment pysoot}
 declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="unicorn"
@@ -203,6 +204,10 @@ then
 		fi
 		info "Installing dependencies..."
 		sudo pacman -S --noconfirm --needed $ARCHDEBS >>$OUTFILE 2>>$ERRFILE
+	elif [ -e /etc/fedora-release ]
+	then
+		info "Installing dependencies..."
+		sudo dnf install -y $RPMS #>>$OUTFILE 2>>$ERRFILE
 	elif [ $IS_MACOS -eq 1 ]
 	then
 		if ! which brew > /dev/null;
@@ -223,6 +228,9 @@ elif [ -e /etc/pacman.conf ]
 then
 	[ $(pacman -Qi $ARCHDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages: $ARCHDEBS"
 	[ $(pacman -Qi $ARCHCOMDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages from AUR (yaourt -S <package_name>)): $ARCHCOMDEBS"
+elif [ -e /etc/fedora-release ]
+then
+	[ $(rpm -q $RPMS  2>&1 | grep "is not installed" | wc -l) -ne 0 ] && error "Please install the following packages: $RPMS"
 elif [ $IS_MACOS -eq 1 ]
 then
 	[ $(brew ls --versions $HOMEBREW_DEBS | wc -l) -ne $(echo $HOMEBREW_DEBS | wc -w) ] && error "Please install the following packages from homebrew: $HOMEBREW_DEBS"
@@ -236,6 +244,11 @@ then
 	sudo pacman -S --needed python-virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 	set +e
 	source /usr/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
+	set -e
+elif [ -e /etc/fedora-release ]
+then
+	set +e
+	source /usr/bin/virtualenvwrapper-3.sh >>$OUTFILE 2>>$ERRFILE
 	set -e
 else
 	python3 -m pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
