@@ -20,7 +20,7 @@ def lint_file(filename):
         pylint_out = subprocess.check_output(cmd).decode()
     except subprocess.CalledProcessError as e:
         if e.returncode == 32:
-            print("LINT FAILRE: pylint failed to run on %s" % filename)
+            print("LINT FAILURE: pylint failed to run on %s" % filename)
             pylint_out = "-1337/10"
         else:
             pylint_out = e.output.decode()
