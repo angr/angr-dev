@@ -5,7 +5,7 @@ import sys
 import os
 import sh
 
-all_repos = map(os.path.dirname, glob.glob("*/.git")) if 'REPOS' not in os.environ else os.environ['REPOS'].split()
+all_repos = list(map(os.path.dirname, glob.glob("*/.git"))) if 'REPOS' not in os.environ else os.environ['REPOS'].split()
 repo_version_commits = { }
 repo_timestamp_commits = { }
 repo_commit_versions = { }
@@ -16,7 +16,7 @@ all_commit_versions = { }
 all_commit_timestamps = { }
 
 def load_commits(repo):
-    print "Loading commits for %s..." % repo
+    print("Loading commits for {}...".format(repo))
     version_commits = { }
     timestamp_commits = { }
     commit_versions = { }
@@ -46,16 +46,18 @@ def checkout_latest(repo, timestamp):
             if t <= timestamp
         )
     except StopIteration:
-        print "Repo %s is too new... No commits found." % repo
+        print("Repo %s is too new... No commits found.".format(repo))
         return
 
-    print "Checking out repo %s to commit %s." % (repo, latest_commit)
+    print("Checking out repo {} to commit {}.".format(repo, latest_commit))
     sh.git('-C', repo, 'checkout', latest_commit, _tty_out=False) #pylint:disable=no-member
 
-map(load_commits, all_repos)
-
-if len(sys.argv[1]) == 40:
-    # we're synchronizing to a commit
-    _timestamp = all_commit_timestamps[sys.argv[1]]
+if __name__ == '__main__':
     for _r in all_repos:
-        checkout_latest(_r, _timestamp)
+        load_commits(_r)
+
+    if len(sys.argv[1]) == 40:
+        # we're synchronizing to a commit
+        _timestamp = all_commit_timestamps[sys.argv[1]]
+        for _r in list(all_repos):
+            checkout_latest(_r, _timestamp)
