@@ -80,6 +80,11 @@ function extract_version
 	echo $ver
 }
 
+function version_to_tuple
+{
+	awk -F '.' '{ printf "(%d, %d, %d, %d)\n", $1, $2, $3, $4}' <<<"$1"
+}
+
 function check_uncommitted
 {
 	out=0
@@ -171,6 +176,7 @@ case $CMD in
 
 			echo "Ticking version number of $i to $VERSION"
 			sed -i -e "s/version=['\"][^'\"]*['\"]/version='$VERSION'/g" setup.py
+			sed -i -e "s/^__version__ = .*/__version__ = $(version_to_tuple $VERSION)/g" */__init__.py
 			cd ..
 		done
 
