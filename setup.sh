@@ -241,7 +241,7 @@ fi
 info "Enabling virtualenvwrapper."
 if [ -e /etc/pacman.conf ]
 then
-	sudo pacman -S --needed python-virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
+	sudo pacman -S --needed --noconfirm python-virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 	set +e
 	source /usr/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
 	set -e
