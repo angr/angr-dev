@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
+set -e
 
 NAME=$1
 DIR=$(dirname $0)
@@ -16,7 +17,17 @@ mkdir -p pypy
 cd pypy
 
 
-if [ -f "/etc/arch-release" ]; then
+if [ -f "/etc/NIXOS" ]; then
+    echo "This is NixOS, using pypy from nix-shell"
+
+    set +e
+    source $(command -v virtualenvwrapper.sh)
+    mkvirtualenv -p $(command -v pypy3) $NAME
+    set -e
+
+    echo "installed pypy in $NAME"
+    exit 0
+elif [ -f "/etc/arch-release" ]; then
     echo "This is an arch distro"
     ARCH=$(uname -m)
     SUBVERSION=$(pacman -Si pypy3 | grep "Version\s*:\s*[0-9.\-]*" | grep -o "[0-9.\-]*")

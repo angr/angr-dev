@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ -z "$VIRTUAL_ENV" ]; then
   echo "Are you sure you want to install angr outside a python virtual environment?"
