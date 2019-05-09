@@ -250,6 +250,11 @@ then
 	set +e
 	source /usr/bin/virtualenvwrapper-3.sh >>$OUTFILE 2>>$ERRFILE
 	set -e
+elif [ -e /etc/NIXOS ]
+then
+	set +e
+	source $(command -v virtualenvwrapper.sh) >>$OUTFILE 2>>$ERRFILE
+	set -e
 else
 	python3 -m pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 	set +e
@@ -453,7 +458,7 @@ then
 	then
 		python2=/usr/bin/python
 	else
-		python2=$(which python2)
+		python2=$(which python2 || echo)
 	fi
 	if [ ! -z "$python2" ]
 	then
