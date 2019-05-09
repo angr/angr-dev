@@ -3,5 +3,6 @@ core
 */
 .gdb_history
 !admin/
+!tests/
 admin/setup.py
 admin/dist
