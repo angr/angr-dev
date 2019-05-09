@@ -231,6 +231,9 @@ then
 elif [ -e /etc/fedora-release ]
 then
 	[ $(rpm -q $RPMS  2>&1 | grep "is not installed" | wc -l) -ne 0 ] && error "Please install the following packages: $RPMS"
+elif [ -e /etc/NIXOS ]
+then
+	[ -z "$IN_NIX_SHELL" ] && error "Please run in the provided shell.nix"
 elif [ $IS_MACOS -eq 1 ]
 then
 	[ $(brew ls --versions $HOMEBREW_DEBS | wc -l) -ne $(echo $HOMEBREW_DEBS | wc -w) ] && error "Please install the following packages from homebrew: $HOMEBREW_DEBS"

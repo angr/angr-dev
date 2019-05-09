@@ -202,7 +202,8 @@ else:
     DEFAULT_COPY_CMD = 'cp dist/* %s'
 
     COMMAND_BASE = """\
-#!/bin/bash -ex
+#!/usr/bin/env bash
+set -ex
 
 function python() {
     /opt/python/cp35-cp35m/bin/python "$@"
