@@ -43,7 +43,8 @@ elif [ -f "/etc/arch-release" ]; then
     source /usr/bin/virtualenvwrapper.sh
     set -e
 else
-    BEST_VERSION=$(wget https://bitbucket.org/pypy/pypy/downloads/ -O - | egrep -o 'href="/pypy/pypy/downloads/[^"]+' | cut -c 28- | grep linux64 | grep 'pypy3\.5' | head -n 1)
+    if [ "$(uname)" == "Darwin" ]; then PYPY_OS=osx64; else PYPY_OS=linux64; fi
+    BEST_VERSION=$(wget https://bitbucket.org/pypy/pypy/downloads/ -O - | egrep -o 'href="/pypy/pypy/downloads/[^"]+' | cut -c 28- | grep "$PYPY_OS" | grep 'pypy3\.5' | head -n 1)
     DOWNLOAD_URL=https://bitbucket.org/pypy/pypy/downloads/$BEST_VERSION
 
     # get pypy
