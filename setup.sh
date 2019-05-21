@@ -221,6 +221,9 @@ then
 			error "Your system doesn't have homebrew installed, I don't know how to install the dependencies.\nPlease install homebrew: https://brew.sh/\nOr install the equivalent of these homebrew packages: $HOMEBREW_DEBS."
 		fi
 		brew install $HOMEBREW_DEBS >>$OUTFILE 2>>$ERRFILE
+	elif [ -e /etc/NIXOS ]
+	then
+		info "Doing nothing about dependencies installation for NixOS, as they are provided via shell.nix..."
 	else
 		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
 	fi
