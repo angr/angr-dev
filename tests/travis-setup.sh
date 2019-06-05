@@ -27,7 +27,7 @@ then
 fi
 ./tests/shell.sh debug.angr.io 3106
 ./setup.sh -i -w -$PY angr $CI_EXTRAS
-(source ~/.virtualenvs/angr/bin/activate && pip install cvc4-solver sphinx sphinx_rtd_theme recommonmark 'requests[security'])
+(source ~/.virtualenvs/angr/bin/activate && pip install cvc4-solver 'sphinx<2.1.0' sphinx_rtd_theme recommonmark 'requests[security'])
 
 ( cat /tmp/setup-* | nc debug.angr.io 3107 ) || echo "debug.angr.io:3107 wasn't listening for build logs..."
 
