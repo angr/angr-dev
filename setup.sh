@@ -183,31 +183,37 @@ trap 'error "An error occurred on line $LINENO. Saved output:"' ERR
 
 if [ "$INSTALL_REQS" -eq 1 ]
 then
+	if [ $EUID -eq 0 ]
+	then
+		export SUDO=
+	else
+		export SUDO=sudo
+	fi
 	if [ -e /etc/debian_version ]
 	then
 		if ! (dpkg --print-foreign-architectures | grep -q i386)
 		then
 			info "Adding i386 architectures..."
-			sudo dpkg --add-architecture i386 >>$OUTFILE 2>>$ERRFILE
-			sudo apt-get update >>$OUTFILE 2>>$ERRFILE
+			$SUDO dpkg --add-architecture i386 >>$OUTFILE 2>>$ERRFILE
+			$SUDO apt-get update >>$OUTFILE 2>>$ERRFILE
 		fi
 		info "Installing dependencies..."
-		sudo apt-get install -y $DEBS >>$OUTFILE 2>>$ERRFILE
+		$SUDO apt-get install -y $DEBS >>$OUTFILE 2>>$ERRFILE
 	elif [ -e /etc/pacman.conf ]
 	then
 		if ! grep --quiet "^\[multilib\]" /etc/pacman.conf;
 		then
 			info "Adding i386 architectures..."
-			sudo sed 's/^\(#\[multilib\]\)/\[multilib\]/' </etc/pacman.conf >/tmp/pacman.conf
-			sudo sed '/^\[multilib\]/{n;s/^#//}' </tmp/pacman.conf >/etc/pacman.conf
-			sudo pacman -Syu >>$OUTFILE 2>>$ERRFILE
+			$SUDO sed 's/^\(#\[multilib\]\)/\[multilib\]/' </etc/pacman.conf >/tmp/pacman.conf
+			$SUDO sed '/^\[multilib\]/{n;s/^#//}' </tmp/pacman.conf >/etc/pacman.conf
+			$SUDO pacman -Syu >>$OUTFILE 2>>$ERRFILE
 		fi
 		info "Installing dependencies..."
-		sudo pacman -S --noconfirm --needed $ARCHDEBS >>$OUTFILE 2>>$ERRFILE
+		$SUDO pacman -S --noconfirm --needed $ARCHDEBS >>$OUTFILE 2>>$ERRFILE
 	elif [ -e /etc/fedora-release ]
 	then
 		info "Installing dependencies..."
-		sudo dnf install -y $RPMS #>>$OUTFILE 2>>$ERRFILE
+		$SUDO dnf install -y $RPMS #>>$OUTFILE 2>>$ERRFILE
 	elif [ $IS_MACOS -eq 1 ]
 	then
 		if ! which brew > /dev/null;
