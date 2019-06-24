@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
+set -e
 
 VERSION_MAJOR=8
 
@@ -80,6 +81,11 @@ function extract_version
 	echo $ver
 }
 
+function version_to_tuple
+{
+	awk -F '.' '{ printf "(%d, %d, %d, %d)\n", $1, $2, $3, $4}' <<<"$1"
+}
+
 function check_uncommitted
 {
 	out=0
@@ -116,7 +122,7 @@ case $CMD in
 		$0 update_dep $TESTPYPI $VERSION
 		MESSAGE="ticked version number to $VERSION"
 		ANGRDOC_MESSAGE="updated api-docs for version $VERSION"
-		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "$MESSAGE" setup.py
+		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -am "$MESSAGE"
 		./git_all.sh diff --color=always github/master master | cat
 		echo
 		echo -n "Does the diff look good (y|n)? "
@@ -169,8 +175,11 @@ case $CMD in
 			#	continue
 			#fi
 
+			set -x
 			echo "Ticking version number of $i to $VERSION"
 			sed -i -e "s/version=['\"][^'\"]*['\"]/version='$VERSION'/g" setup.py
+			sed -i -e "s/^__version__ = .*/__version__ = $(version_to_tuple $VERSION)/g" */__init__.py
+			set +x
 			cd ..
 		done
 

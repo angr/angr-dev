@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
+set -e
 
 NAME=$1
 DIR=$(dirname $0)
@@ -16,7 +17,17 @@ mkdir -p pypy
 cd pypy
 
 
-if [ -f "/etc/arch-release" ]; then
+if [ -f "/etc/NIXOS" ]; then
+    echo "This is NixOS, using pypy from nix-shell"
+
+    set +e
+    source $(command -v virtualenvwrapper.sh)
+    mkvirtualenv -p $(command -v pypy3) $NAME
+    set -e
+
+    echo "installed pypy in $NAME"
+    exit 0
+elif [ -f "/etc/arch-release" ]; then
     echo "This is an arch distro"
     ARCH=$(uname -m)
     SUBVERSION=$(pacman -Si pypy3 | grep "Version\s*:\s*[0-9.\-]*" | grep -o "[0-9.\-]*")
@@ -32,7 +43,8 @@ if [ -f "/etc/arch-release" ]; then
     source /usr/bin/virtualenvwrapper.sh
     set -e
 else
-    BEST_VERSION=$(wget https://bitbucket.org/pypy/pypy/downloads/ -O - | egrep -o 'href="/pypy/pypy/downloads/[^"]+' | cut -c 28- | grep linux64 | grep pypy3 | head -n 1)
+    if [ "$(uname)" == "Darwin" ]; then PYPY_OS=osx64; else PYPY_OS=linux64; fi
+    BEST_VERSION=$(wget https://bitbucket.org/pypy/pypy/downloads/ -O - | egrep -o 'href="/pypy/pypy/downloads/[^"]+' | cut -c 28- | grep "$PYPY_OS" | grep 'pypy3\.5' | head -n 1)
     DOWNLOAD_URL=https://bitbucket.org/pypy/pypy/downloads/$BEST_VERSION
 
     # get pypy
@@ -46,7 +58,7 @@ fi
 
 # virtualenv
 set +e
-mkvirtualenv -p "$PWD/"pypy3-*/bin/pypy3 $NAME
+mkvirtualenv -p "$PWD/"pypy3.5-*/bin/pypy3 $NAME
 set -e
 pip install -U setuptools
 

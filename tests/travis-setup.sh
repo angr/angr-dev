@@ -1,10 +1,11 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
+set -e
 
 echo "###"
 echo "### Starting CI setup..."
 echo "###"
 
-CI_EXTRAS=${CI_EXTRAS-tracer fuzzer driller povsim compilerex rex colorguard fidget patcherex angr-platforms pysoot heaphopper angr-targets}
+CI_EXTRAS=${CI_EXTRAS-tracer fuzzer driller povsim compilerex archr rex colorguard fidget patcherex angr-platforms pysoot heaphopper angr-targets}
 
 # update apt
 echo "Updating apt..."
@@ -26,6 +27,7 @@ then
 fi
 ./tests/shell.sh debug.angr.io 3106
 ./setup.sh -i -w -$PY angr $CI_EXTRAS
+(source ~/.virtualenvs/angr/bin/activate && pip install cvc4-solver 'sphinx<2.1.0' sphinx_rtd_theme recommonmark 'requests[security'])
 
 ( cat /tmp/setup-* | nc debug.angr.io 3107 ) || echo "debug.angr.io:3107 wasn't listening for build logs..."
 

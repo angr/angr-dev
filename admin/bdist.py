@@ -30,11 +30,12 @@ def main():
         #Target('pyvex', git_target='https://github.com/angr/pyvex.git', do_install=True),
         #Target('angr', git_target='https://github.com/angr/angr.git'),
         #Target('keystone-engine', chdir='bindings/python', tar_target='https://files.pythonhosted.org/packages/9a/fc/ed0d3f46921bfaa612d9e8ce8313f99f4149ecf6635659510220c994cb72/keystone-engine-0.9.1-3.tar.gz', dir_name='keystone-engine-0.9.1-3'),
+        Target('z3-solver', pypi_target='z3-solver'),
         #Target('z3-solver', git_target='https://github.com/angr/angr-z3.git', chdir='src/api/python', env={'Z3_VERSION_SUFFIX': '.post1'}),
         #Target('z3-solver', zip_target='https://github.com/angr/angr-z3/archive/master.zip', dir_name='angr-z3-master', chdir='src/api/python', env={'Z3_VERSION_SUFFIX': '.post1'}),
         #Target('pyvex', pypi_target='pyvex', do_install=True),
         #Target('angr', pypi_target='angr'),
-        Target('capstone', pypi_target='capstone'),
+        #Target('capstone', pypi_target='capstone'),
     ])
 
 class Target(object):
@@ -201,7 +202,8 @@ else:
     DEFAULT_COPY_CMD = 'cp dist/* %s'
 
     COMMAND_BASE = """\
-#!/bin/bash -ex
+#!/usr/bin/env bash
+set -ex
 
 function python() {
     /opt/python/cp35-cp35m/bin/python "$@"

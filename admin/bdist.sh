@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -e
 
 INTERNAL_PYTHON=/opt/python/cp27-cp27mu/bin/python
@@ -18,8 +17,7 @@ mkdir -p $DEST
 shift
 
 cat > $DEST/build.sh <<EOF
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -e
 
 yum install -y libffi libffi-devel

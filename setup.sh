@@ -46,11 +46,12 @@ then
 fi
 
 
-DEBS=${DEBS-virtualenvwrapper python3-pip python3-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386}
+DEBS=${DEBS-virtualenvwrapper python3-pip python3-dev python3-setuptools build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386 openjdk-8-jdk}
 HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm capstone unicorn}
-ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python3-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt4 binutils binutils nasm lib32-glibc lib32-gcc-libs lib32-libstdc++5 lib32-zlib}
-ARCHCOMDEBS=${ARCHCOMDEBS-lib32-libtinfo}
-REPOS=${REPOS-idalink cooldict mulpyplexer monkeyhex superstruct archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment angr-targets}
+ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils binutils nasm lib32-glibc lib32-gcc-libs lib32-zlib lib32-ncurses}
+ARCHCOMDEBS=${ARCHCOMDEBS}
+RPMS=${RPMS-gcc gcc-c++ make python3-virtualenvwrapper python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel python2 glibc.i686 libgcc.i686 libstdc++.i686 ncurses-compat-libs.i686 zlib.i686 java-1.8.0-openjdk-devel}
+REPOS=${REPOS-idalink cooldict mulpyplexer monkeyhex archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment pysoot angr-targets archr}
 declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="unicorn"
 EXTRA_DEPS["pyvex"]="--pre capstone"
@@ -182,27 +183,37 @@ trap 'error "An error occurred on line $LINENO. Saved output:"' ERR
 
 if [ "$INSTALL_REQS" -eq 1 ]
 then
+	if [ $EUID -eq 0 ]
+	then
+		export SUDO=
+	else
+		export SUDO=sudo
+	fi
 	if [ -e /etc/debian_version ]
 	then
 		if ! (dpkg --print-foreign-architectures | grep -q i386)
 		then
 			info "Adding i386 architectures..."
-			sudo dpkg --add-architecture i386 >>$OUTFILE 2>>$ERRFILE
-			sudo apt-get update >>$OUTFILE 2>>$ERRFILE
+			$SUDO dpkg --add-architecture i386 >>$OUTFILE 2>>$ERRFILE
+			$SUDO apt-get update >>$OUTFILE 2>>$ERRFILE
 		fi
 		info "Installing dependencies..."
-		sudo apt-get install -y $DEBS >>$OUTFILE 2>>$ERRFILE
+		$SUDO apt-get install -y $DEBS >>$OUTFILE 2>>$ERRFILE
 	elif [ -e /etc/pacman.conf ]
 	then
 		if ! grep --quiet "^\[multilib\]" /etc/pacman.conf;
 		then
 			info "Adding i386 architectures..."
-			sudo sed 's/^\(#\[multilib\]\)/\[multilib\]/' </etc/pacman.conf >/tmp/pacman.conf
-			sudo sed '/^\[multilib\]/{n;s/^#//}' </tmp/pacman.conf >/etc/pacman.conf
-			sudo pacman -Syu >>$OUTFILE 2>>$ERRFILE
+			$SUDO sed 's/^\(#\[multilib\]\)/\[multilib\]/' </etc/pacman.conf >/tmp/pacman.conf
+			$SUDO sed '/^\[multilib\]/{n;s/^#//}' </tmp/pacman.conf >/etc/pacman.conf
+			$SUDO pacman -Syu >>$OUTFILE 2>>$ERRFILE
 		fi
 		info "Installing dependencies..."
-		sudo pacman -S --noconfirm --needed $ARCHDEBS >>$OUTFILE 2>>$ERRFILE
+		$SUDO pacman -S --noconfirm --needed $ARCHDEBS >>$OUTFILE 2>>$ERRFILE
+	elif [ -e /etc/fedora-release ]
+	then
+		info "Installing dependencies..."
+		$SUDO dnf install -y $RPMS #>>$OUTFILE 2>>$ERRFILE
 	elif [ $IS_MACOS -eq 1 ]
 	then
 		if ! which brew > /dev/null;
@@ -223,6 +234,12 @@ elif [ -e /etc/pacman.conf ]
 then
 	[ $(pacman -Qi $ARCHDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages: $ARCHDEBS"
 	[ $(pacman -Qi $ARCHCOMDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages from AUR (yaourt -S <package_name>)): $ARCHCOMDEBS"
+elif [ -e /etc/fedora-release ]
+then
+	[ $(rpm -q $RPMS  2>&1 | grep "is not installed" | wc -l) -ne 0 ] && error "Please install the following packages: $RPMS"
+elif [ -e /etc/NIXOS ]
+then
+	[ -z "$IN_NIX_SHELL" ] && error "Please run in the provided shell.nix"
 elif [ $IS_MACOS -eq 1 ]
 then
 	[ $(brew ls --versions $HOMEBREW_DEBS | wc -l) -ne $(echo $HOMEBREW_DEBS | wc -w) ] && error "Please install the following packages from homebrew: $HOMEBREW_DEBS"
@@ -233,9 +250,18 @@ fi
 info "Enabling virtualenvwrapper."
 if [ -e /etc/pacman.conf ]
 then
-	sudo pacman -S --needed python-virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
 	set +e
 	source /usr/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
+	set -e
+elif [ -e /etc/fedora-release ]
+then
+	set +e
+	source /usr/bin/virtualenvwrapper-3.sh >>$OUTFILE 2>>$ERRFILE
+	set -e
+elif [ -e /etc/NIXOS ]
+then
+	set +e
+	source $(command -v virtualenvwrapper.sh) >>$OUTFILE 2>>$ERRFILE
 	set -e
 else
 	python3 -m pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
@@ -284,7 +310,7 @@ then
 	workon $ANGR_VENV || error "Unable to activate the virtual environment."
 
 	# older versions of pip will fail to process the --find-links arg silently
-	pip install -U pip
+	pip3 install -U pip
 fi
 
 function try_remote
@@ -339,30 +365,30 @@ function install_wheels
 {
 	#LATEST_Z3=$(ls -tr wheels/angr_only_z3_custom-*)
 	#echo "Installing $LATEST_Z3..." >> $OUTFILE 2>> $ERRFILE
-	#pip install $LATEST_Z3 >> $OUTFILE 2>> $ERRFILE
+	#pip3 install $LATEST_Z3 >> $OUTFILE 2>> $ERRFILE
 
-	LATEST_VEX=$(ls -tr wheels/vex-*)
-	debug "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
-	tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
-	touch vex/*/*.o vex/libvex.a
+	#LATEST_VEX=$(ls -tr wheels/vex-*)
+	#debug "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
+	#tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
+	#touch vex/*/*.o vex/libvex.a
 
 	#LATEST_QEMU=$(ls -tr wheels/shellphish_qemu-*)
 	#echo "Installing $LATEST_QEMU" >> $OUTFILE 2>> $ERRFILE
-	#pip install $LATEST_QEMU >> $OUTFILE 2>> $ERRFILE
+	#pip3 install $LATEST_QEMU >> $OUTFILE 2>> $ERRFILE
 
 	#LATEST_AFL=$(ls -tr wheels/shellphish_afl-*)
 	#echo "Installing $LATEST_AFL" >> $OUTFILE 2>> $ERRFILE
-	#pip install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
+	#pip3 install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
 
 	LATEST_KEYSTONE=$(ls -tr wheels/keystone_engine-*)
 	echo "Installing $LATEST_KEYSTONE" >> $OUTFILE 2>> $ERRFILE
-	pip install $LATEST_KEYSTONE >> $OUTFILE 2>> $ERRFILE
+	pip3 install $LATEST_KEYSTONE >> $OUTFILE 2>> $ERRFILE
 }
 
 function pip_install
 {
         debug "pip-installing: $@."
-        if ! pip install $PIP_OPTIONS -v $@ >>$OUTFILE 2>>$ERRFILE
+        if ! pip3 install $PIP_OPTIONS -v $@ >>$OUTFILE 2>>$ERRFILE
         then
             	error "pip failure ($@). Check $OUTFILE for details, or read it here:"
             	exit 1
@@ -440,7 +466,7 @@ then
 	then
 		python2=/usr/bin/python
 	else
-		python2=$(which python2)
+		python2=$(which python2 || echo)
 	fi
 	if [ ! -z "$python2" ]
 	then
@@ -468,7 +494,7 @@ then
     	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
-	if ! pip install --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
+	if ! pip3 install --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
 	then
 		# keystone-engine fails to install on mac os, but there's a workaround, let's try that
 		# https://github.com/keystone-engine/keypatch/issues/57
@@ -477,9 +503,9 @@ then
 		git submodule update --init --recursive || error "Unable to update keystone-engine submodules."
 		cd -
 		pip_install -e keystone-engine
-		pip show keystone-engine >> $OUTFILE 2>> $ERRFILE || error "Unable to install keystone-engine."
+		pip3 show keystone-engine >> $OUTFILE 2>> $ERRFILE || error "Unable to install keystone-engine."
 	fi
-	if pip install ipython pylint ipdb nose nose-timer coverage flaky sphinx sphinx_rtd_theme recommonmark 'requests[security]' >> $OUTFILE 2>> $ERRFILE
+	if pip3 install ipython pylint ipdb nose nose-timer coverage flaky >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
 	else
