@@ -229,7 +229,7 @@ fi
 info "Checking dependencies..."
 if [ -e /etc/debian_version ]
 then
-	[ $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && error "Please install the following packages: $DEBS"
+	[ $(dpkg --get-selections $DEBS | wc -l) -lt $(echo $DEBS | wc -w) ] && error "Please install the following packages: $DEBS"
 elif [ -e /etc/pacman.conf ]
 then
 	[ $(pacman -Qi $ARCHDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages: $ARCHDEBS"
