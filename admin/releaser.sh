@@ -55,7 +55,7 @@ function build_docs
 
 	cd angr-doc
 	git checkout master
-	git push github master
+	git push origin master
 	cd - >/dev/null
 
 	cd angr.github.io
@@ -68,7 +68,7 @@ function build_docs
 
 	cd angr.github.io
 	git commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -m "updated api-docs for version $VERSION" api-doc
-	git push github master
+	git push origin master
 	cd - >/dev/null
 }
 
@@ -123,7 +123,7 @@ case $CMD in
 		MESSAGE="ticked version number to $VERSION"
 		ANGRDOC_MESSAGE="updated api-docs for version $VERSION"
 		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -am "$MESSAGE"
-		./git_all.sh diff --color=always github/master master | cat
+		./git_all.sh diff --color=always origin/master master | cat
 		echo
 		echo -n "Does the diff look good (y|n)? "
 		read a
@@ -153,9 +153,8 @@ case $CMD in
 	sync)
 		admin/remotes.sh
 		./git_all.sh checkout master
-		./git_all.sh pull gitlab master
-		./git_all.sh pull github master
-		./git_all.sh push both
+		./git_all.sh pull origin master
+		./git_all.sh push origin master
 		./git_all.sh checkout @{-1}
 		;;
 	version)
