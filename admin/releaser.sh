@@ -141,7 +141,7 @@ case $CMD in
 			done
 			exit 1
 		fi
-		./git_all.sh push both master
+		./git_all.sh push origin master
 		./git_all.sh checkout @{-1}
 		$0 sdist $TESTPYPI
 		build_docs
