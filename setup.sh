@@ -229,7 +229,14 @@ fi
 info "Checking dependencies..."
 if [ -e /etc/debian_version ]
 then
-	[ $(dpkg --get-selections $DEBS | wc -l) -ne $(echo $DEBS | wc -w) ] && error "Please install the following packages: $DEBS"
+	INSTALLED_DEBS=$(dpkg --get-selections $DEBS 2>/dev/null)
+	MISSING_DEBS=""
+	for REQ in $DEBS; do
+		if ! grep "$REQ" <<<$INSTALLED_DEBS >/dev/null 2>/dev/null; then
+			MISSING_DEBS="$REQ $MISSING_DEBS"
+		fi
+	done
+	[ -n "$MISSING_DEBS" ] && error "Please install the following packages: $MISSING_DEBS"
 elif [ -e /etc/pacman.conf ]
 then
 	[ $(pacman -Qi $ARCHDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages: $ARCHDEBS"
