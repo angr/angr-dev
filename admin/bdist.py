@@ -25,12 +25,12 @@ def main():
 
     run('bdist', [
         #Target('capstone', chdir='bindings/python', tar_target='https://github.com/aquynh/capstone/archive/4.0.tar.gz', dir_name='capstone-4.0'),
-        #Target('unicorn', chdir='bindings/python', tar_target='https://github.com/unicorn-engine/unicorn/archive/1.0.tar.gz', dir_name='unicorn-1.0'),
+        Target('unicorn', chdir='bindings/python', tar_target='https://github.com/rhelmot/unicorn/archive/master.tar.gz', dir_name='unicorn-master'),
         #Target('unicorn', chdir='bindings/python', git_target='https://github.com/rhelmot/unicorn.git', git_branch='fix/x86_eflags_cc_op'),
         #Target('pyvex', git_target='https://github.com/angr/pyvex.git', do_install=True),
         #Target('angr', git_target='https://github.com/angr/angr.git'),
         #Target('keystone-engine', chdir='bindings/python', tar_target='https://files.pythonhosted.org/packages/9a/fc/ed0d3f46921bfaa612d9e8ce8313f99f4149ecf6635659510220c994cb72/keystone-engine-0.9.1-3.tar.gz', dir_name='keystone-engine-0.9.1-3'),
-        Target('z3-solver', pypi_target='z3-solver'),
+        #Target('z3-solver', pypi_target='z3-solver'),
         #Target('z3-solver', git_target='https://github.com/angr/angr-z3.git', chdir='src/api/python', env={'Z3_VERSION_SUFFIX': '.post1'}),
         #Target('z3-solver', zip_target='https://github.com/angr/angr-z3/archive/master.zip', dir_name='angr-z3-master', chdir='src/api/python', env={'Z3_VERSION_SUFFIX': '.post1'}),
         #Target('pyvex', pypi_target='pyvex', do_install=True),
@@ -205,15 +205,10 @@ else:
 #!/usr/bin/env bash
 set -ex
 
-function python() {
-    /opt/python/cp35-cp35m/bin/python "$@"
-}
+export PATH=/opt/python/cp35-cp35m/bin:$PATH
+ln -sf /opt/python/cp27-cp27m/bin/python /usr/bin/python
 
-function pip() {
-    /opt/python/cp35-cp35m/bin/pip "$@"
-}
-
-yum install -y libffi libffi-devel
+/usr/bin/python2.4 `which yum` install -y libffi libffi-devel
 """
 
 
