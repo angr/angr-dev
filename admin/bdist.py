@@ -2,6 +2,7 @@
 
 import os
 import sys
+import shutil
 import requests
 
 # THE GIST IS
@@ -21,6 +22,8 @@ def mkdir(path):
         os.mkdir(path)
 
 def main():
+    if os.path.isdir('bdist'):
+        shutil.rmtree('bdist')
     mkdir('bdist')
 
     run('bdist', [
