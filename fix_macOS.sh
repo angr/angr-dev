@@ -14,11 +14,11 @@ then
 	fi
 fi
 # To work for any setup, we get the paths to the relevant packages from python itself. (May not be in site packages)
-PYVEX=`python2 -c 'import pyvex; print pyvex.__path__[0]'`
+PYVEX=`python -c 'import pyvex; print(pyvex.__path__[0])'`
 echo "pyvex packate at $PYVEX"
-UNICORN=`python2 -c 'import unicorn; print unicorn.__path__[0]'`
+UNICORN=`python -c 'import unicorn; print(unicorn.__path__[0])'`
 echo "unicorn package at $UNICORN"
-ANGR=`python2 -c 'import logging; logging.basicConfig(level=logging.CRITICAL); import angr; print angr.__path__[0]'`
+ANGR=`python -c 'import logging; logging.basicConfig(level=logging.CRITICAL); import angr; print(angr.__path__[0])'`
 echo "angr package at $ANGR"
 
 install_name_tool -change libunicorn.1.dylib "$UNICORN"/lib/libunicorn.dylib "$ANGR"/lib/angr_native.dylib
