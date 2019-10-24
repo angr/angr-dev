@@ -359,7 +359,9 @@ function clone_repo
 
 	if [ ! -e $NAME ]
 	then
+		set +e
 		error "Failed to clone $NAME. Error was:"
+		set -e
 		cat $CLONE_LOG
 		rm -f $CLONE_LOG
 		return 1
