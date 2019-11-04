@@ -44,7 +44,7 @@ elif [ -f "/etc/arch-release" ]; then
     set -e
 else
     if [ "$(uname)" == "Darwin" ]; then PYPY_OS=osx64; else PYPY_OS=linux64; fi
-    BEST_VERSION=$(wget https://bitbucket.org/pypy/pypy/downloads/ -O - | egrep -o 'href="/pypy/pypy/downloads/[^"]+' | cut -c 28- | grep "$PYPY_OS" | grep 'pypy3\.5' | head -n 1)
+    BEST_VERSION=$(wget https://bitbucket.org/pypy/pypy/downloads/ -O - | egrep -o 'href="/pypy/pypy/downloads/[^"]+' | cut -c 28- | grep "$PYPY_OS" | grep 'pypy3\.6' | head -n 1)
     DOWNLOAD_URL=https://bitbucket.org/pypy/pypy/downloads/$BEST_VERSION
 
     # get pypy
@@ -58,7 +58,7 @@ fi
 
 # virtualenv
 set +e
-mkvirtualenv -p "$PWD/"pypy3.5-*/bin/pypy3 $NAME
+mkvirtualenv -p "$PWD/"pypy3.6-*/bin/pypy3 $NAME
 set -e
 pip install -U setuptools
 
