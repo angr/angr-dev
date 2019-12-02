@@ -50,9 +50,15 @@ else
     # get pypy
     wget $DOWNLOAD_URL --local-encoding=utf-8 -O - | tar xj
 
-    set +e
-    source /etc/bash_completion.d/virtualenvwrapper
-    set -e
+    if [ -f "/etc/fedora-release" ]; then
+        set +e
+        source /usr/bin/virtualenvwrapper-3.sh
+        set -e
+    else
+        set +e
+        source /etc/bash_completion.d/virtualenvwrapper
+        set -e
+    fi
 fi
 
 
