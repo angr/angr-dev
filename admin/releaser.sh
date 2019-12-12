@@ -123,6 +123,7 @@ case $CMD in
 		MESSAGE="ticked version number to $VERSION"
 		ANGRDOC_MESSAGE="updated api-docs for version $VERSION"
 		./git_all.sh commit --author "angr release bot <angr@lists.cs.ucsb.edu>" -am "$MESSAGE"
+		./git_all.sh fetch origin
 		./git_all.sh diff --color=always origin/master master | cat
 		echo
 		echo -n "Does the diff look good (y|n)? "
