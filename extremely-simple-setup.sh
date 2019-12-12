@@ -18,6 +18,7 @@ git clone https://github.com/angr/pyvex.git
 git clone https://github.com/angr/claripy.git
 git clone https://github.com/angr/cle.git
 git clone https://github.com/angr/angr.git
+git clone https://github.com/angr/ailment.git
 git clone https://github.com/angr/angr-doc.git
 git clone https://github.com/angr/binaries.git
 
@@ -28,6 +29,7 @@ pip install -e ./pyvex
 pip install -e ./claripy
 pip install -e ./cle
 pip install -e ./angr
+pip install -e ./ailment
 
 ## END VERY COMPLICATED INSTALL PROCEDURE
 
