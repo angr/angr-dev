@@ -51,7 +51,7 @@ HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib 
 ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils binutils nasm lib32-glibc lib32-gcc-libs lib32-zlib lib32-ncurses}
 ARCHCOMDEBS=${ARCHCOMDEBS}
 RPMS=${RPMS-gcc gcc-c++ make python3-virtualenvwrapper python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel python2 glibc.i686 libgcc.i686 libstdc++.i686 ncurses-compat-libs.i686 zlib.i686 java-1.8.0-openjdk-devel}
-REPOS=${REPOS-cooldict mulpyplexer monkeyhex archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment pysoot archr angr-targets}
+REPOS=${REPOS-mulpyplexer monkeyhex archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment pysoot archr angr-targets}
 declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="unicorn"
 EXTRA_DEPS["pyvex"]="--pre capstone"
@@ -221,6 +221,9 @@ then
 			error "Your system doesn't have homebrew installed, I don't know how to install the dependencies.\nPlease install homebrew: https://brew.sh/\nOr install the equivalent of these homebrew packages: $HOMEBREW_DEBS."
 		fi
 		brew install $HOMEBREW_DEBS >>$OUTFILE 2>>$ERRFILE
+	elif [ -e /etc/NIXOS ]
+	then
+		info "Doing nothing about dependencies installation for NixOS, as they are provided via shell.nix..."
 	else
 		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
 	fi

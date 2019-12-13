@@ -129,7 +129,7 @@ synchronize () {
     echo "Cache contents:"
     #ls -alhR $PERSIST_DATA
     cd /home/angr/angr
-    for REPO in vex pyvex cle claripy simuvex angr ana cooldict binaries archinfo ../angr-doc; do
+    for REPO in vex pyvex cle claripy simuvex angr binaries archinfo ../angr-doc; do
         if [[ ! -d $REPO ]]; then
             continue
         fi
