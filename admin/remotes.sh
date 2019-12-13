@@ -46,7 +46,6 @@ mechaphish/pov_fuzzing
 mechaphish/qemu-cgc
 salls/angrop
 zardus/mulpyplexer
-zardus/cooldict
 "
 
 GITLAB_REPOS="
