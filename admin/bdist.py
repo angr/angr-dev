@@ -4,6 +4,7 @@ import os
 import sys
 import shutil
 import requests
+import subprocess
 
 # THE GIST IS
 # create a new environment (docker, virtualenv, ...)
@@ -144,6 +145,17 @@ class Target(object):
 
 def run_windows(output_dir, targets):
     output_dir = os.path.realpath(output_dir)
+    try:
+        pys = dict([line.split('\t') for line in subprocess.check_output(['py', '-0p'], stderr=subprocess.DEVNULL).decode().strip().splitlines()])
+        for version, path in pys.items():
+            if version.endswith('-32'):
+                key = 'PYTHON_32'
+            else:
+                key = 'PYTHON_64'
+            if key not in os.environ:
+                os.environ[key] = path.strip('"')
+    except FileNotFoundError:
+        pass
     try:
         path32 = os.environ['PYTHON_32']
         path64 = os.environ['PYTHON_64']
