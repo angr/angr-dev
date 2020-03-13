@@ -50,13 +50,36 @@ else
     # get pypy
     wget $DOWNLOAD_URL --local-encoding=utf-8 -O - | tar xj
 
-    if [ -f "/etc/fedora-release" ]; then
+    if [ -e /etc/pacman.conf ]
+    then
+        set +e
+        source /usr/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
+        set -e
+    elif [ -e /etc/fedora-release ]
+    then
         set +e
         source /usr/bin/virtualenvwrapper-3.sh
         set -e
-    else
+    elif [ -e /etc/NIXOS ]
+    then
         set +e
-        source /etc/bash_completion.d/virtualenvwrapper
+        source $(command -v virtualenvwrapper.sh) 
+        set -e
+    else
+        python3 -m pip install virtualenvwrapper 
+        set +e
+        if [ -f /etc/bash_completion.d/virtualenvwrapper ]
+        then
+            source /etc/bash_completion.d/virtualenvwrapper 
+        elif [ -f /usr/local/bin/virtualenvwrapper.sh ]
+        then
+            export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+            source /usr/local/bin/virtualenvwrapper.sh 
+        elif [ -f  /usr/share/virtualenvwrapper/virtualenvwrapper.sh ]
+        then
+            export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+            source /usr/share/virtualenvwrapper/virtualenvwrapper.sh  
+        fi
         set -e
     fi
 fi

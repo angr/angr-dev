@@ -283,6 +283,10 @@ else
 	then
 		export VIRTUALENVWRAPPER_PYTHON=$(which python3)
 		source /usr/local/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
+	elif [ -f  /usr/share/virtualenvwrapper/virtualenvwrapper.sh ]
+	then
+		export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+		source /usr/share/virtualenvwrapper/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
 	fi
 	set -e
 fi
