@@ -517,7 +517,8 @@ then
 		pip_install -e keystone-engine
 		pip3 show keystone-engine >> $OUTFILE 2>> $ERRFILE || error "Unable to install keystone-engine."
 	fi
-	if pip3 install ipython pylint ipdb nose nose-timer coverage flaky >> $OUTFILE 2>> $ERRFILE
+	# we need the pyelftools from upstream
+	if pip3 install -U ipython pylint ipdb nose nose-timer coverage flaky 'git+https://github.com/eliben/pyelftools#egg=pyelftools' >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
 	else
