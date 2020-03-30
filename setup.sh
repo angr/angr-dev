@@ -48,9 +48,10 @@ fi
 
 DEBS=${DEBS-virtualenvwrapper python3-pip python3-dev python3-setuptools build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386 openjdk-8-jdk}
 HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm capstone unicorn patchelf}
-ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils binutils nasm lib32-glibc lib32-gcc-libs lib32-zlib lib32-ncurses}
+ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils nasm lib32-glibc lib32-gcc-libs lib32-zlib lib32-ncurses}
 ARCHCOMDEBS=${ARCHCOMDEBS}
 RPMS=${RPMS-gcc gcc-c++ make python3-virtualenvwrapper python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel python2 glibc.i686 libgcc.i686 libstdc++.i686 ncurses-compat-libs.i686 zlib.i686 java-1.8.0-openjdk-devel}
+OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-virtualenvwrapper python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel python glibc-32bit libgcc_s1-32bit libstdc++6-32bit libncurses5-32bit libz1-32bit java-1_8_0-openjdk-devel} 
 REPOS=${REPOS-mulpyplexer monkeyhex archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment pysoot archr angr-targets}
 declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="unicorn"
@@ -214,6 +215,10 @@ then
 	then
 		info "Installing dependencies..."
 		$SUDO dnf install -y $RPMS #>>$OUTFILE 2>>$ERRFILE
+	elif [ -e /etc/zypp ]
+	then
+		info "Installing dependencies..."
+		$SUDO zypper install -y $OPENSUSE_RPMS
 	elif [ $IS_MACOS -eq 1 ]
 	then
 		if ! which brew > /dev/null;
@@ -247,6 +252,9 @@ then
 elif [ -e /etc/fedora-release ]
 then
 	[ $(rpm -q $RPMS  2>&1 | grep "is not installed" | wc -l) -ne 0 ] && error "Please install the following packages: $RPMS"
+elif [ -e /etc/zypp ]
+then
+	[ $(rpm -q $OPENSUSE_RPMS 2>&1 | grep "is not installed" | wc -l) -ne 0 ] && error "Please install the following packages: $OPENSUSE_RPMS"
 elif [ -e /etc/NIXOS ]
 then
 	[ -z "$IN_NIX_SHELL" ] && error "Please run in the provided shell.nix"
@@ -267,6 +275,12 @@ elif [ -e /etc/fedora-release ]
 then
 	set +e
 	source /usr/bin/virtualenvwrapper-3.sh >>$OUTFILE 2>>$ERRFILE
+	set -e
+elif [ -e /etc/zypp ]
+then
+	set +e
+	export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+	source /usr/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
 	set -e
 elif [ -e /etc/NIXOS ]
 then
