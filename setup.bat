@@ -29,6 +29,7 @@ if not "%TO_CHECKOUT%" == "" (
 )
 
 pip install unicorn
+pip install sqlalchemy
 pip install cffi
 
 pip install -e .\archinfo || goto :error

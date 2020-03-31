@@ -54,7 +54,7 @@ RPMS=${RPMS-gcc gcc-c++ make python3-virtualenvwrapper python3-pip python3-devel
 OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-virtualenvwrapper python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel python glibc-32bit libgcc_s1-32bit libstdc++6-32bit libncurses5-32bit libz1-32bit java-1_8_0-openjdk-devel} 
 REPOS=${REPOS-mulpyplexer monkeyhex archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment pysoot archr angr-targets}
 declare -A EXTRA_DEPS
-EXTRA_DEPS["angr"]="unicorn"
+EXTRA_DEPS["angr"]="unicorn sqlalchemy"
 EXTRA_DEPS["pyvex"]="--pre capstone"
 
 ORIGIN_REMOTE=${ORIGIN_REMOTE-$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|[^/:]*/angr-dev.*||")}
