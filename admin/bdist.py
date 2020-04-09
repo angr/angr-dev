@@ -29,7 +29,7 @@ def main():
 
     run('bdist', [
         #Target('capstone', chdir='bindings/python', tar_target='https://github.com/aquynh/capstone/archive/4.0.tar.gz', dir_name='capstone-4.0'),
-        Target('unicorn', chdir='bindings/python', tar_target='https://github.com/unicorn-engine/unicorn/archive/1.0.2-rc2.tar.gz', dir_name='unicorn-1.0.2-rc2'),
+        Target('unicorn', chdir='bindings/python', tar_target='https://github.com/unicorn-engine/unicorn/archive/1.0.2-rc3.tar.gz', dir_name='unicorn-1.0.2-rc3'),
         #Target('unicorn', chdir='bindings/python', git_target='https://github.com/rhelmot/unicorn.git', git_branch='fix/x86_eflags_cc_op'),
         #Target('pyvex', git_target='https://github.com/angr/pyvex.git', do_install=True),
         #Target('angr', git_target='https://github.com/angr/angr.git'),
