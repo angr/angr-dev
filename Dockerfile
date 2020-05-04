@@ -1,5 +1,7 @@
-from ubuntu:bionic
+from ubuntu:focal
 maintainer yans@yancomm.net
+
+arg DEBIAN_FRONTEND=noninteractive
 
 run dpkg --add-architecture i386
 run apt-get update &&									\
