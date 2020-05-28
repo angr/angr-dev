@@ -220,7 +220,7 @@ else:
 #!/usr/bin/env bash
 set -ex
 
-export PATH=/opt/python/cp35-cp35m/bin:$PATH
+export PATH=/opt/python/cp36-cp36m/bin:$PATH
 ln -sf /opt/python/cp27-cp27m/bin/python /usr/bin/python
 
 /usr/bin/python2.4 `which yum` install -y libffi libffi-devel
