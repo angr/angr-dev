@@ -423,7 +423,7 @@ function install_wheels
 function pip_install
 {
         debug "pip-installing: $@."
-        if ! pip3 install $PIP_OPTIONS -v $@ >>$OUTFILE 2>>$ERRFILE
+        if ! pip3 install $PIP_OPTIONS `[ $VERBOSE -eq 1 ] && echo -v` $@ >>$OUTFILE 2>>$ERRFILE
         then
             	error "pip failure ($@). Check $OUTFILE for details, or read it here:"
             	exit 1
