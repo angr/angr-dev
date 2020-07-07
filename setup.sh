@@ -22,6 +22,7 @@ function usage
 	echo "             	Can be specified multiple times."
 	echo "    -b BRANCH     Check out a given branch across all the repositories."
 	echo "    -D            Ignore the default repo list."
+	echo "    -u 		Unattended, skip all prompts."
 	echo "    EXTRA_REPOS	any extra repositories you want to clone from the angr org."
 	echo
 	echo "This script clones all the angr repositories and sets up an angr"
@@ -70,9 +71,10 @@ CONCURRENT_CLONE=0
 WHEELS=0
 VERBOSE=0
 BRANCH=
+UNATTENDED=0
 
 
-while getopts "iCcwDvse:E:p:P:r:b:h" opt
+while getopts "iCcwDvsue:E:p:P:r:b:h" opt
 do
 	case $opt in
 		i)
@@ -119,6 +121,9 @@ do
 			;;
 		s)
 			GIT_OPTIONS="$GIT_OPTIONS --depth 1 --no-single-branch"
+			;;
+		u)
+			UNATTENDED=1
 			;;
 		\?)
 			usage
@@ -262,7 +267,7 @@ elif [ $IS_MACOS -eq 1 ]
 then
 	[ $(brew ls --versions $HOMEBREW_DEBS | wc -l) -ne $(echo $HOMEBREW_DEBS | wc -w) ] && error "Please install the following packages from homebrew: $HOMEBREW_DEBS"
 else
-	warning -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && read a
+	warning -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && ([ $UNATTENDED == 0 ] || read a)
 fi
 
 info "Enabling virtualenvwrapper."
@@ -463,7 +468,7 @@ fi
 
 if [ $INSTALL -eq 1 ]
 then
-	if [ -z "$VIRTUAL_ENV" ]
+	if [ -z "$VIRTUAL_ENV" ] && [ $UNATTENDED != 1 ]
 	then
 		warning "You are installing angr outside of a virtualenv. This is NOT"
 		warning "RECOMMENDED. Activate a virtualenv before running this script"
