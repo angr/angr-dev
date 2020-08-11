@@ -49,10 +49,10 @@ fi
 
 DEBS=${DEBS-python3-pip python3-dev python3-setuptools build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386 openjdk-8-jdk}
 HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm patchelf}
-ARCHDEBS=${ARCHDEBS-python-virtualenvwrapper python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils nasm lib32-glibc lib32-gcc-libs lib32-zlib lib32-ncurses}
+ARCHDEBS=${ARCHDEBS-python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils nasm lib32-glibc lib32-gcc-libs lib32-zlib lib32-ncurses}
 ARCHCOMDEBS=${ARCHCOMDEBS}
-RPMS=${RPMS-gcc gcc-c++ make python3-virtualenvwrapper python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel python2 glibc.i686 libgcc.i686 libstdc++.i686 ncurses-compat-libs.i686 zlib.i686 java-1.8.0-openjdk-devel}
-OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-virtualenvwrapper python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel python glibc-32bit libgcc_s1-32bit libstdc++6-32bit libncurses5-32bit libz1-32bit java-1_8_0-openjdk-devel} 
+RPMS=${RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel python2 glibc.i686 libgcc.i686 libstdc++.i686 ncurses-compat-libs.i686 zlib.i686 java-1.8.0-openjdk-devel}
+OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel python glibc-32bit libgcc_s1-32bit libstdc++6-32bit libncurses5-32bit libz1-32bit java-1_8_0-openjdk-devel} 
 REPOS=${REPOS-mulpyplexer monkeyhex archinfo vex pyvex cle claripy angr angr-management angrop angr-doc binaries ailment pysoot angr-targets}
 # archr is Linux only because of shellphish-qemu dependency
 if [ `uname` == "Linux" ]; then REPOS="${REPOS} archr"; fi
@@ -273,47 +273,37 @@ else
 fi
 
 info "Enabling virtualenvwrapper."
-if [ -e /etc/pacman.conf ]
-then
-	set +e
-	source /usr/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
-	set -e
-elif [ -e /etc/fedora-release ]
-then
-	set +e
-	source /usr/bin/virtualenvwrapper-3.sh >>$OUTFILE 2>>$ERRFILE
-	set -e
-elif [ -e /etc/zypp ]
-then
-	set +e
-	export VIRTUALENVWRAPPER_PYTHON=$(which python3)
-	source /usr/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
-	set -e
-elif [ -e /etc/NIXOS ]
-then
-	set +e
-	source $(command -v virtualenvwrapper.sh) >>$OUTFILE 2>>$ERRFILE
-	set -e
-else
-	python3 -m pip install virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
-	set +e
-	if [ -f /etc/bash_completion.d/virtualenvwrapper ]
-	then
-		source /etc/bash_completion.d/virtualenvwrapper >>$OUTFILE 2>>$ERRFILE
-	elif [ -f /usr/local/bin/virtualenvwrapper.sh ]
-	then
-		export VIRTUALENVWRAPPER_PYTHON=$(which python3)
-		source /usr/local/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
-	elif [ -f  /usr/share/virtualenvwrapper/virtualenvwrapper.sh ]
-	then
-		export VIRTUALENVWRAPPER_PYTHON=$(which python3)
-		source /usr/share/virtualenvwrapper/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
-	elif [ -f ~/.local/bin/virtualenvwrapper.sh ]
-	then
-		export VIRTUALENVWRAPPER_PYTHON=$(which python3)
-		source ~/.local/bin/virtualenvwrapper.sh >>$OUTFILE 2>>$ERRFILE
+# The idea here is to attpempt to use a preinstalled version of
+# virtualenvwrapper. If we can't we'll install it using pip3. This should
+# minimize issues where there are conflicting distro and pip versions.
+virtualenvwrapper_locations=( \
+	$(command -v virtualenvwrapper.sh || true) \
+	~/.local/bin/virtualenvwrapper.sh \
+	/usr/share/virtualenvwrapper/virtualenvwrapper.sh \
+	/etc/bash_completion.d/virtualenvwrapper \
+)
+export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+for f in ${virtualenvwrapper_locations[@]}; do
+	if [ -e $f ]; then
+		set +e
+		source $f
+		set -e
+		venvwrapper_loc=$f
+		break
 	fi
+done
+if ! command -v workon &> /dev/null; then
+	info "Could not find virtualenvwrapper preinstalled, installing via pip3..."
+	pip3 install --user virtualenvwrapper
+	set +e
+	source ~/.local/bin/virtualenvwrapper.sh
 	set -e
+	venvwrapepr_loc=~/.local/bin/virtualenvwrapper.sh
+fi
+if [[ $venvwrapper_loc == "~/.local/bin/virtualenvwrapper.sh" && ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+	info "\$HOME/.local/bin is not in your path, adding temporarily."
+	info "To make this permanent, add $HOME/.local/bin to your \$PATH"
+	export PATH=$HOME/.local/bin:$PATH
 fi
 
 if [ -n "$ANGR_VENV" ]
