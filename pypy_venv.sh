@@ -44,8 +44,7 @@ elif [ -f "/etc/arch-release" ]; then
     set -e
 else
     if [ "$(uname)" == "Darwin" ]; then PYPY_OS=osx64; else PYPY_OS=linux64; fi
-    BEST_VERSION=$(wget https://bitbucket.org/pypy/pypy/downloads/ -O - | egrep -o 'href="/pypy/pypy/downloads/[^"]+' | cut -c 28- | grep "$PYPY_OS" | grep 'pypy3\.6' | head -n 1)
-    DOWNLOAD_URL=https://bitbucket.org/pypy/pypy/downloads/$BEST_VERSION
+    DOWNLOAD_URL=$(wget -q -O - https://www.pypy.org/download.html | egrep -o 'https://downloads.python.org/pypy/pypy3[^"]+' | grep "$PYPY_OS" | head -n 1)
 
     # get pypy
     wget $DOWNLOAD_URL --local-encoding=utf-8 -O - | tar xj
