@@ -2,6 +2,7 @@ from ubuntu:focal
 maintainer yans@yancomm.net
 
 arg DEBIAN_FRONTEND=noninteractive
+arg BRANCH=master
 
 run dpkg --add-architecture i386
 run apt-get update &&									\
@@ -9,6 +10,6 @@ run apt-get update &&									\
 
 run useradd -s /bin/bash -m angr
 
-run su - angr -c "git clone https://github.com/angr/angr-dev && cd angr-dev && ./setup.sh -w -e angr && ./setup.sh -w -p angr-pypy"
+run su - angr -c "git clone https://github.com/angr/angr-dev -b $BRANCH && cd angr-dev && ./setup.sh -w -e angr && ./setup.sh -w -p angr-pypy"
 run su - angr -c "echo 'source /usr/share/virtualenvwrapper/virtualenvwrapper.sh' >> /home/angr/.bashrc && echo 'workon angr' >> /home/angr/.bashrc"
 cmd su - angr
