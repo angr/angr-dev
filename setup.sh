@@ -57,7 +57,7 @@ REPOS=${REPOS-mulpyplexer monkeyhex archinfo vex pyvex cle claripy ailment angr 
 # archr is Linux only because of shellphish-qemu dependency
 if [ `uname` == "Linux" ]; then REPOS="${REPOS} archr"; fi
 declare -A EXTRA_DEPS
-EXTRA_DEPS["angr"]="sqlalchemy unicorn>=1.0.1rc2"
+EXTRA_DEPS["angr"]="sqlalchemy unicorn>=1.0.2rc4"
 EXTRA_DEPS["pyvex"]="--pre capstone"
 
 ORIGIN_REMOTE=${ORIGIN_REMOTE-$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|[^/:]*/angr-dev.*||")}
