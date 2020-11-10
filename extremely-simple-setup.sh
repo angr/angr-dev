@@ -24,12 +24,12 @@ git clone https://github.com/angr/binaries.git
 
 set -e
 
+pip install -e ./ailment
 pip install -e ./archinfo
 pip install -e ./pyvex
 pip install -e ./claripy
 pip install -e ./cle
 pip install -e ./angr
-pip install -e ./ailment
 
 ## END VERY COMPLICATED INSTALL PROCEDURE
 
