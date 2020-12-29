@@ -61,7 +61,7 @@ function checkup
     git status | egrep --color=never 'have diverged|each, respectively|is behind|is ahead of' >/dev/null 2>/dev/null
     is_desync=$?
 
-	[ "$branch_name" != "master" ]
+	[ "$branch_name" != "master" -a "$branch_name" != "main" ]
 	isnt_master=$?
 
 	if [ $is_dirty == 0 -o $isnt_master == 0 -o $is_desync == 0 ]; then
