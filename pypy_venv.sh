@@ -86,7 +86,7 @@ fi
 
 # virtualenv
 set +e
-mkvirtualenv -p "$PWD/"pypy3.6-*/bin/pypy3 $NAME
+mkvirtualenv -p "$PWD/"pypy3.*/bin/pypy3 $NAME
 set -e
 pip install -U setuptools
 
