@@ -71,7 +71,7 @@ ignored-classes=SQLObject,nose.tools,nose.tools.trivial,sympy
 # expressions are accepted.
 generated-members=REQUEST,acl_users,aq_parent
 
-ignored-modules=sh
+ignored-modules=sh,PySide2,PySide2.QtTest,PySide2.QtCore,PySide2.QtWidgets,PySide2.QtGui
 
 [FORMAT]
 
