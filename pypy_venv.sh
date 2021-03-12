@@ -74,6 +74,10 @@ else
         then
             export VIRTUALENVWRAPPER_PYTHON=$(which python3)
             source /usr/local/bin/virtualenvwrapper.sh 
+        elif [ -f "$HOME/.local/bin/virtualenvwrapper.sh" ]
+	then
+            export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+	    source "$HOME/.local/bin/virtualenvwrapper.sh"
         elif [ -f  /usr/share/virtualenvwrapper/virtualenvwrapper.sh ]
         then
             export VIRTUALENVWRAPPER_PYTHON=$(which python3)
