@@ -511,18 +511,12 @@ then
 		export MACOS_UNIVERSAL=no
 	fi
 
-	# remove angr-management if running in pypy or in travis
-	#(python --version 2>&1| grep -q PyPy) && 
-	info "NOTE: removing angr-management until we sort out the pyside packaging"
-	TO_INSTALL=${TO_INSTALL// angr-management/}
 	info "Install list: $TO_INSTALL"
-	[ -n "$TRAVIS" ] && TO_INSTALL=${TO_INSTALL// angr-management/}
-
-    	for PACKAGE in $TO_INSTALL; do
-            	info "Installing $PACKAGE."
-            	[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
-            	pip_install -e $PACKAGE
-    	done
+	for PACKAGE in $TO_INSTALL; do
+		info "Installing $PACKAGE."
+		[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
+		pip_install -e $PACKAGE
+	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
 	if ! pip3 install --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
