@@ -511,6 +511,13 @@ then
 		export MACOS_UNIVERSAL=no
 	fi
 
+	info "Install list: $TO_INSTALL"
+	for PACKAGE in $TO_INSTALL; do
+			info "Installing $PACKAGE."
+			[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
+			pip_install -e $PACKAGE
+	done
+
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
 	if ! pip3 install --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
 	then
