@@ -513,9 +513,9 @@ then
 
 	info "Install list: $TO_INSTALL"
 	for PACKAGE in $TO_INSTALL; do
-			info "Installing $PACKAGE."
-			[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
-			pip_install -e $PACKAGE
+		info "Installing $PACKAGE."
+		[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
+		pip_install -e $PACKAGE
 	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
