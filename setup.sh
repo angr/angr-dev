@@ -272,42 +272,42 @@ else
 	warning -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && ([ $UNATTENDED == 0 ] || read a)
 fi
 
-info "Enabling virtualenvwrapper."
-# The idea here is to attpempt to use a preinstalled version of
-# virtualenvwrapper. If we can't we'll install it using pip3. This should
-# minimize issues where there are conflicting distro and pip versions.
-virtualenvwrapper_locations=( \
-	$(command -v virtualenvwrapper.sh || true) \
-	~/.local/bin/virtualenvwrapper.sh \
-	/usr/share/virtualenvwrapper/virtualenvwrapper.sh \
-	/etc/bash_completion.d/virtualenvwrapper \
-)
-export VIRTUALENVWRAPPER_PYTHON=$(which python3)
-for f in ${virtualenvwrapper_locations[@]}; do
-	if [ -e $f ]; then
-		set +e
-		source $f
-		set -e
-		venvwrapper_loc=$f
-		break
-	fi
-done
-if ! command -v workon &> /dev/null; then
-	info "Could not find virtualenvwrapper preinstalled, installing via pip3..."
-	pip3 install --user virtualenvwrapper
-	set +e
-	source ~/.local/bin/virtualenvwrapper.sh
-	set -e
-	venvwrapepr_loc=~/.local/bin/virtualenvwrapper.sh
-fi
-if [[ $venvwrapper_loc == "~/.local/bin/virtualenvwrapper.sh" && ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-	info "\$HOME/.local/bin is not in your path, adding temporarily."
-	info "To make this permanent, add $HOME/.local/bin to your \$PATH"
-	export PATH=$HOME/.local/bin:$PATH
-fi
-
 if [ -n "$ANGR_VENV" ]
 then
+	info "Enabling virtualenvwrapper."
+	# The idea here is to attpempt to use a preinstalled version of
+	# virtualenvwrapper. If we can't we'll install it using pip3. This should
+	# minimize issues where there are conflicting distro and pip versions.
+	virtualenvwrapper_locations=( \
+		$(command -v virtualenvwrapper.sh || true) \
+		~/.local/bin/virtualenvwrapper.sh \
+		/usr/share/virtualenvwrapper/virtualenvwrapper.sh \
+		/etc/bash_completion.d/virtualenvwrapper \
+	)
+	export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+	for f in ${virtualenvwrapper_locations[@]}; do
+		if [ -e $f ]; then
+			set +e
+			source $f
+			set -e
+			venvwrapper_loc=$f
+			break
+		fi
+	done
+	if ! command -v workon &> /dev/null; then
+		info "Could not find virtualenvwrapper preinstalled, installing via pip3..."
+		pip3 install --user virtualenvwrapper
+		set +e
+		source ~/.local/bin/virtualenvwrapper.sh
+		set -e
+		venvwrapepr_loc=~/.local/bin/virtualenvwrapper.sh
+	fi
+	if [[ $venvwrapper_loc == "~/.local/bin/virtualenvwrapper.sh" && ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+		info "\$HOME/.local/bin is not in your path, adding temporarily."
+		info "To make this permanent, add $HOME/.local/bin to your \$PATH"
+		export PATH=$HOME/.local/bin:$PATH
+	fi
+
 	set +e
 	if [ -n "$VIRTUAL_ENV" ]
 	then
