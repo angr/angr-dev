@@ -519,19 +519,8 @@ then
 	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
-	if ! pip3 install --no-binary=keystone-engine keystone-engine >> $OUTFILE 2>> $ERRFILE # hack because keystone sucks
-	then
-		# keystone-engine fails to install on mac os, but there's a workaround, let's try that
-		# https://github.com/keystone-engine/keypatch/issues/57
-		git clone https://github.com/fjh658/keystone-engine.git >> $OUTFILE 2>> $ERRFILE || error "Unable to clone fixed keystone-engine repo."
-		cd keystone-engine
-		git submodule update --init --recursive || error "Unable to update keystone-engine submodules."
-		cd -
-		pip_install -e keystone-engine
-		pip3 show keystone-engine >> $OUTFILE 2>> $ERRFILE || error "Unable to install keystone-engine."
-	fi
 	# we need the pyelftools from upstream
-	if pip3 install -U ipython pylint ipdb nose nose-timer coverage flaky 'git+https://github.com/eliben/pyelftools#egg=pyelftools' >> $OUTFILE 2>> $ERRFILE
+	if pip3 install -U ipython pylint ipdb nose nose-timer coverage flaky keystone-engine 'git+https://github.com/eliben/pyelftools#egg=pyelftools' >> $OUTFILE 2>> $ERRFILE
 	then
 		info "Success!"
 	else
