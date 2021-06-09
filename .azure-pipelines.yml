@@ -4,7 +4,11 @@ parameters:
   default: [ "ubuntu-18.04", "ubuntu-20.04", "windows-latest", "macos-latest" ]
 - name: python_versions
   type: object
-  default: [ "3.6", "3.7", "3.8" ]
+  default:
+  - "3.6"
+  - "3.7"
+  - "3.8"
+  - "3.9"
 
 jobs:
   - ${{ each pool in parameters.pools }}:
