@@ -56,7 +56,7 @@ disable=
     too-many-return-statements,
     too-many-statements,
     unidiomatic-typecheck,
-    
+
 
 [REPORTS]
 
