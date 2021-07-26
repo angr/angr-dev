@@ -90,7 +90,8 @@ fi
 
 # virtualenv
 set +e
-mkvirtualenv -p "$PWD/"pypy3.*/bin/pypy3 $NAME
+mkvirtualenv --no-pip -p "$PWD/"pypy3.*/bin/pypy3 $NAME
+python -m ensurepip
 set -e
 pip install -U setuptools
 
