@@ -464,7 +464,7 @@ fi
 
 if [ $INSTALL -eq 1 ]
 then
-	if [ -z "$VIRTUAL_ENV" ] && [ $UNATTENDED != 1 ]
+	if [ -z "$VIRTUAL_ENV" ] && [ $UNATTENDED != 1 ] && [ -z "$CONDA_DEFAULT_ENV" ]
 	then
 		warning "You are installing angr outside of a virtualenv. This is NOT"
 		warning "RECOMMENDED. Activate a virtualenv before running this script"
