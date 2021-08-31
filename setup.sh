@@ -53,7 +53,8 @@ ARCHDEBS=${ARCHDEBS-python-pip libxml2 libxslt git libffi cmake readline libtool
 ARCHCOMDEBS=${ARCHCOMDEBS}
 RPMS=${RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel python2 glibc.i686 libgcc.i686 libstdc++.i686 ncurses-compat-libs.i686 zlib.i686 java-1.8.0-openjdk-devel}
 OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel python glibc-32bit libgcc_s1-32bit libstdc++6-32bit libncurses5-32bit libz1-32bit java-1_8_0-openjdk-devel} 
-REPOS=${REPOS-mulpyplexer monkeyhex archinfo vex pyvex cle claripy ailment angr angr-management angrop angr-doc binaries pysoot angr-targets}
+REPOS=${REPOS-mulpyplexer monkeyhex archinfo vex pyvex cle claripy ailment angr angrop angr-doc binaries pysoot angr-targets}
+REPOS_CPYTHON=${REPOS_CPYTHON-angr-management}
 # archr is Linux only because of shellphish-qemu dependency
 if [ `uname` == "Linux" ]; then REPOS="${REPOS} archr"; fi
 declare -A EXTRA_DEPS
@@ -341,6 +342,10 @@ then
 	# older versions of pip will fail to process the --find-links arg silently
 	pip3 install -U 'pip>=20.0.2'
 fi
+
+# Must happen after virutalenv is enabled to correctly detect python implementation
+_implementation=$(python -c "import sys; print(sys.implementation.name)")
+if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
 function try_remote
 {
