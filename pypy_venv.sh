@@ -33,9 +33,9 @@ elif [ -f "/etc/arch-release" ]; then
     SUBVERSION=$(pacman -Si pypy3 | grep "Version\s*:\s*[0-9.\-]*" | grep -o "[0-9.\-]*")
     VERSION=${2-pypy3-$SUBVERSION-$ARCH}
     # get pypy
-    [ ! -e $VERSION.pkg.tar.xz ] && wget https://mirrors.kernel.org/archlinux/community/os/$ARCH/$VERSION.pkg.tar.xz
+    [ ! -e $VERSION.pkg.tar.zst ] && wget https://mirrors.kernel.org/archlinux/community/os/$ARCH/$VERSION.pkg.tar.zst
     if [ ! -e $VERSION ]; then
-        tar xf $VERSION.pkg.tar.xz
+        tar xf $VERSION.pkg.tar.zst
         mv ./opt/pypy3 ./$VERSION
     fi
 
@@ -90,7 +90,8 @@ fi
 
 # virtualenv
 set +e
-mkvirtualenv --no-pip -p "$PWD/"pypy3.*/bin/pypy3 $NAME
+pypy3_=$(find ${PWD} -maxdepth 1 -type d -name "pypy3-*")
+mkvirtualenv --no-pip -p ${pypy3_}/bin/pypy3 $NAME
 python -m ensurepip
 set -e
 python -m pip install -U setuptools
