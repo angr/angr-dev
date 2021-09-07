@@ -344,7 +344,7 @@ then
 fi
 
 # Must happen after virutalenv is enabled to correctly detect python implementation
-_implementation=$(python -c "import sys; print(sys.implementation.name)")
+implementation=$(python -c "import sys; print(sys.implementation.name)")
 if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
 function try_remote
