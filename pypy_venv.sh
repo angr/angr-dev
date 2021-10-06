@@ -90,7 +90,7 @@ fi
 
 # virtualenv
 set +e
-pypy3_=$(find ${PWD} -maxdepth 1 -type d -name "pypy3-*")
+pypy3_=$(find ${PWD} -maxdepth 1 -type d -name "pypy3*")
 mkvirtualenv --no-pip -p ${pypy3_}/bin/pypy3 $NAME
 python -m ensurepip
 set -e
