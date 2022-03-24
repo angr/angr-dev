@@ -23,6 +23,9 @@ jobs:
             versionSpec: ${{ python_version }}
           displayName: Use python version ${{ python_version }}
 
+        - script: git config --global url.https://github.com/.insteadOf "git@github.com:"
+          displayName: Configure git
+
         - ${{ if contains(pool, 'macos') }}:
           # macos ships an older version of bash than is supported in setup.sh
           - script: brew install bash
