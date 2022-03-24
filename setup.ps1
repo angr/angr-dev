@@ -1,6 +1,5 @@
 $repos = @(
     "angr/archinfo"
-    "angr/vex"
     "angr/pyvex"
     "angr/cle"
     "angr/claripy"
@@ -60,7 +59,7 @@ function Get-Repo($repo) {
     $name = $repo.Split('/')[-1]
 
     if (-Not (Test-Path -Path $name)) {
-        git clone git@github.com:$repo.git
+        git clone --recursive git@github.com:$repo.git
         if (!$?) {
             Write-Error "Failed to clone $repo"
             exit 1
