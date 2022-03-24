@@ -13,8 +13,6 @@ parameters:
 jobs:
   - ${{ each pool in parameters.pools }}:
     - ${{ each python_version in parameters.python_versions }}:
-      - script: git config --global url.https://github.com/.insteadOf "git@github.com:"
-        displayName: Configure git
       - job:
         displayName: ${{ format('Install on {0} with python {1}', pool, python_version) }}
         pool:
@@ -24,6 +22,9 @@ jobs:
           inputs:
             versionSpec: ${{ python_version }}
           displayName: Use python version ${{ python_version }}
+
+        - script: git config --global url.https://github.com/.insteadOf "git@github.com:"
+          displayName: Configure git
 
         - ${{ if contains(pool, 'macos') }}:
           # macos ships an older version of bash than is supported in setup.sh
