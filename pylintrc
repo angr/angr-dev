@@ -56,6 +56,7 @@ disable=
     too-many-return-statements,
     too-many-statements,
     unidiomatic-typecheck,
+    consider-using-f-string,
 
 
 [REPORTS]
@@ -223,7 +224,7 @@ max-public-methods=20
 [IMPORTS]
 
 # Deprecated modules which should not be used, separated by a comma
-deprecated-modules=regsub,string,TERMIOS,Bastion,rexec
+deprecated-modules=regsub,TERMIOS,Bastion,rexec
 
 # Create a graph of every (i.e. internal and external) dependencies in the
 # given file (report RP0402 must not be disabled)
