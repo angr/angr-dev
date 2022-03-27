@@ -352,7 +352,7 @@ function try_remote
 	URL=$1
 	debug "Trying to clone from $URL"
 	rm -f $CLONE_LOG
-	git clone --recursive $GIT_OPTIONS $URL >> $CLONE_LOG 2>> $CLONE_LOG
+	git clone --recursive --recurse-submodules $GIT_OPTIONS $URL >> $CLONE_LOG 2>> $CLONE_LOG
 	r=$?
 
 	if grep -q -E "(ssh_exchange_identification: read: Connection reset by peer|ssh_exchange_identification: Connection closed by remote host)" $CLONE_LOG
@@ -437,7 +437,7 @@ then
 	for r in $REPOS
 	do
 		clone_repo $r || exit 1
-		[ -e "$NAME/setup.py" ] && TO_INSTALL="$TO_INSTALL $NAME"
+		[ -e "$NAME/setup.py" -o -e "$NAME/setup.cfg" ] && TO_INSTALL="$TO_INSTALL $NAME"
 	done
 else
 	declare -A CLONE_PROCS
