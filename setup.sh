@@ -453,7 +453,7 @@ else
 		if wait ${CLONE_PROCS[$r]}
 		then
 			#echo "... SUCCESS"
-			[ -e "$r/setup.py" ] && TO_INSTALL="$TO_INSTALL $r"
+			[ -e "$r/setup.py" -o -e "$r/setup.cfg" ] && TO_INSTALL="$TO_INSTALL $r"
 		else
 			#echo "... FAIL"
 			exit 1
