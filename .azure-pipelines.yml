@@ -35,13 +35,8 @@ jobs:
 
         # Windows setup
         - ${{ if contains(pool, 'windows') }}:
-          - task: BatchScript@1
-            displayName: Call vcvars64.bat
-            inputs:
-              filename: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat
-              modifyEnvironment: true
-          - script: setup.bat
-            displayName: Run setup.bat
+          - script: setup.ps1
+            displayName: Run setup.ps1
 
         # *nix setup
         - ${{ if not(contains(pool, 'windows')) }}:
