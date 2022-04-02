@@ -5,10 +5,9 @@ parameters:
 - name: python_versions
   type: object
   default:
-  - "3.6"
-  - "3.7"
   - "3.8"
   - "3.9"
+  - "3.10"
 
 jobs:
   - ${{ each pool in parameters.pools }}:
