@@ -16,7 +16,7 @@ USER angr
 ADD . /home/angr/angr-dev
 WORKDIR /home/angr/angr-dev
 
-RUN ./setup.sh -w -e angr && ./setup.sh -w -p angr-pypy
+RUN ./setup.sh -w -e angr
 RUN echo 'source /usr/share/virtualenvwrapper/virtualenvwrapper.sh' >> /home/angr/.bashrc && \
     echo 'workon angr' >> /home/angr/.bashrc
 
