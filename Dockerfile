@@ -13,7 +13,7 @@ RUN apt-get update && apt-get -o APT::Immediate-Configure=0 install -y \
 RUN useradd -s /bin/bash -m angr
 USER angr
 
-ADD . /home/angr/angr-dev
+ADD --chown=angr . /home/angr/angr-dev
 WORKDIR /home/angr/angr-dev
 
 RUN ./setup.sh -w -e angr
