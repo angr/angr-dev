@@ -28,12 +28,14 @@ if not "%TO_CHECKOUT%" == "" (
     call git_all.bat checkout %TO_CHECKOUT%
 )
 
+pip install -U "setuptools>=59" wheel
+
 pip install -e .\archinfo || goto :error
 pip install -e .\pyvex || goto :error
 pip install -e .\cle || goto :error
 pip install -e .\claripy || goto :error
 pip install -e .\ailment || goto :error
-pip install -e .\angr[angrdb] || goto :error
+pip install --no-build-isolation -e .\angr[angrdb] || goto :error
 pip install -e .\angr-management || goto :error
 
 pip install nose nose2 flaky monkeyhex ipdb || goto :error
