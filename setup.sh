@@ -347,6 +347,9 @@ fi
 implementation=$(python -c "import sys; print(sys.implementation.name)")
 if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
+# Install setuptools and wheel until build isolation can be enabled
+pip install -U pip "setuptools>=59" wheel
+
 function try_remote
 {
 	URL=$1
