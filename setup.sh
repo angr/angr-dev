@@ -520,7 +520,7 @@ then
 	for PACKAGE in $TO_INSTALL; do
 		info "Installing $PACKAGE."
 		[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
-		pip_install -e $PACKAGE
+		pip_install --no-build-isolation -e $PACKAGE
 	done
 
 	info "Installing some other helpful stuff (logging to $OUTFILE)."
