@@ -33,7 +33,7 @@ pip install -e .\pyvex || goto :error
 pip install -e .\cle || goto :error
 pip install -e .\claripy || goto :error
 pip install -e .\ailment || goto :error
-pip install -e .\angr[angrdb] || goto :error
+pip install --no-build-isolation -e .\angr[angrdb] || goto :error
 pip install -e .\angr-management || goto :error
 
 pip install nose nose2 flaky monkeyhex ipdb || goto :error
