@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# This script generates a summary of who has contributed the most lines to the
+# projects passed as arguments.
 
 function blame()
 {
