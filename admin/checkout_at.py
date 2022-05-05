@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# This script takes a commit hash in one of the repositories checked out as part
+# of angr-dev, and uses timestamp information to check out commits from the same
+# time in other repositories.
 
 import glob
 import sys
