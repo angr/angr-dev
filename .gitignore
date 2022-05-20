@@ -3,5 +3,5 @@ core
 */
 .gdb_history
 !admin/
-admin/setup.py
-admin/dist
+!.github/
+!.github/workflows
