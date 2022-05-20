@@ -12,7 +12,7 @@ python -m pip install -U setuptools wheel build
 export PIP_FIND_LINKS=$OUTDIR
 
 for REPO in $REPOS; do
-	python -m build --wheel --outdir "$OUTDIR" "$REPO_ROOT/$REPO"
+	python -m build --outdir "$OUTDIR" "$REPO_ROOT/$REPO"
 done
 
 echo 'All done!'
