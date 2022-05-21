@@ -28,7 +28,8 @@ if not "%TO_CHECKOUT%" == "" (
     call git_all.bat checkout %TO_CHECKOUT%
 )
 
-pip install -U "setuptools>=59" wheel
+:: Install build dependencies until build isolation can be enabled
+pip install -U pip "setuptools>=59" wheel cffi unicorn==1.0.2rc4
 
 pip install -e .\archinfo || goto :error
 pip install -e .\pyvex || goto :error
