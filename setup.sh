@@ -47,7 +47,13 @@ then
 fi
 
 
-DEBS=${DEBS-python3-pip python3-dev python3-setuptools build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev libc6:i386 libgcc1:i386 libstdc++6:i386 libtinfo5:i386 zlib1g:i386 openjdk-8-jdk}
+LIBGCC_DEB="libgcc1:i386"
+if [ -e /etc/os-release ] && ! grep "ID=debian" /etc/os-release -q; then
+	LIBGCC_DEB="libgcc1-s1:i386"
+fi
+
+
+DEBS=${DEBS-python3-pip python3-dev python3-setuptools build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev libc6:i386  libstdc++6:i386 ${LIBGCC_DEV} libtinfo5:i386 zlib1g:i386 openjdk-8-jdk}
 HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm patchelf}
 ARCHDEBS=${ARCHDEBS-python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils nasm lib32-glibc lib32-gcc-libs lib32-zlib lib32-ncurses}
 ARCHCOMDEBS=${ARCHCOMDEBS}
