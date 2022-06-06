@@ -40,6 +40,8 @@ jobs:
             inputs:
               filename: C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat
               modifyEnvironment: true
+          - script: pip install -U "setuptools>=59"
+            displayName: Run setup.bat
           - script: setup.bat
             displayName: Run setup.bat
 
