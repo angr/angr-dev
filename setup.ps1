@@ -13,7 +13,9 @@ $extra_requires = @{
 }
 
 $build_deps = $(
+    "pip>=21.1"
     "setuptools>=59"
+    "wheel"
 )
 
 $extras_install = $(
