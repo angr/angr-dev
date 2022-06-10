@@ -37,9 +37,7 @@ jobs:
 
     - name: Run setup.bat
       if: matrix.os == 'windows-2022'
-      run: |
-        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        .\setup.bat
+      run: .\setup.ps1
 
     - name: Test angr import
       run: python -c "import angr; print('angr imports!')"

@@ -77,7 +77,7 @@ function Install-Repo($repo) {
             $extras = ""
         }
 
-        python -m pip install -e .\$name$extras
+        python -m pip install --no-build-isolation -e .\$name$extras
         if (!$?) {
             Write-Error "Failed to install $repo"
         }
