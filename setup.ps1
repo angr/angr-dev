@@ -12,6 +12,10 @@ $extra_requires = @{
     angr = @("angrdb")
 }
 
+$build_deps = $(
+    "setuptools>=59"
+)
+
 $extras_install = $(
     "nose"
     "nose2"
@@ -84,6 +88,14 @@ function Install-Repo($repo) {
     }
 }
 
+function Install-BuildDeps() {
+    python -m pip install $build_deps
+    if (!$?) {
+        Write-Error "Failed to install extras"
+        exit 1
+    }
+}
+
 function Install-Extras() {
     python -m pip install $extras_install
     if (!$?) {
@@ -103,6 +115,9 @@ foreach ($repo in $repos) {
 
 Write-Output "Installing Visual Studio..."
 Initialize-VisualStudio
+
+Write-Output "Installing Python build dependencies..."
+Install-BuildDeps
 
 Write-Output "Installing repos..."
 foreach ($repo in $repos) {
