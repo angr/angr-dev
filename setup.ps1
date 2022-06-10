@@ -59,7 +59,7 @@ function Get-Repo($repo) {
     $name = $repo.Split('/')[-1]
 
     if (-Not (Test-Path -Path $name)) {
-        git clone --recursive git@github.com:$repo.git
+        git clone --recursive https://github.com/$repo.git
         if (!$?) {
             Write-Error "Failed to clone $repo"
             exit 1
