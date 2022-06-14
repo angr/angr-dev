@@ -12,6 +12,12 @@ $extra_requires = @{
     angr = @("angrdb")
 }
 
+$build_deps = $(
+    "pip>=21.1"
+    "setuptools>=59"
+    "wheel"
+)
+
 $extras_install = $(
     "nose"
     "nose2"
@@ -59,7 +65,7 @@ function Get-Repo($repo) {
     $name = $repo.Split('/')[-1]
 
     if (-Not (Test-Path -Path $name)) {
-        git clone --recursive git@github.com:$repo.git
+        git clone --recursive https://github.com/$repo.git
         if (!$?) {
             Write-Error "Failed to clone $repo"
             exit 1
@@ -70,17 +76,25 @@ function Get-Repo($repo) {
 function Install-Repo($repo) {
     $name = $repo.Split('/')[-1]
 
-    if (Test-Path -Path $name/setup.py) {
+    if (Test-Path -Path $name/pyproject.toml) {
         if ($extra_requires.ContainsKey($name)) {
             $extras = "[" + ($extra_requires[$name] -Join ",") + "]"
         } else {
             $extras = ""
         }
 
-        python -m pip install -e .\$name$extras
+        python -m pip install --no-build-isolation -e .\$name$extras
         if (!$?) {
             Write-Error "Failed to install $repo"
         }
+    }
+}
+
+function Install-BuildDeps() {
+    python -m pip install $build_deps
+    if (!$?) {
+        Write-Error "Failed to install extras"
+        exit 1
     }
 }
 
@@ -103,6 +117,9 @@ foreach ($repo in $repos) {
 
 Write-Output "Installing Visual Studio..."
 Initialize-VisualStudio
+
+Write-Output "Installing Python build dependencies..."
+Install-BuildDeps
 
 Write-Output "Installing repos..."
 foreach ($repo in $repos) {
