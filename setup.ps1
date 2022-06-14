@@ -76,7 +76,7 @@ function Get-Repo($repo) {
 function Install-Repo($repo) {
     $name = $repo.Split('/')[-1]
 
-    if (Test-Path -Path $name/setup.py) {
+    if (Test-Path -Path $name/pyproject.toml) {
         if ($extra_requires.ContainsKey($name)) {
             $extras = "[" + ($extra_requires[$name] -Join ",") + "]"
         } else {
