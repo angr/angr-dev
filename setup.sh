@@ -167,25 +167,29 @@ then
 	else
 		export SUDO=sudo
 	fi
-	source /etc/os-release
-	if [ "$ID_LIKE" -eq "*debian*" ]; then
-		$SUDO apt-get update
-		$SUDO apt-get install -y $DEBS
-	elif [ "$ID_LIKE" -eq "*fedora*" ]; then
-		$SUDO dnf install -yq $RPMS
-	elif [ "$ID_LIKE" -eq "*suse*" ]; then
-		$SUDO zypper install -y $OPENSUSE_RPMS
-	elif [ "$ID" -eq "arch" ]; then
-		$SUDO pacman -Sy --noconfirm --needed $ARCHDEBS
-	elif [ $IS_MACOS -eq 1 ]; then
+	if [ $IS_MACOS -eq 1 ]; then
 		if ! which brew > /dev/null; then
 			error "Your system doesn't have homebrew installed, I don't know how to install the dependencies.\nPlease install homebrew: https://brew.sh/\nOr install the equivalent of these homebrew packages: $HOMEBREW_DEBS."
 		fi
 		brew install $HOMEBREW_DEBS
 	elif [ -e /etc/NIXOS ]; then
 		info "Doing nothing about dependencies installation for NixOS, as they are provided via shell.nix..."
+	elif [ -f /etc/os-release ]; do
+		source /etc/os-release
+		if [ "$ID_LIKE" = "*debian*" ]; then
+			$SUDO apt-get update
+			$SUDO apt-get install -y $DEBS
+		elif [ "$ID_LIKE" = "*fedora*" ]; then
+			$SUDO dnf install -yq $RPMS
+		elif [ "$ID_LIKE" = "*suse*" ]; then
+			$SUDO zypper install -y $OPENSUSE_RPMS
+		elif [ "$ID" = "arch" ]; then
+			$SUDO pacman -Sy --noconfirm --needed $ARCHDEBS
+		else
+			error "We don't recognize this system. Please install equivelents of these debian packages: $DEBS"
+		fi
 	else
-		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
+		error "We don't recognize this system. Please install the equivalents of these debian packages: $DEBS."
 	fi
 fi
 
