@@ -12,7 +12,6 @@ function usage
 	echo "    -C		don't do the actual installation (quit after cloning)"
 	echo "    -c		clone repositories concurrently in the background"
 	echo "    -s            Use shallow clones (pull just the latest commit from each branch)."
-	echo "    -w		use pre-built packages where available"
 	echo "    -v		verbose (don't redirect installation logging)"
 	echo "    -e ENV	create or reuse a cpython environment ENV"
 	echo "    -E ENV	re-create a cpython environment ENV"
@@ -71,7 +70,6 @@ USE_PYPY=
 RMVENV=0
 INSTALL=1
 CONCURRENT_CLONE=0
-WHEELS=0
 VERBOSE=0
 BRANCH=
 UNATTENDED=0
@@ -116,9 +114,6 @@ do
 		c)
 			CONCURRENT_CLONE=1
 			;;
-		w)
-			WHEELS=1
-			;;
 		D)
 			REPOS=""
 			;;
@@ -139,11 +134,6 @@ done
 
 # Hacky way to prevent http username/password prompts (ssh should not be affected)
 export GIT_ASKPASS=true
-
-if [ $WHEELS -eq 1 ]
-then
-	REPOS="$REPOS wheels"
-fi
 
 EXTRA_REPOS=${@:$OPTIND:$OPTIND+100}
 REPOS="$REPOS $EXTRA_REPOS"
@@ -400,30 +390,6 @@ function clone_repo
 	return 0
 }
 
-function install_wheels
-{
-	#LATEST_Z3=$(ls -tr wheels/angr_only_z3_custom-*)
-	#echo "Installing $LATEST_Z3..." >> $OUTFILE 2>> $ERRFILE
-	#pip3 install $LATEST_Z3 >> $OUTFILE 2>> $ERRFILE
-
-	#LATEST_VEX=$(ls -tr wheels/vex-*)
-	#debug "Extracting $LATEST_VEX..." >> $OUTFILE 2>> $ERRFILE
-	#tar xvzf $LATEST_VEX >> $OUTFILE 2>> $ERRFILE
-	#touch vex/*/*.o vex/libvex.a
-
-	#LATEST_QEMU=$(ls -tr wheels/shellphish_qemu-*)
-	#echo "Installing $LATEST_QEMU" >> $OUTFILE 2>> $ERRFILE
-	#pip3 install $LATEST_QEMU >> $OUTFILE 2>> $ERRFILE
-
-	#LATEST_AFL=$(ls -tr wheels/shellphish_afl-*)
-	#echo "Installing $LATEST_AFL" >> $OUTFILE 2>> $ERRFILE
-	#pip3 install $LATEST_AFL >> $OUTFILE 2>> $ERRFILE
-
-	LATEST_KEYSTONE=$(ls -tr wheels/keystone_engine-*)
-	echo "Installing $LATEST_KEYSTONE" >> $OUTFILE 2>> $ERRFILE
-	pip3 install $LATEST_KEYSTONE >> $OUTFILE 2>> $ERRFILE
-}
-
 function pip_install
 {
         debug "pip-installing: $@."
@@ -492,12 +458,6 @@ then
 		info "Installing python packages!"
 	else
 		info "Installing python packages (logging to $OUTFILE)!"
-	fi
-
-	if [ $WHEELS -eq 1 ]
-	then
-		install_wheels
-		PIP_OPTIONS="$PIP_OPTIONS --find-links=$PWD/wheels"
 	fi
 
 	# the angr environment on macos hides the python2 from us, so we'll used the installed version in /usr/bin/python
