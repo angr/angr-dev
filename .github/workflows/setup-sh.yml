@@ -73,10 +73,10 @@ jobs:
         - opensuse/leap:15
         - opensuse/tumbleweed:latest
       fail-fast: false
-    name: Run setup on ${{ container }}
+    name: Run setup on ${{ matrix.container }}
     runs-on: ubuntu-latest
     container:
-      image: ${{ container }}
+      image: ${{ matrix.container }}
     steps:
     - uses: actions/checkout@v3
     - name: Run setup.sh
