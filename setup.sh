@@ -46,13 +46,13 @@ fi
 
 
 # macOS
-HOMEBREW_DEBS=${HOMEBREW_DEBS-python3}
+HOMEBREW_DEBS=${HOMEBREW_DEBS-git python3}
 
 # Linux distros
-DEBS=${DEBS-python3-dev python3-venv}
-ARCHDEBS=${ARCHDEBS-python base-devel}
-RPMS=${RPMS-python3-devel}
-OPENSUSE_RPMS=${OPENSUSE_RPMS-python3-devel}
+DEBS=${DEBS-git python3-dev python3-venv}
+ARCHDEBS=${ARCHDEBS-git python base-devel}
+RPMS=${RPMS-git python3-devel}
+OPENSUSE_RPMS=${OPENSUSE_RPMS-git python3-devel}
 
 REPOS=${REPOS-archinfo pyvex cle claripy ailment angr angr-doc binaries}
 REPOS_CPYTHON=${REPOS_CPYTHON-angr-management}
@@ -167,27 +167,22 @@ then
 	else
 		export SUDO=sudo
 	fi
-	if [ -e /etc/debian_version ]
-	then
+	source /etc/os-release
+	if [ "$ID_LIKE" -eq "*debian*" ]; then
+		$SUDO apt-get update
 		$SUDO apt-get install -y $DEBS
-	elif [ -e /etc/pacman.conf ]
-	then
-		$SUDO pacman -S --noconfirm --needed $ARCHDEBS
-	elif [ -e /etc/fedora-release ]
-	then
-		$SUDO dnf install -y $RPMS
-	elif [ -e /etc/zypp ]
-	then
+	if [ "$ID_LIKE" -eq "*fedora*" ]; then
+		$SUDO dnf install -yq $RPMS
+	elif [ "$ID_LIKE" -eq "*suse*" ]; then
 		$SUDO zypper install -y $OPENSUSE_RPMS
-	elif [ $IS_MACOS -eq 1 ]
-	then
-		if ! which brew > /dev/null;
-		then
+	elif [ "$ID" -eq "arch" ]; then
+		$SUDO pacman -Sy --noconfirm --needed $ARCHDEBS
+	elif [ $IS_MACOS -eq 1 ]; then
+		if ! which brew > /dev/null; then
 			error "Your system doesn't have homebrew installed, I don't know how to install the dependencies.\nPlease install homebrew: https://brew.sh/\nOr install the equivalent of these homebrew packages: $HOMEBREW_DEBS."
 		fi
 		brew install $HOMEBREW_DEBS
-	elif [ -e /etc/NIXOS ]
-	then
+	elif [ -e /etc/NIXOS ]; then
 		info "Doing nothing about dependencies installation for NixOS, as they are provided via shell.nix..."
 	else
 		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
