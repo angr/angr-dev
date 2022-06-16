@@ -46,7 +46,7 @@ fi
 
 
 # macOS
-HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm patchelf}
+HOMEBREW_DEBS=${HOMEBREW_DEBS-python3}
 
 # Linux distros
 DEBS=${DEBS-python3-dev python3-venv}
