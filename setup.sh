@@ -45,16 +45,20 @@ then
 fi
 
 
-DEBS=${DEBS-python3-pip python3-dev python3-setuptools build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev}
+# macOS
 HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm patchelf}
-ARCHDEBS=${ARCHDEBS-python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils nasm}
-ARCHCOMDEBS=${ARCHCOMDEBS}
-RPMS=${RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel}
-OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel}
+
+# Linux distros
+DEBS=${DEBS-python3-dev python3-venv}
+ARCHDEBS=${ARCHDEBS-python base-devel}
+RPMS=${RPMS-python3-devel}
+OPENSUSE_RPMS=${OPENSUSE_RPMS-python3-devel}
+
 REPOS=${REPOS-archinfo pyvex cle claripy ailment angr angr-doc binaries}
 REPOS_CPYTHON=${REPOS_CPYTHON-angr-management}
 # archr is Linux only because of shellphish-qemu dependency
 if [ `uname` == "Linux" ]; then REPOS="${REPOS} archr"; fi
+
 declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="sqlalchemy unicorn==2.0.1.post1"
 EXTRA_DEPS["pyvex"]="--pre capstone"
@@ -156,6 +160,7 @@ function error
 
 if [ "$INSTALL_REQS" -eq 1 ]
 then
+	info "Installing dependencies..."
 	if [ $EUID -eq 0 ]
 	then
 		export SUDO=
@@ -164,32 +169,15 @@ then
 	fi
 	if [ -e /etc/debian_version ]
 	then
-		if ! (dpkg --print-foreign-architectures | grep -q i386)
-		then
-			info "Adding i386 architectures..."
-			$SUDO dpkg --add-architecture i386
-			$SUDO apt-get update
-		fi
-		info "Installing dependencies..."
 		$SUDO apt-get install -y $DEBS
 	elif [ -e /etc/pacman.conf ]
 	then
-		if ! grep --quiet "^\[multilib\]" /etc/pacman.conf;
-		then
-			info "Adding i386 architectures..."
-			$SUDO sed 's/^\(#\[multilib\]\)/\[multilib\]/' </etc/pacman.conf >/tmp/pacman.conf
-			$SUDO sed '/^\[multilib\]/{n;s/^#//}' </tmp/pacman.conf >/etc/pacman.conf
-			$SUDO pacman -Syu
-		fi
-		info "Installing dependencies..."
 		$SUDO pacman -S --noconfirm --needed $ARCHDEBS
 	elif [ -e /etc/fedora-release ]
 	then
-		info "Installing dependencies..."
 		$SUDO dnf install -y $RPMS
 	elif [ -e /etc/zypp ]
 	then
-		info "Installing dependencies..."
 		$SUDO zypper install -y $OPENSUSE_RPMS
 	elif [ $IS_MACOS -eq 1 ]
 	then
@@ -204,37 +192,6 @@ then
 	else
 		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
 	fi
-fi
-
-info "Checking dependencies..."
-if [ -e /etc/debian_version ]
-then
-	INSTALLED_DEBS=$(dpkg --get-selections $DEBS 2>/dev/null)
-	MISSING_DEBS=""
-	for REQ in $DEBS; do
-		if ! grep "$REQ" <<<$INSTALLED_DEBS >/dev/null 2>/dev/null; then
-			MISSING_DEBS="$REQ $MISSING_DEBS"
-		fi
-	done
-	[ -n "$MISSING_DEBS" ] && error "Please install the following packages: $MISSING_DEBS"
-elif [ -e /etc/pacman.conf ]
-then
-	[ $(pacman -Qi $ARCHDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages: $ARCHDEBS"
-	[ $(pacman -Qi $ARCHCOMDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages from AUR (yaourt -S <package_name>)): $ARCHCOMDEBS"
-elif [ -e /etc/fedora-release ]
-then
-	[ $(rpm -q $RPMS  2>&1 | grep "is not installed" | wc -l) -ne 0 ] && error "Please install the following packages: $RPMS"
-elif [ -e /etc/zypp ]
-then
-	[ $(rpm -q $OPENSUSE_RPMS 2>&1 | grep "is not installed" | wc -l) -ne 0 ] && error "Please install the following packages: $OPENSUSE_RPMS"
-elif [ -e /etc/NIXOS ]
-then
-	[ -z "$IN_NIX_SHELL" ] && error "Please run in the provided shell.nix"
-elif [ $IS_MACOS -eq 1 ]
-then
-	[ $(brew ls --versions $HOMEBREW_DEBS | wc -l) -ne $(echo $HOMEBREW_DEBS | wc -w) ] && error "Please install the following packages from homebrew: $HOMEBREW_DEBS"
-else
-	warning "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS."
 fi
 
 if [ -n "$ANGR_VENV" ]

@@ -12,12 +12,33 @@ on:
     - ".github/workflows/setup-sh.yml"
 
 jobs:
-  build:
+  build_windows:
     strategy:
       matrix:
         os:
-        - ubuntu-20.04
-        - ubuntu-22.04
+        - windows-2022
+        python:
+        - "3.8"
+        - "3.9"
+        - "3.10"
+      fail-fast: false
+    name: Run setup on ${{ matrix.os }} with python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Run setup.ps1
+      if: matrix.os == 'windows-2022'
+      run: .\setup.ps1
+    - name: Test angr import
+      run: python -c "import angr; print('angr imports!')"
+
+  build_macos:
+    strategy:
+      matrix:
+        os:
         - macos-12
         python:
         - "3.8"
@@ -28,18 +49,36 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
-
     - name: Upgrade bash
       if: matrix.os == 'macos-12'
       run: brew install bash
-
     - uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python }}
-
     - name: Run setup.sh
       run: ./setup.sh -i -u
+    - name: Test angr import
+      run: python -c "import angr; print('angr imports!')"
 
+  build_linux:
+    strategy:
+      matrix:
+        container:
+        - ubuntu:bionic
+        - ubuntu:focal
+        - archlinux:latest
+        - fedora:36
+        - almalinux:8
+        - almalinux:9
+        - opensuse/leap:15
+        - opensuse/tumbleweed:latest
+      fail-fast: false
+    name: Run setup on ${{ container.os }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run setup.sh
+      run: ./setup.sh -i -u
     - name: Test angr import
       run: python -c "import angr; print('angr imports!')"
 
