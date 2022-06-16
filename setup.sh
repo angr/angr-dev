@@ -171,7 +171,7 @@ then
 	if [ "$ID_LIKE" -eq "*debian*" ]; then
 		$SUDO apt-get update
 		$SUDO apt-get install -y $DEBS
-	if [ "$ID_LIKE" -eq "*fedora*" ]; then
+	elif [ "$ID_LIKE" -eq "*fedora*" ]; then
 		$SUDO dnf install -yq $RPMS
 	elif [ "$ID_LIKE" -eq "*suse*" ]; then
 		$SUDO zypper install -y $OPENSUSE_RPMS
