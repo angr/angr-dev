@@ -174,7 +174,7 @@ then
 		brew install $HOMEBREW_DEBS
 	elif [ -e /etc/NIXOS ]; then
 		info "Doing nothing about dependencies installation for NixOS, as they are provided via shell.nix..."
-	elif [ -f /etc/os-release ]; do
+	elif [ -f /etc/os-release ]; then
 		source /etc/os-release
 		if [ "$ID_LIKE" = "*debian*" ]; then
 			$SUDO apt-get update
