@@ -265,7 +265,7 @@ then
 fi
 
 # Must happen after virutalenv is enabled to correctly detect python implementation
-implementation=$(python -c "import sys; print(sys.implementation.name)")
+implementation=$(python3 -c "import sys; print(sys.implementation.name)")
 if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
 # Install build dependencies until build isolation can be enabled
