@@ -176,12 +176,12 @@ then
 		info "Doing nothing about dependencies installation for NixOS, as they are provided via shell.nix..."
 	elif [ -f /etc/os-release ]; then
 		source /etc/os-release
-		if [ "$ID_LIKE" = "*debian*" ]; then
+		if [[ "$ID_LIKE" =~ "debian" ]]; then
 			$SUDO apt-get update
 			$SUDO apt-get install -y $DEBS
-		elif [ "$ID_LIKE" = "*fedora*" ]; then
+		elif [[ "$ID_LIKE" =~ "fedora" ]]; then
 			$SUDO dnf install -yq $RPMS
-		elif [ "$ID_LIKE" = "*suse*" ]; then
+		elif [[ "$ID_LIKE" =~ "suse" ]]; then
 			$SUDO zypper install -y $OPENSUSE_RPMS
 		elif [ "$ID" = "arch" ]; then
 			$SUDO pacman -Sy --noconfirm --needed $ARCHDEBS
