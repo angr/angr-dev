@@ -50,8 +50,8 @@ DEBS=${DEBS-python3-pip python3-dev python3-setuptools build-essential libxml2-d
 HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm patchelf}
 ARCHDEBS=${ARCHDEBS-python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils nasm lib32-glibc lib32-gcc-libs lib32-zlib lib32-ncurses}
 ARCHCOMDEBS=${ARCHCOMDEBS}
-RPMS=${RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel python2 glibc.i686 libgcc.i686 libstdc++.i686 ncurses-compat-libs.i686 zlib.i686 java-1.8.0-openjdk-devel}
-OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel python glibc-32bit libgcc_s1-32bit libstdc++6-32bit libncurses5-32bit libz1-32bit java-1_8_0-openjdk-devel} 
+RPMS=${RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel python2.7 glibc.i686 libgcc.i686 libstdc++.i686 ncurses-compat-libs.i686 zlib.i686 java-1.8.0-openjdk-devel}
+OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel python glibc-32bit libgcc_s1-32bit libstdc++6-32bit libncurses5-32bit libz1-32bit java-1_8_0-openjdk-devel}
 REPOS=${REPOS-archinfo pyvex cle claripy ailment angr angr-doc binaries}
 REPOS_CPYTHON=${REPOS_CPYTHON-angr-management}
 # archr is Linux only because of shellphish-qemu dependency
