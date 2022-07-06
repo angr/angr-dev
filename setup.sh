@@ -12,7 +12,6 @@ function usage
 	echo "    -C		don't do the actual installation (quit after cloning)"
 	echo "    -c		clone repositories concurrently in the background"
 	echo "    -s            Use shallow clones (pull just the latest commit from each branch)."
-	echo "    -v		verbose (don't redirect installation logging)"
 	echo "    -e ENV	create or reuse a cpython environment ENV"
 	echo "    -E ENV	re-create a cpython environment ENV"
 	echo "    -p ENV	create or reuse a pypy environment ENV"
@@ -70,7 +69,6 @@ USE_PYPY=
 RMVENV=0
 INSTALL=1
 CONCURRENT_CLONE=0
-VERBOSE=0
 BRANCH=
 UNATTENDED=0
 
@@ -80,9 +78,6 @@ do
 	case $opt in
 		i)
 			INSTALL_REQS=1
-			;;
-		v)
-			VERBOSE=1
 			;;
 		e)
 			ANGR_VENV=$OPTARG
@@ -138,47 +133,26 @@ export GIT_ASKPASS=true
 EXTRA_REPOS=${@:$OPTIND:$OPTIND+100}
 REPOS="$REPOS $EXTRA_REPOS"
 
-if [ $VERBOSE -eq 1 ]
-then
-	OUTFILE=/dev/stdout
-	ERRFILE=/dev/stderr
-else
-	OUTFILE=/tmp/setup-$$
-	ERRFILE=/tmp/setup-$$
-	touch $OUTFILE
-fi
+function debug
+{
+	echo -e "$(tput setaf 6 2>/dev/null)[-] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
+}
 
 function info
 {
 	echo -e "$(tput setaf 4 2>/dev/null)[+] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
-	if [ $VERBOSE -eq 0 ]; then echo "[+] $@"; fi >> $OUTFILE
 }
 
 function warning
 {
 	echo -e "$(tput setaf 3 2>/dev/null)[!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
-	if [ $VERBOSE -eq 0 ]; then echo "[!] $@"; fi >> $OUTFILE
-}
-
-function debug
-{
-	echo -e "$(tput setaf 6 2>/dev/null)[-] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
-	if [ $VERBOSE -eq 0 ]; then echo "[-] $@"; fi >> $OUTFILE
 }
 
 function error
 {
-	echo -e "$(tput setaf 1 2>/dev/null)[!!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)" >&2
-	if [ $VERBOSE -eq 0 ]
-	then
-		echo "[!!] $@" >> $ERRFILE
-		cat $OUTFILE
-		[ $OUTFILE == $ERRFILE ] || cat $ERRFILE
-	fi
+	echo -e "$(tput setaf 1 2>/dev/null)[!!] $(date +%H:%M:%S) $@$(tput sgr0 2>/dev/null)"
 	exit 1
 }
-
-trap 'error "An error occurred on line $LINENO. Saved output:"' ERR
 
 if [ "$INSTALL_REQS" -eq 1 ]
 then
@@ -193,11 +167,11 @@ then
 		if ! (dpkg --print-foreign-architectures | grep -q i386)
 		then
 			info "Adding i386 architectures..."
-			$SUDO dpkg --add-architecture i386 >>$OUTFILE 2>>$ERRFILE
-			$SUDO apt-get update >>$OUTFILE 2>>$ERRFILE
+			$SUDO dpkg --add-architecture i386
+			$SUDO apt-get update
 		fi
 		info "Installing dependencies..."
-		$SUDO apt-get install -y $DEBS >>$OUTFILE 2>>$ERRFILE
+		$SUDO apt-get install -y $DEBS
 	elif [ -e /etc/pacman.conf ]
 	then
 		if ! grep --quiet "^\[multilib\]" /etc/pacman.conf;
@@ -205,14 +179,14 @@ then
 			info "Adding i386 architectures..."
 			$SUDO sed 's/^\(#\[multilib\]\)/\[multilib\]/' </etc/pacman.conf >/tmp/pacman.conf
 			$SUDO sed '/^\[multilib\]/{n;s/^#//}' </tmp/pacman.conf >/etc/pacman.conf
-			$SUDO pacman -Syu >>$OUTFILE 2>>$ERRFILE
+			$SUDO pacman -Syu
 		fi
 		info "Installing dependencies..."
-		$SUDO pacman -S --noconfirm --needed $ARCHDEBS >>$OUTFILE 2>>$ERRFILE
+		$SUDO pacman -S --noconfirm --needed $ARCHDEBS
 	elif [ -e /etc/fedora-release ]
 	then
 		info "Installing dependencies..."
-		$SUDO dnf install -y $RPMS #>>$OUTFILE 2>>$ERRFILE
+		$SUDO dnf install -y $RPMS
 	elif [ -e /etc/zypp ]
 	then
 		info "Installing dependencies..."
@@ -223,7 +197,7 @@ then
 		then
 			error "Your system doesn't have homebrew installed, I don't know how to install the dependencies.\nPlease install homebrew: https://brew.sh/\nOr install the equivalent of these homebrew packages: $HOMEBREW_DEBS."
 		fi
-		brew install $HOMEBREW_DEBS >>$OUTFILE 2>>$ERRFILE
+		brew install $HOMEBREW_DEBS
 	elif [ -e /etc/NIXOS ]
 	then
 		info "Doing nothing about dependencies installation for NixOS, as they are provided via shell.nix..."
@@ -260,7 +234,7 @@ elif [ $IS_MACOS -eq 1 ]
 then
 	[ $(brew ls --versions $HOMEBREW_DEBS | wc -l) -ne $(echo $HOMEBREW_DEBS | wc -w) ] && error "Please install the following packages from homebrew: $HOMEBREW_DEBS"
 else
-	warning -e "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS.\nPress enter to continue." && ([ $UNATTENDED == 0 ] || read a)
+	warning "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS."
 fi
 
 if [ -n "$ANGR_VENV" ]
@@ -320,10 +294,10 @@ then
 	elif [ "$USE_PYPY" -eq 1 ]
 	then
 		info "Creating pypy virtualenv $ANGR_VENV..."
-		./pypy_venv.sh $ANGR_VENV >>$OUTFILE 2>>$ERRFILE
+		./pypy_venv.sh $ANGR_VENV
 	else
 		info "Creating cpython virtualenv $ANGR_VENV..."
-		mkvirtualenv --python=$(which python3) $ANGR_VENV >>$OUTFILE 2>>$ERRFILE
+		mkvirtualenv --python=$(which python3) $ANGR_VENV
 	fi
 
 	set -e
@@ -393,10 +367,9 @@ function clone_repo
 function pip_install
 {
         debug "pip-installing: $@."
-        if ! pip3 install $PIP_OPTIONS `[ $VERBOSE -eq 1 ] && echo -v` $@ >>$OUTFILE 2>>$ERRFILE
+        if ! pip3 install $PIP_OPTIONS $@
         then
-            	error "pip failure ($@). Check $OUTFILE for details, or read it here:"
-            	exit 1
+            	error "pip failure ($@)."
         fi
 }
 
@@ -418,13 +391,10 @@ else
 
 	for r in $REPOS
 	do
-		#echo "WAITING FOR: $r (PID ${CLONE_PROCS[$r]})"
 		if wait ${CLONE_PROCS[$r]}
 		then
-			#echo "... SUCCESS"
 			[ -e "$r/setup.py" -o -e "$r/pyproject.toml" ] && TO_INSTALL="$TO_INSTALL $r"
 		else
-			#echo "... FAIL"
 			exit 1
 		fi
 	done
@@ -433,7 +403,7 @@ fi
 if [ -n "$BRANCH" ]
 then
 	info "Checking out branch $BRANCH."
-	./git_all.sh checkout $BRANCH >> $OUTFILE 2>> $ERRFILE
+	./git_all.sh checkout $BRANCH
 fi
 
 if [ $INSTALL -eq 1 ]
@@ -453,12 +423,7 @@ then
 		fi
 	fi
 
-	if [ $VERBOSE -eq 1 ]
-	then
-		info "Installing python packages!"
-	else
-		info "Installing python packages (logging to $OUTFILE)!"
-	fi
+	info "Installing python packages!"
 
 	# the angr environment on macos hides the python2 from us, so we'll used the installed version in /usr/bin/python
 	if [ $IS_MACOS -eq 1 ]
@@ -486,15 +451,9 @@ then
 		pip_install --no-build-isolation -e $PACKAGE
 	done
 
-	info "Installing some other helpful stuff (logging to $OUTFILE)."
+	info "Installing some other helpful stuff"
 	# we need the pyelftools from upstream
-	if pip3 install -U ipython pylint ipdb nose nose-timer coverage flaky keystone-engine 'git+https://github.com/eliben/pyelftools#egg=pyelftools' >> $OUTFILE 2>> $ERRFILE
-	then
-		info "Success!"
-	else
-		error "Something failed to install. Check $OUTFILE for details, or read it here:"
-		exit 1
-	fi
+	pip3 install -U ipython pylint ipdb nose nose-timer coverage flaky keystone-engine 'git+https://github.com/eliben/pyelftools#egg=pyelftools'
 
 	echo ''
 	info "All done! Execute \"workon $ANGR_VENV\" to use your new angr virtual"
