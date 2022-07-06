@@ -70,8 +70,9 @@ jobs:
         - fedora:36
         - almalinux:8
         - almalinux:9
-        - opensuse/leap:15
-        - opensuse/tumbleweed:latest
+        # OpenSUSE is disabled because they don't include tar
+        # - opensuse/leap:15
+        # - opensuse/tumbleweed:latest
       fail-fast: false
     name: Run setup on ${{ matrix.container }}
     runs-on: ubuntu-latest
