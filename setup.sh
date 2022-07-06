@@ -406,7 +406,7 @@ then
 	for r in $REPOS
 	do
 		clone_repo $r || exit 1
-		[ -e "$NAME/setup.py" -o -e "$NAME/setup.cfg" ] && TO_INSTALL="$TO_INSTALL $NAME"
+		[ -e "$NAME/setup.py" -o -e "$NAME/pyproject.toml" ] && TO_INSTALL="$TO_INSTALL $NAME"
 	done
 else
 	declare -A CLONE_PROCS
@@ -422,7 +422,7 @@ else
 		if wait ${CLONE_PROCS[$r]}
 		then
 			#echo "... SUCCESS"
-			[ -e "$r/setup.py" -o -e "$r/setup.cfg" ] && TO_INSTALL="$TO_INSTALL $r"
+			[ -e "$r/setup.py" -o -e "$r/pyproject.toml" ] && TO_INSTALL="$TO_INSTALL $r"
 		else
 			#echo "... FAIL"
 			exit 1
