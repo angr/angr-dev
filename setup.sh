@@ -183,7 +183,7 @@ then
 			$SUDO dnf install -yq $RPMS
 		elif [[ "$ID $ID_LIKE" =~ "suse" ]]; then
 			$SUDO zypper install -y $OPENSUSE_RPMS
-		elif [ "$ID $ID_LIKE" ~= "arch" ]; then
+		elif [ "$ID $ID_LIKE" =~ "arch" ]; then
 			$SUDO pacman -Syq --noconfirm --needed $ARCHDEBS
 		else
 			error "We don't recognize this system. Please install equivelents of these debian packages: $DEBS"
