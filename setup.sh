@@ -323,6 +323,9 @@ function clone_repo
 
 function pip_install
 {
+		# Use --user flag if not using a venv
+		if [ -n "$VIRTUAL_ENV" ]; then USER_FLAG="--user"; else USER_FLAG=""; fi
+
         debug "pip-installing: $@."
         if ! pip3 install $PIP_OPTIONS $@
         then
@@ -405,7 +408,7 @@ then
 	for PACKAGE in $TO_INSTALL; do
 		info "Installing $PACKAGE."
 		[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
-		pip_install --no-build-isolation -e $PACKAGE
+		pip_install --no-build-isolation -e ./$PACKAGE
 	done
 
 	info "Installing some other helpful stuff"
