@@ -56,7 +56,7 @@ jobs:
       with:
         python-version: ${{ matrix.python }}
     - name: Run setup.sh
-      run: ./setup.sh -i -u
+      run: ./setup.sh -i -u -v
     - name: Test angr import
       run: python -c "import angr; print('angr imports!')"
 
