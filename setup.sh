@@ -158,6 +158,68 @@ function error
 	exit 1
 }
 
+function try_remote
+{
+	URL=$1
+	debug "Trying to clone from $URL"
+	rm -f $CLONE_LOG
+	git clone --recursive $GIT_OPTIONS $URL >> $CLONE_LOG 2>> $CLONE_LOG
+	r=$?
+
+	if grep -q -E "(ssh_exchange_identification: read: Connection reset by peer|ssh_exchange_identification: Connection closed by remote host)" $CLONE_LOG
+	then
+		warning "Too many concurrent connections to the server. Retrying after sleep."
+		sleep $[$RANDOM % 5]
+		try_remote $URL
+		return $?
+	else
+		[ $r -eq 0 ] && rm -f $CLONE_LOG
+		return $r
+	fi
+}
+
+function clone_repo
+{
+	NAME=$1
+	CLONE_LOG=/tmp/clone-$BASHPID
+	if [ -e $NAME ]
+	then
+		info "Skipping $NAME -- already cloned. Use ./git_all.sh pull for update."
+		return 0
+	fi
+
+	info "Cloning repo $NAME."
+	for r in $REMOTES
+	do
+		URL="$r/$NAME"
+		try_remote $URL && debug "Success - $NAME cloned!" && break
+	done
+
+	if [ ! -e $NAME ]
+	then
+		set +e
+		error "Failed to clone $NAME. Error was:"
+		set -e
+		cat $CLONE_LOG
+		rm -f $CLONE_LOG
+		return 1
+	fi
+
+	return 0
+}
+
+function pip_install
+{
+		# Use --user flag if not using a venv
+		if [ -n "$VIRTUAL_ENV" ]; then USER_FLAG="--user"; else USER_FLAG=""; fi
+
+        debug "pip-installing: $@."
+        if ! pip3 install $PIP_OPTIONS $@
+        then
+            	error "pip failure ($@)."
+        fi
+}
+
 if [ "$INSTALL_REQS" -eq 1 ]
 then
 	info "Installing dependencies..."
@@ -270,68 +332,6 @@ if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
 # Install build dependencies until build isolation can be enabled
 pip install -U pip "setuptools==64.0.1" wheel cffi unicorn==2.0.1.post1 cmake ninja
-
-function try_remote
-{
-	URL=$1
-	debug "Trying to clone from $URL"
-	rm -f $CLONE_LOG
-	git clone --recursive $GIT_OPTIONS $URL >> $CLONE_LOG 2>> $CLONE_LOG
-	r=$?
-
-	if grep -q -E "(ssh_exchange_identification: read: Connection reset by peer|ssh_exchange_identification: Connection closed by remote host)" $CLONE_LOG
-	then
-		warning "Too many concurrent connections to the server. Retrying after sleep."
-		sleep $[$RANDOM % 5]
-		try_remote $URL
-		return $?
-	else
-		[ $r -eq 0 ] && rm -f $CLONE_LOG
-		return $r
-	fi
-}
-
-function clone_repo
-{
-	NAME=$1
-	CLONE_LOG=/tmp/clone-$BASHPID
-	if [ -e $NAME ]
-	then
-		info "Skipping $NAME -- already cloned. Use ./git_all.sh pull for update."
-		return 0
-	fi
-
-	info "Cloning repo $NAME."
-	for r in $REMOTES
-	do
-		URL="$r/$NAME"
-		try_remote $URL && debug "Success - $NAME cloned!" && break
-	done
-
-	if [ ! -e $NAME ]
-	then
-		set +e
-		error "Failed to clone $NAME. Error was:"
-		set -e
-		cat $CLONE_LOG
-		rm -f $CLONE_LOG
-		return 1
-	fi
-
-	return 0
-}
-
-function pip_install
-{
-		# Use --user flag if not using a venv
-		if [ -n "$VIRTUAL_ENV" ]; then USER_FLAG="--user"; else USER_FLAG=""; fi
-
-        debug "pip-installing: $@."
-        if ! pip3 install $PIP_OPTIONS $@
-        then
-            	error "pip failure ($@)."
-        fi
-}
 
 info "Cloning angr components!"
 if [ $CONCURRENT_CLONE -eq 0 ]
