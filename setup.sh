@@ -265,7 +265,7 @@ then
 		set +e
 		source ~/.local/bin/virtualenvwrapper.sh
 		set -e
-		venvwrapepr_loc=~/.local/bin/virtualenvwrapper.sh
+		venvwrapper_loc=~/.local/bin/virtualenvwrapper.sh
 	fi
 	if [[ $venvwrapper_loc == "~/.local/bin/virtualenvwrapper.sh" && ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
 		info "\$HOME/.local/bin is not in your path, adding temporarily."
