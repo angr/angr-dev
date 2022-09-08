@@ -214,7 +214,7 @@ function pip_install
 		if [ -n "$VIRTUAL_ENV" ]; then USER_FLAG="--user"; else USER_FLAG=""; fi
 
         debug "pip-installing: $@."
-        if ! pip3 install $PIP_OPTIONS $@
+        if ! pip install $PIP_OPTIONS $@
         then
             	error "pip failure ($@)."
         fi
@@ -279,7 +279,7 @@ then
 	done
 	if ! command -v workon &> /dev/null; then
 		info "Could not find virtualenvwrapper preinstalled, installing via pip3..."
-		pip3 install --user virtualenvwrapper
+		pip install --user virtualenvwrapper
 		set +e
 		source ~/.local/bin/virtualenvwrapper.sh
 		set -e
@@ -323,7 +323,7 @@ then
 
 	# older versions of pip will fail to process the --find-links arg silently
 	# setuptools<64.0.1 is needed for editable installs for now, see angr/angr#3487
-	pip3 install -U 'pip>=20.0.2'
+	pip install -U 'pip>=20.0.2'
 fi
 
 # Must happen after virutalenv is enabled to correctly detect python implementation
@@ -413,7 +413,7 @@ then
 
 	info "Installing some other helpful stuff"
 	# we need the pyelftools from upstream
-	pip3 install -U ipython pylint ipdb nose nose-timer coverage flaky keystone-engine 'git+https://github.com/eliben/pyelftools#egg=pyelftools'
+	pip install -U ipython pylint ipdb nose nose-timer coverage flaky keystone-engine 'git+https://github.com/eliben/pyelftools#egg=pyelftools'
 
 	echo ''
 	info "All done! Execute \"workon $ANGR_VENV\" to use your new angr virtual"
