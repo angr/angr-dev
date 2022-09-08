@@ -64,8 +64,8 @@ jobs:
     strategy:
       matrix:
         container:
-        - ubuntu:bionic
         - ubuntu:focal
+        - ubuntu:jammy
         - archlinux:latest
         - fedora:36
         - almalinux:8
