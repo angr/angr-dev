@@ -80,7 +80,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Run setup.sh
-      run: ./setup.sh -i -u
+      run: ./setup.sh -i -u -e angr
     - name: Test angr import
       run: python -c "import angr; print('angr imports!')"
 
