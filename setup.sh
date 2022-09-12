@@ -49,10 +49,10 @@ fi
 HOMEBREW_DEBS=${HOMEBREW_DEBS-git python3}
 
 # Linux distros
-DEBS=${DEBS-git python3-dev python3-venv}
-ARCHDEBS=${ARCHDEBS-git python base-devel}
-RPMS=${RPMS-git python3-devel}
-OPENSUSE_RPMS=${OPENSUSE_RPMS-git python3-devel}
+DEBS=${DEBS-git python3-dev python3-venv python3-pip}
+ARCHDEBS=${ARCHDEBS-git python python-pip base-devel}
+RPMS=${RPMS-git python3-devel python3-pip}
+OPENSUSE_RPMS=${OPENSUSE_RPMS-git python3-devel python3-pip}
 
 REPOS=${REPOS-archinfo pyvex cle claripy ailment angr angr-doc binaries}
 REPOS_CPYTHON=${REPOS_CPYTHON-angr-management}
