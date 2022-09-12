@@ -79,8 +79,17 @@ jobs:
       image: ${{ matrix.container }}
     steps:
     - uses: actions/checkout@v3
+    - name: Install python3
+      run: |
+        # Don't try to cover everything, just what's in CI
+        source /etc/os-release
+        [ "$ID" -eq "ubuntu" ] && apt update; apt install -y python3-venv
+        [ "$ID" -eq "arch" ] && pacman -Syu python
+        [ "$ID" -eq "fedora" ] && dnf install python3
+        [ "$ID" -eq "almalinux" ] && yum install python3
+        python3 -m venv venv
     - name: Run setup.sh
-      run: ./setup.sh -i -u
+      run: source venv/bin/activate && ./setup.sh -i -u
     - name: Test angr import
       run: python -c "import angr; print('angr imports!')"
 
