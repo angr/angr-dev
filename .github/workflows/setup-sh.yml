@@ -68,7 +68,6 @@ jobs:
         - ubuntu:jammy
         - archlinux:latest
         - fedora:36
-        - almalinux:8
         - almalinux:9
         # OpenSUSE is disabled because they don't include tar
         # - opensuse/leap:15
