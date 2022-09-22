@@ -305,7 +305,7 @@ then
 
 	# older versions of pip will fail to process the --find-links arg silently
 	# setuptools<64.0.1 is needed for editable installs for now, see angr/angr#3487
-	pip3 install -U 'pip>=20.0.2' 'setuptools==64.0.1'
+	pip3 install -U 'pip>=20.0.2'
 fi
 
 # Must happen after virutalenv is enabled to correctly detect python implementation
@@ -313,7 +313,7 @@ implementation=$(python -c "import sys; print(sys.implementation.name)")
 if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
 # Install build dependencies until build isolation can be enabled
-pip install -U pip "setuptools>=59" wheel cffi unicorn==1.0.2rc4
+pip install -U pip "setuptools==64.0.1" wheel cffi unicorn==1.0.2rc4
 
 function try_remote
 {
