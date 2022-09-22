@@ -304,7 +304,8 @@ then
 	workon $ANGR_VENV || error "Unable to activate the virtual environment."
 
 	# older versions of pip will fail to process the --find-links arg silently
-	pip3 install -U 'pip>=20.0.2'
+	# setuptools<64.0.1 is needed for editable installs for now, see angr/angr#3487
+	pip3 install -U 'pip>=20.0.2' 'setuptools==64.0.1'
 fi
 
 # Must happen after virutalenv is enabled to correctly detect python implementation
