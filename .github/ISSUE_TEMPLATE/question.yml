@@ -1,5 +1,5 @@
 name: Ask a question
-description: Ask a question about angr
+description: Ask a question about angr-dev
 labels: [question,needs-triage]
 body:
   - type: markdown
