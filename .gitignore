@@ -5,3 +5,5 @@ core
 !admin/
 !.github/
 !.github/workflows
+!.github/ISSUE_TEMPLATE
+
