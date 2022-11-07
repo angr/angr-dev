@@ -313,7 +313,7 @@ implementation=$(python -c "import sys; print(sys.implementation.name)")
 if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
 # Install build dependencies until build isolation can be enabled
-pip install -U pip "setuptools==64.0.1" wheel cffi unicorn==2.0.1
+pip install -U pip "setuptools==64.0.1" wheel cffi unicorn==2.0.1 cmake ninja
 
 function try_remote
 {
