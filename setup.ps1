@@ -13,13 +13,14 @@ $extra_requires = @{
 }
 
 $build_deps = $(
-    "pip>=21.1"
-    "setuptools>=59"
+    "pip"
+    "setuptools==64.0.1"
     "wheel"
+    "cffi"
+    "unicorn==2.0.1"
 )
 
 $extras_install = $(
-    "nose"
     "nose2"
     "flaky"
     "ipython"
