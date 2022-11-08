@@ -21,7 +21,7 @@ git clone https://github.com/angr/ailment.git
 git clone https://github.com/angr/angr-doc.git
 git clone https://github.com/angr/binaries.git
 
-python -m pip install -U pip wheel setuptools "unicorn==1.0.2rc4"
+python -m pip install -U pip wheel setuptools cffi "unicorn==2.0.1"
 
 pip install -e ./ailment
 pip install -e ./archinfo
