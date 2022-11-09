@@ -5,6 +5,11 @@ on:
   push:
     paths:
     - "setup.ps1"
+    - ".github/workflows/setup-ps1.yml"
+  pull_request:
+    paths:
+    - "setup.ps1"
+    - ".github/workflows/setup-ps1.yml"
 
 jobs:
   build:

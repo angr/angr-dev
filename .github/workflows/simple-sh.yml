@@ -3,8 +3,13 @@ name: Test extremely-simple-setup.sh
 on:
   workflow_call:
   push:
-    path:
-    - extremely-simple-setup.sh
+    paths:
+    - "extremely-simple-setup.sh"
+    - ".github/workflows/simple-sh.yml"
+  pull_request:
+    paths:
+    - "extremely-simple-setup.sh"
+    - ".github/workflows/simple-sh.yml"
 
 jobs:
   build:

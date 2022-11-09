@@ -4,7 +4,12 @@ on:
   workflow_call:
   push:
     paths:
-    - setup.sh
+    - "setup.sh"
+    - ".github/workflows/setup-sh.yml"
+  pull_request:
+    paths:
+    - "setup.sh"
+    - ".github/workflows/setup-sh.yml"
 
 jobs:
   build:
