@@ -1,9 +1,15 @@
-name: CI
+name: Test extremely-simple-setup.sh
 
 on:
   workflow_call:
   push:
+    paths:
+    - "extremely-simple-setup.sh"
+    - ".github/workflows/simple-sh.yml"
   pull_request:
+    paths:
+    - "extremely-simple-setup.sh"
+    - ".github/workflows/simple-sh.yml"
 
 jobs:
   build:
@@ -11,33 +17,27 @@ jobs:
       matrix:
         os:
         - ubuntu-20.04
-        - windows-2022
+        - ubuntu-22.04
         - macos-12
         python:
         - "3.8"
         - "3.9"
         - "3.10"
       fail-fast: false
-    name: Run setup on ${{ matrix.os }} with python ${{ matrix.python }}
+    name: Run extremely-simple-setup.sh on ${{ matrix.os }} with python ${{ matrix.python }}
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
-
-    - name: Upgrade bash
-      if: matrix.os == 'macos-12'
-      run: brew install bash
 
     - uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python }}
 
     - name: Run setup.sh
-      if: matrix.os != 'windows-2022'
-      run: ./setup.sh -i -u
-
-    - name: Run setup.bat
-      if: matrix.os == 'windows-2022'
-      run: .\setup.ps1
+      run: ./extremely-simple-setup.sh
 
     - name: Test angr import
       run: python -c "import angr; print('angr imports!')"
+
+    - name: Test angrmanagement import
+      run: python -c "import angrmanagement; print('angr management imports!')"

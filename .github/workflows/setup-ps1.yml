@@ -1,0 +1,41 @@
+name: Test setup.ps1
+
+on:
+  workflow_call:
+  push:
+    paths:
+    - "setup.ps1"
+    - ".github/workflows/setup-ps1.yml"
+  pull_request:
+    paths:
+    - "setup.ps1"
+    - ".github/workflows/setup-ps1.yml"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+        - windows-2022
+        python:
+        - "3.8"
+        - "3.9"
+        - "3.10"
+      fail-fast: false
+    name: Run setup.ps1 on ${{ matrix.os }} with python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Run setup.ps1
+      run: .\setup.ps1
+
+    - name: Test angr import
+      run: python -c "import angr; print('angr imports!')"
+
+    - name: Test angr management import
+      run: python -c "import angrmanagement; print('angr management imports!')"

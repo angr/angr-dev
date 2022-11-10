@@ -1,0 +1,47 @@
+name: Test setup.sh
+
+on:
+  workflow_call:
+  push:
+    paths:
+    - "setup.sh"
+    - ".github/workflows/setup-sh.yml"
+  pull_request:
+    paths:
+    - "setup.sh"
+    - ".github/workflows/setup-sh.yml"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+        - ubuntu-20.04
+        - ubuntu-22.04
+        - macos-12
+        python:
+        - "3.8"
+        - "3.9"
+        - "3.10"
+      fail-fast: false
+    name: Run setup on ${{ matrix.os }} with python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Upgrade bash
+      if: matrix.os == 'macos-12'
+      run: brew install bash
+
+    - uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Run setup.sh
+      run: ./setup.sh -i -u
+
+    - name: Test angr import
+      run: python -c "import angr; print('angr imports!')"
+
+    - name: Test angr management import
+      run: python -c "import angrmanagement; print('angr management imports!')"
