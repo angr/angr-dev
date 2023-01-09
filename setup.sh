@@ -56,7 +56,7 @@ REPOS_CPYTHON=${REPOS_CPYTHON-angr-management}
 # archr is Linux only because of shellphish-qemu dependency
 if [ `uname` == "Linux" ]; then REPOS="${REPOS} archr"; fi
 declare -A EXTRA_DEPS
-EXTRA_DEPS["angr"]="sqlalchemy unicorn==2.0.1"
+EXTRA_DEPS["angr"]="sqlalchemy unicorn==2.0.1.post1"
 EXTRA_DEPS["pyvex"]="--pre capstone"
 
 ORIGIN_REMOTE=${ORIGIN_REMOTE-$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|[^/:]*/angr-dev.*||")}
@@ -313,7 +313,7 @@ implementation=$(python -c "import sys; print(sys.implementation.name)")
 if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
 # Install build dependencies until build isolation can be enabled
-pip install -U pip "setuptools==64.0.1" wheel cffi unicorn==2.0.1 cmake ninja
+pip install -U pip "setuptools==64.0.1" wheel cffi unicorn==2.0.1.post1 cmake ninja
 
 function try_remote
 {
