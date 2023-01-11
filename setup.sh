@@ -63,7 +63,7 @@ declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="sqlalchemy unicorn==2.0.1.post1"
 EXTRA_DEPS["pyvex"]="--pre capstone"
 
-if [ ! $(which git) ]; then
+if [ ! -z '$(which git)' ]; then
 	ORIGIN_REMOTE=${ORIGIN_REMOTE-$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|[^/:]*/angr-dev.*||")}
 else
 	ORIGIN_REMOTE="https://github.com/"
