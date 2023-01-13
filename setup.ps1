@@ -17,7 +17,7 @@ $build_deps = $(
     "setuptools==64.0.1"
     "wheel"
     "cffi"
-    "unicorn==2.0.1"
+    "unicorn==2.0.1.post1"
 )
 
 $extras_install = $(

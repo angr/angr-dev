@@ -10,7 +10,7 @@ git clone https://github.com/angr/angr-management.git
 git clone https://github.com/angr/angr-doc.git
 git clone https://github.com/angr/binaries.git
 
-python -m pip install -U pip wheel setuptools cffi "unicorn==2.0.1"
+python -m pip install -U pip wheel setuptools cffi "unicorn==2.0.1.post1"
 
 pip install -e ./archinfo
 pip install -e ./pyvex
