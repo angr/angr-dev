@@ -45,21 +45,29 @@ then
 fi
 
 
-DEBS=${DEBS-python3-pip python3-dev python3-setuptools build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev}
-HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm patchelf}
-ARCHDEBS=${ARCHDEBS-python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils nasm}
-ARCHCOMDEBS=${ARCHCOMDEBS}
-RPMS=${RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel}
-OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel}
+# macOS
+HOMEBREW_DEBS=${HOMEBREW_DEBS-git python3}
+
+# Linux distros
+DEBS=${DEBS-git python3-dev python3-venv python3-pip}
+ARCHDEBS=${ARCHDEBS-git python python-pip base-devel}
+RPMS=${RPMS-git python3-devel python3-pip}
+OPENSUSE_RPMS=${OPENSUSE_RPMS-git python3-devel python3-pip}
+
 REPOS=${REPOS-archinfo pyvex cle claripy ailment angr angr-doc binaries}
 REPOS_CPYTHON=${REPOS_CPYTHON-angr-management}
 # archr is Linux only because of shellphish-qemu dependency
 if [ `uname` == "Linux" ]; then REPOS="${REPOS} archr"; fi
+
 declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="sqlalchemy unicorn==2.0.1.post1"
 EXTRA_DEPS["pyvex"]="--pre capstone"
 
-ORIGIN_REMOTE=${ORIGIN_REMOTE-$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|[^/:]*/angr-dev.*||")}
+if [ ! -z '$(which git)' ]; then
+	ORIGIN_REMOTE=${ORIGIN_REMOTE-$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|[^/:]*/angr-dev.*||")}
+else
+	ORIGIN_REMOTE="https://github.com/"
+fi
 REMOTES=${REMOTES-${ORIGIN_REMOTE}angr ${ORIGIN_REMOTE}shellphish ${ORIGIN_REMOTE}mechaphish https://git:@github.com/zardus https://git:@github.com/rhelmot https://git:@github.com/salls https://git:@github.com/lukas-dresel https://git:@github.com/mborgerson}
 
 
@@ -154,167 +162,6 @@ function error
 	exit 1
 }
 
-if [ "$INSTALL_REQS" -eq 1 ]
-then
-	if [ $EUID -eq 0 ]
-	then
-		export SUDO=
-	else
-		export SUDO=sudo
-	fi
-	if [ -e /etc/debian_version ]
-	then
-		if ! (dpkg --print-foreign-architectures | grep -q i386)
-		then
-			info "Adding i386 architectures..."
-			$SUDO dpkg --add-architecture i386
-			$SUDO apt-get update
-		fi
-		info "Installing dependencies..."
-		$SUDO apt-get install -y $DEBS
-	elif [ -e /etc/pacman.conf ]
-	then
-		if ! grep --quiet "^\[multilib\]" /etc/pacman.conf;
-		then
-			info "Adding i386 architectures..."
-			$SUDO sed 's/^\(#\[multilib\]\)/\[multilib\]/' </etc/pacman.conf >/tmp/pacman.conf
-			$SUDO sed '/^\[multilib\]/{n;s/^#//}' </tmp/pacman.conf >/etc/pacman.conf
-			$SUDO pacman -Syu
-		fi
-		info "Installing dependencies..."
-		$SUDO pacman -S --noconfirm --needed $ARCHDEBS
-	elif [ -e /etc/fedora-release ]
-	then
-		info "Installing dependencies..."
-		$SUDO dnf install -y $RPMS
-	elif [ -e /etc/zypp ]
-	then
-		info "Installing dependencies..."
-		$SUDO zypper install -y $OPENSUSE_RPMS
-	elif [ $IS_MACOS -eq 1 ]
-	then
-		if ! which brew > /dev/null;
-		then
-			error "Your system doesn't have homebrew installed, I don't know how to install the dependencies.\nPlease install homebrew: https://brew.sh/\nOr install the equivalent of these homebrew packages: $HOMEBREW_DEBS."
-		fi
-		brew install $HOMEBREW_DEBS
-	elif [ -e /etc/NIXOS ]
-	then
-		info "Doing nothing about dependencies installation for NixOS, as they are provided via shell.nix..."
-	else
-		error "We don't know which dependencies to install for this sytem.\nPlease install the equivalents of these debian packages: $DEBS."
-	fi
-fi
-
-info "Checking dependencies..."
-if [ -e /etc/debian_version ]
-then
-	INSTALLED_DEBS=$(dpkg --get-selections $DEBS 2>/dev/null)
-	MISSING_DEBS=""
-	for REQ in $DEBS; do
-		if ! grep "$REQ" <<<$INSTALLED_DEBS >/dev/null 2>/dev/null; then
-			MISSING_DEBS="$REQ $MISSING_DEBS"
-		fi
-	done
-	[ -n "$MISSING_DEBS" ] && error "Please install the following packages: $MISSING_DEBS"
-elif [ -e /etc/pacman.conf ]
-then
-	[ $(pacman -Qi $ARCHDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages: $ARCHDEBS"
-	[ $(pacman -Qi $ARCHCOMDEBS  2>&1 | grep "was not found" | wc -l) -ne 0 ] && error "Please install the following packages from AUR (yaourt -S <package_name>)): $ARCHCOMDEBS"
-elif [ -e /etc/fedora-release ]
-then
-	[ $(rpm -q $RPMS  2>&1 | grep "is not installed" | wc -l) -ne 0 ] && error "Please install the following packages: $RPMS"
-elif [ -e /etc/zypp ]
-then
-	[ $(rpm -q $OPENSUSE_RPMS 2>&1 | grep "is not installed" | wc -l) -ne 0 ] && error "Please install the following packages: $OPENSUSE_RPMS"
-elif [ -e /etc/NIXOS ]
-then
-	[ -z "$IN_NIX_SHELL" ] && error "Please run in the provided shell.nix"
-elif [ $IS_MACOS -eq 1 ]
-then
-	[ $(brew ls --versions $HOMEBREW_DEBS | wc -l) -ne $(echo $HOMEBREW_DEBS | wc -w) ] && error "Please install the following packages from homebrew: $HOMEBREW_DEBS"
-else
-	warning "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS."
-fi
-
-if [ -n "$ANGR_VENV" ]
-then
-	info "Enabling virtualenvwrapper."
-	# The idea here is to attpempt to use a preinstalled version of
-	# virtualenvwrapper. If we can't we'll install it using pip3. This should
-	# minimize issues where there are conflicting distro and pip versions.
-	virtualenvwrapper_locations=( \
-		$(command -v virtualenvwrapper.sh || true) \
-		~/.local/bin/virtualenvwrapper.sh \
-		/usr/share/virtualenvwrapper/virtualenvwrapper.sh \
-		/etc/bash_completion.d/virtualenvwrapper \
-	)
-	export VIRTUALENVWRAPPER_PYTHON=$(which python3)
-	for f in ${virtualenvwrapper_locations[@]}; do
-		if [ -e $f ]; then
-			set +e
-			source $f
-			set -e
-			venvwrapper_loc=$f
-			break
-		fi
-	done
-	if ! command -v workon &> /dev/null; then
-		info "Could not find virtualenvwrapper preinstalled, installing via pip3..."
-		pip3 install --user virtualenvwrapper
-		set +e
-		source ~/.local/bin/virtualenvwrapper.sh
-		set -e
-		venvwrapper_loc=~/.local/bin/virtualenvwrapper.sh
-	fi
-	if [[ $venvwrapper_loc == "~/.local/bin/virtualenvwrapper.sh" && ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-		info "\$HOME/.local/bin is not in your path, adding temporarily."
-		info "To make this permanent, add $HOME/.local/bin to your \$PATH"
-		export PATH=$HOME/.local/bin:$PATH
-	fi
-
-	set +e
-	if [ -n "$VIRTUAL_ENV" ]
-	then
-		# We can't just deactivate, since those functions are in the parent shell.
-		# So, we do some hackish stuff.
-		PATH=${PATH/$VIRTUAL_ENV\/bin:/}
-		unset VIRTUAL_ENV
-	fi
-
-	if [ "$RMVENV" -eq 1 ]
-	then
-		info "Removing existing virtual environment $ANGR_VENV..."
-		rmvirtualenv $ANGR_VENV || error "Failed to remote virtualenv $ANGR_VENV."
-	fi
-
-	if lsvirtualenv | grep -q "^$ANGR_VENV$"
-	then
-		info "Virtualenv $ANGR_VENV already exists, reusing it. Use -E instead of -e if you want to re-create the environment."
-	elif [ "$USE_PYPY" -eq 1 ]
-	then
-		info "Creating pypy virtualenv $ANGR_VENV..."
-		./pypy_venv.sh $ANGR_VENV
-	else
-		info "Creating cpython virtualenv $ANGR_VENV..."
-		mkvirtualenv --python=$(which python3) $ANGR_VENV
-	fi
-
-	set -e
-	workon $ANGR_VENV || error "Unable to activate the virtual environment."
-
-	# older versions of pip will fail to process the --find-links arg silently
-	# setuptools<64.0.1 is needed for editable installs for now, see angr/angr#3487
-	pip3 install -U 'pip>=20.0.2'
-fi
-
-# Must happen after virutalenv is enabled to correctly detect python implementation
-implementation=$(python -c "import sys; print(sys.implementation.name)")
-if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
-
-# Install build dependencies until build isolation can be enabled
-pip install -U pip "setuptools==64.0.1" wheel cffi unicorn==2.0.1.post1 cmake ninja
-
 function try_remote
 {
 	URL=$1
@@ -367,12 +214,128 @@ function clone_repo
 
 function pip_install
 {
+		# Use --user flag if not using a venv
+		if [ -n "$VIRTUAL_ENV" ]; then USER_FLAG="--user"; else USER_FLAG=""; fi
+
         debug "pip-installing: $@."
-        if ! pip3 install $PIP_OPTIONS $@
+        if ! pip install $PIP_OPTIONS $@
         then
             	error "pip failure ($@)."
         fi
 }
+
+if [ "$INSTALL_REQS" -eq 1 ]
+then
+	info "Installing dependencies..."
+	if [ $EUID -eq 0 ]
+	then
+		export SUDO=
+	else
+		export SUDO=sudo
+	fi
+	if [ $IS_MACOS -eq 1 ]; then
+		if ! which brew > /dev/null; then
+			error "Your system doesn't have homebrew installed, I don't know how to install the dependencies.\nPlease install homebrew: https://brew.sh/\nOr install the equivalent of these homebrew packages: $HOMEBREW_DEBS."
+		fi
+		brew install $HOMEBREW_DEBS
+	elif [ -e /etc/NIXOS ]; then
+		info "Doing nothing about dependencies installation for NixOS, as they are provided via shell.nix..."
+	elif [ -f /etc/os-release ]; then
+		source /etc/os-release
+		if [[ "$ID $ID_LIKE" =~ "debian" ]]; then
+			$SUDO apt-get update
+			$SUDO apt-get install -yq $DEBS
+		elif [[ "$ID $ID_LIKE" =~ "fedora" ]]; then
+			$SUDO dnf install -yq $RPMS
+		elif [[ "$ID $ID_LIKE" =~ "suse" ]]; then
+			$SUDO zypper install -y $OPENSUSE_RPMS
+		elif [[ "$ID $ID_LIKE" =~ "arch" ]]; then
+			$SUDO pacman -Syq --noconfirm --needed $ARCHDEBS
+		else
+			error "We don't recognize this system. Please install equivelents of these debian packages: $DEBS"
+		fi
+	else
+		error "We don't recognize this system. Please install the equivalents of these debian packages: $DEBS."
+	fi
+fi
+
+if [ -n "$ANGR_VENV" ]
+then
+	info "Enabling virtualenvwrapper."
+	# The idea here is to attpempt to use a preinstalled version of
+	# virtualenvwrapper. If we can't we'll install it using pip3. This should
+	# minimize issues where there are conflicting distro and pip versions.
+	virtualenvwrapper_locations=( \
+		$(command -v virtualenvwrapper.sh || true) \
+		~/.local/bin/virtualenvwrapper.sh \
+		/usr/share/virtualenvwrapper/virtualenvwrapper.sh \
+		/etc/bash_completion.d/virtualenvwrapper \
+	)
+	export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+	for f in ${virtualenvwrapper_locations[@]}; do
+		if [ -e $f ]; then
+			set +e
+			source $f
+			set -e
+			venvwrapper_loc=$f
+			break
+		fi
+	done
+	if ! command -v workon &> /dev/null; then
+		info "Could not find virtualenvwrapper preinstalled, installing via pip3..."
+		pip install --user virtualenvwrapper
+		set +e
+		source ~/.local/bin/virtualenvwrapper.sh
+		set -e
+		venvwrapper_loc=~/.local/bin/virtualenvwrapper.sh
+	fi
+	if [[ $venvwrapper_loc == "~/.local/bin/virtualenvwrapper.sh" && ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+		info "\$HOME/.local/bin is not in your path, adding temporarily."
+		info "To make this permanent, add $HOME/.local/bin to your \$PATH"
+		export PATH=$HOME/.local/bin:$PATH
+	fi
+
+	set +e
+	if [ -n "$VIRTUAL_ENV" ]
+	then
+		# We can't just deactivate, since those functions are in the parent shell.
+		# So, we do some hackish stuff.
+		PATH=${PATH/$VIRTUAL_ENV\/bin:/}
+		unset VIRTUAL_ENV
+	fi
+
+	if [ "$RMVENV" -eq 1 ]
+	then
+		info "Removing existing virtual environment $ANGR_VENV..."
+		rmvirtualenv $ANGR_VENV || error "Failed to remote virtualenv $ANGR_VENV."
+	fi
+
+	if lsvirtualenv | grep -q "^$ANGR_VENV$"
+	then
+		info "Virtualenv $ANGR_VENV already exists, reusing it. Use -E instead of -e if you want to re-create the environment."
+	elif [ "$USE_PYPY" -eq 1 ]
+	then
+		info "Creating pypy virtualenv $ANGR_VENV..."
+		./pypy_venv.sh $ANGR_VENV
+	else
+		info "Creating cpython virtualenv $ANGR_VENV..."
+		mkvirtualenv --python=$(which python3) $ANGR_VENV
+	fi
+
+	set -e
+	workon $ANGR_VENV || error "Unable to activate the virtual environment."
+
+	# older versions of pip will fail to process the --find-links arg silently
+	# setuptools<64.0.1 is needed for editable installs for now, see angr/angr#3487
+	pip install -U 'pip>=20.0.2'
+fi
+
+# Must happen after virutalenv is enabled to correctly detect python implementation
+implementation=$(python3 -c "import sys; print(sys.implementation.name)")
+if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
+
+# Install build dependencies until build isolation can be enabled
+pip install -U pip "setuptools==64.0.1" wheel cffi unicorn==2.0.1.post1 cmake ninja
 
 info "Cloning angr components!"
 if [ $CONCURRENT_CLONE -eq 0 ]
@@ -449,12 +412,12 @@ then
 	for PACKAGE in $TO_INSTALL; do
 		info "Installing $PACKAGE."
 		[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
-		pip_install --no-build-isolation -e $PACKAGE
+		pip_install --no-build-isolation -e ./$PACKAGE
 	done
 
 	info "Installing some other helpful stuff"
 	# we need the pyelftools from upstream
-	pip3 install -U ipython pylint ipdb nose nose-timer coverage flaky keystone-engine 'git+https://github.com/eliben/pyelftools#egg=pyelftools'
+	pip install -U ipython pylint ipdb nose nose-timer coverage flaky keystone-engine 'git+https://github.com/eliben/pyelftools#egg=pyelftools'
 
 	echo ''
 	info "All done! Execute \"workon $ANGR_VENV\" to use your new angr virtual"
