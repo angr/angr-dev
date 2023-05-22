@@ -7,9 +7,9 @@ stdenv.mkDerivation rec {
 
   buildInputs = [
     python3Packages.virtualenvwrapper
-    python2   # To build unicorn
-    python3   # For CPython install
-    pypy3     # for PyPy install
+    python2 # To build unicorn
+    python3 # For CPython install
+    pypy3 # for PyPy install
     nasm
     libxml2
     libxslt
@@ -29,7 +29,7 @@ stdenv.mkDerivation rec {
   ];
 
   shellHook = ''
-      source $(command -v virtualenvwrapper.sh)
-      export LD_LIBRARY_PATH="${stdenv.cc.cc.lib}/lib:${pkgs.z3.lib}/lib:$LD_LIBRARY_PATH"
+    source $(command -v virtualenvwrapper.sh)
+    export LD_LIBRARY_PATH="${stdenv.cc.cc.lib}/lib:${pkgs.z3.lib}/lib:$LD_LIBRARY_PATH"
   '';
 }
