@@ -22,6 +22,7 @@ stdenv.mkDerivation rec {
     qt5.qtdeclarative
     openssl
     jdk8
+    pkgs.z3
 
     # needed for pure environments
     which
@@ -29,5 +30,6 @@ stdenv.mkDerivation rec {
 
   shellHook = ''
       source $(command -v virtualenvwrapper.sh)
+      export LD_LIBRARY_PATH="${stdenv.cc.cc.lib}/lib:${pkgs.z3.lib}/lib:$LD_LIBRARY_PATH"
   '';
 }
