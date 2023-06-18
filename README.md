@@ -33,7 +33,7 @@ If you are working on macOS, you have to run the fix_macOS.sh script while in yo
 Alternatively, you can use the dockerfile:
 
 ```ShellSession
-$ docker build -t angr - < angr-dev/Dockerfile
+$ docker build -t angr angr-dev
 $ docker run -it angr
 ```
 
