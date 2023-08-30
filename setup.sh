@@ -51,7 +51,7 @@ ARCHDEBS=${ARCHDEBS-python-pip libxml2 libxslt git libffi cmake readline libtool
 ARCHCOMDEBS=${ARCHCOMDEBS}
 RPMS=${RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel}
 OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel}
-REPOS=${REPOS-archinfo pyvex cle claripy ailment angr angr-doc binaries}
+REPOS=${REPOS-archinfo pyvex cle claripy ailment angr angr-management binaries}
 REPOS_CPYTHON=${REPOS_CPYTHON-angr-management}
 # archr is Linux only because of shellphish-qemu dependency
 if [ `uname` == "Linux" ]; then REPOS="${REPOS} archr"; fi
