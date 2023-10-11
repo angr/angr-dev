@@ -2,6 +2,10 @@
 # This script takes a commit hash in one of the repositories checked out as part
 # of angr-dev, and uses timestamp information to check out commits from the same
 # time in other repositories.
+#
+# Example usage:
+# cd angr-dev
+# ./admin/checkout_at.py a8bab649cfc18912d5bb3ce70ef57a4ae4039f53
 
 import glob
 import sys
@@ -24,7 +28,11 @@ def load_commits(repo):
     timestamp_commits = { }
     commit_versions = { }
     commit_timestamps = { }
-    for commit in sh.git('-C', repo, 'log', '--pretty=%H|%ct|%s', _tty_out=False): #pylint:disable=no-member
+    for commit in sh.git('-C', repo, 'log', '--pretty="%H|%ct|%s"', _tty_out=False).split("\n"): #pylint:disable=no-member
+        commit = commit.replace('"', "") 
+        if not commit:
+            continue
+
         commit_hash, timestamp, comment = commit.strip().split('|', 2)
         timestamp = int(timestamp)
         timestamp_commits[timestamp] = commit_hash
@@ -60,6 +68,7 @@ if __name__ == '__main__':
         load_commits(_r)
 
     if len(sys.argv[1]) == 40:
+        print("Synchronizing now...")
         # we're synchronizing to a commit
         _timestamp = all_commit_timestamps[sys.argv[1]]
         for _r in list(all_repos):
