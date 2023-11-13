@@ -14,7 +14,7 @@ $extra_requires = @{
 
 $build_deps = $(
     "pip"
-    "setuptools"
+    "setuptools>=66.1.0"
     "wheel"
     "cffi"
     "unicorn==2.0.1.post1"
