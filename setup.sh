@@ -45,12 +45,12 @@ then
 fi
 
 
-DEBS=${DEBS-python3-pip python3-dev python3-setuptools build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev}
+DEBS=${DEBS-python3-pip python3-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev}
 HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm patchelf}
 ARCHDEBS=${ARCHDEBS-python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils nasm}
 ARCHCOMDEBS=${ARCHCOMDEBS}
-RPMS=${RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel}
-OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-pip python3-devel python3-setuptools libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel}
+RPMS=${RPMS-gcc gcc-c++ make python3-pip python3-devel libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel}
+OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-pip python3-devel libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel}
 REPOS=${REPOS-archinfo pyvex cle claripy ailment angr angr-management binaries}
 REPOS_CPYTHON=${REPOS_CPYTHON-angr-management}
 # archr is Linux only because of shellphish-qemu dependency
@@ -304,7 +304,6 @@ then
 	workon $ANGR_VENV || error "Unable to activate the virtual environment."
 
 	# older versions of pip will fail to process the --find-links arg silently
-	# setuptools<64.0.1 is needed for editable installs for now, see angr/angr#3487
 	pip3 install -U 'pip>=20.0.2'
 fi
 
@@ -313,7 +312,7 @@ implementation=$(python -c "import sys; print(sys.implementation.name)")
 if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
 # Install build dependencies until build isolation can be enabled
-pip install -U pip "setuptools==64.0.1" wheel cffi unicorn==2.0.1.post1 cmake ninja
+pip install -U pip "setuptools>=66.1.0" wheel cffi unicorn==2.0.1.post1 cmake ninja
 
 function try_remote
 {
