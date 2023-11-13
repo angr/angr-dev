@@ -6,4 +6,4 @@ core
 !.github/
 !.github/workflows
 !.github/ISSUE_TEMPLATE
-
+.env
