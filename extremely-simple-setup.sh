@@ -11,11 +11,11 @@ git clone https://github.com/angr/binaries.git
 
 python -m pip install -U pip wheel setuptools cffi "unicorn==2.0.1.post1"
 
-pip install -e ./archinfo
-pip install -e ./pyvex
-pip install -e ./cle
-pip install -e ./claripy
-pip install -e ./ailment
-pip install --no-build-isolation -e ./angr
-pip install -e ./angr-management
+pip install -e ./archinfo --config-settings editable_mode=strict
+pip install -e ./pyvex --config-settings editable_mode=strict
+pip install -e ./cle --config-settings editable_mode=strict
+pip install -e ./claripy --config-settings editable_mode=strict
+pip install -e ./ailment --config-settings editable_mode=strict
+pip install --no-build-isolation -e ./angr --config-settings editable_mode=strict
+pip install -e ./angr-management --config-settings editable_mode=strict
 
