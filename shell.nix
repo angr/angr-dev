@@ -3,13 +3,12 @@ with import <nixpkgs> { };
 stdenv.mkDerivation rec {
   name = "angr-env";
 
-  nativeBuildInputs = [ cmake pkgconfig git ];
+  nativeBuildInputs = [ cmake pkg-config git ];
 
   buildInputs = [
+    python3
+    python3Packages.pip
     python3Packages.virtualenvwrapper
-    python2 # To build unicorn
-    python3 # For CPython install
-    pypy3 # for PyPy install
     nasm
     libxml2
     libxslt
@@ -22,7 +21,6 @@ stdenv.mkDerivation rec {
     qt5.qtdeclarative
     openssl
     jdk8
-    pkgs.z3
 
     # needed for pure environments
     which
@@ -30,6 +28,7 @@ stdenv.mkDerivation rec {
 
   shellHook = ''
     source $(command -v virtualenvwrapper.sh)
-    export LD_LIBRARY_PATH="${stdenv.cc.cc.lib}/lib:${pkgs.z3.lib}/lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="${lib.getLib stdenv.cc.cc}/lib:$LD_LIBRARY_PATH"
+    workon angr 2>/dev/null || { mkvirtualenv angr && NIX_ENFORCE_PURITY= ./extremely-simple-setup.sh; }
   '';
 }
