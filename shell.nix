@@ -34,7 +34,6 @@ stdenv.mkDerivation {
   ];
 
   shellHook = ''
-    source $(command -v virtualenvwrapper.sh)
     export LD_LIBRARY_PATH="${lib.getLib stdenv.cc.cc}/lib:$LD_LIBRARY_PATH"
     if ! [ -d ".venv" ]; then
       python -m venv .venv
