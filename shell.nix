@@ -16,7 +16,6 @@ stdenv.mkDerivation {
   buildInputs = [
     python3
     python3Packages.pip
-    python3Packages.virtualenvwrapper
     nasm
     libxml2
     libxslt
