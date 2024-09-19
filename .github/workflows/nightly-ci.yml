@@ -1,0 +1,48 @@
+name: Nightly CI
+
+on:
+  schedule:
+  - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  observability:
+    name: "User Story - Telemetry"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Deps
+        run: 'sudo apt-get update && sudo apt-get install -y jq'
+      - name: Install
+        run: './extremely-simple-setup.sh && pip install --no-build-isolation -e ./angr[telemetry] opentelemetry-sdk'
+      - name: Run
+        run: |
+          cd .. && python3 <<EOF
+          from opentelemetry import trace
+          from opentelemetry.sdk.trace import TracerProvider
+          from opentelemetry.sdk.trace.export import (
+              BatchSpanProcessor,
+              ConsoleSpanExporter,
+          )
+          
+          provider = TracerProvider()
+          processor = BatchSpanProcessor(ConsoleSpanExporter(out=open('/tmp/telemetry.json', 'w')))
+          provider.add_span_processor(processor)
+          
+          # Sets the global default tracer provider
+          trace.set_tracer_provider(provider)
+
+          import angr
+          p = angr.Project('/bin/true', auto_load_libs=False)
+          cfg = p.analyses.CFGFast(normalize=True)
+          print(p.analyses.Decompiler('main').codegen.text)
+          EOF
+      - name: Validate
+        run: |
+          set +o pipefail
+          jq .name /tmp/telemetry.json | grep -m1 CFGFast
+          jq .attributes.\"project.binary_name\" /tmp/telemetry.json | grep -m1 /bin/true
+          jq .attributes.\"arg.func\" /tmp/telemetry.json | grep -m1 main
