@@ -19,6 +19,21 @@ $ workon angr
 [1] import angr
 ```
 
+### Windows
+If you are working with Windows, download the setup.ps1 file.
+
+Move the setup.ps1 file to your path for your python virtual environment inside of Scripts.
+
+Open the setup.ps1 file in Visual Code and run a virtual environment pre-created in the terminal by using: 
+```ShellSession
+(virtualEnvNameHere)/Scripts/Activate.ps1
+```
+
+Run the setup.ps1 file in the terminal in Visual Code. All files and dependencies will be installed after running.
+```ShellSession
+(virtualEnvNameHere)/Scripts/setup.ps1
+```
+
 ### MacOS
 
 Mojave seems to be working with the current version, so this fixing might not be necessary. Will need to verify.
