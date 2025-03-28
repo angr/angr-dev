@@ -100,7 +100,7 @@ function do_one
 		git "$@" 2>&1| sed -e "s/^/$DIR: /"
 		RETURN_CODE=${PIPESTATUS[0]}
 	else
-		git "$@"
+		git "${@//@repo@/$DIR}"
 		RETURN_CODE=$?
 	fi
 	cd ..
