@@ -18,9 +18,8 @@ jobs:
         os:
         - windows-2022
         python:
-        - "3.8"
-        - "3.9"
         - "3.10"
+        - "3.13"
       fail-fast: false
     name: Run setup.ps1 on ${{ matrix.os }} with python ${{ matrix.python }}
     runs-on: ${{ matrix.os }}
