@@ -16,13 +16,12 @@ jobs:
     strategy:
       matrix:
         os:
-        - ubuntu-20.04
         - ubuntu-22.04
-        - macos-12
+        - ubuntu-24.04
+        - macos-15
         python:
-        - "3.8"
-        - "3.9"
         - "3.10"
+        - "3.13"
       fail-fast: false
     name: Run setup on ${{ matrix.os }} with python ${{ matrix.python }}
     runs-on: ${{ matrix.os }}
@@ -30,7 +29,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Upgrade bash
-      if: matrix.os == 'macos-12'
+      if: matrix.os == 'macos-15'
       run: brew install bash
 
     - uses: actions/setup-python@v3
