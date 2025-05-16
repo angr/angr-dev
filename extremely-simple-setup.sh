@@ -9,7 +9,7 @@ git clone https://github.com/angr/angr.git
 git clone https://github.com/angr/angr-management.git
 git clone https://github.com/angr/binaries.git
 
-python -m pip install -U pip wheel setuptools cffi "unicorn==2.0.1.post1"
+python -m pip install -U pip wheel setuptools setuptools-rust cffi "unicorn==2.0.1.post1"
 
 pip install -e ./archinfo --config-settings editable_mode=strict
 pip install -e ./pyvex --config-settings editable_mode=strict
