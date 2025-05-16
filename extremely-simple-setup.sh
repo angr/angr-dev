@@ -16,6 +16,5 @@ pip install -e ./pyvex --config-settings editable_mode=strict
 pip install -e ./cle --config-settings editable_mode=strict
 pip install -e ./claripy --config-settings editable_mode=strict
 pip install -e ./ailment --config-settings editable_mode=strict
-pip install --no-build-isolation -e ./angr --config-settings editable_mode=strict
+pip install --no-build-isolation -e ./angr --config-settings editable_mode=compat
 pip install -e ./angr-management --config-settings editable_mode=strict
-
