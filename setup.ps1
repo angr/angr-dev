@@ -3,7 +3,6 @@ $repos = @(
     "angr/pyvex"
     "angr/cle"
     "angr/claripy"
-    "angr/ailment"
     "angr/angr"
     "angr/angr-management"
 )

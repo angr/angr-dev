@@ -8,7 +8,7 @@ QUIET=${QUIET-}
 REPO_ROOT="$(realpath "$(dirname $0)/..")"
 
 # if you edit this or specify a new value make sure the packages are in dependency order!
-REPOS=${REPOS-archinfo pyvex claripy cle ailment angr}
+REPOS=${REPOS-archinfo pyvex claripy cle angr}
 
 OUTDIR=$(realpath "${OUTDIR-./build}")
 mkdir -p "$OUTDIR"

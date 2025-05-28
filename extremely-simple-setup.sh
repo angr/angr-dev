@@ -4,7 +4,6 @@ git clone https://github.com/angr/archinfo.git
 git clone --recursive https://github.com/angr/pyvex.git
 git clone https://github.com/angr/cle.git
 git clone https://github.com/angr/claripy.git
-git clone https://github.com/angr/ailment.git
 git clone https://github.com/angr/angr.git
 git clone https://github.com/angr/angr-management.git
 git clone https://github.com/angr/binaries.git
@@ -15,6 +14,5 @@ pip install -e ./archinfo --config-settings editable_mode=strict
 pip install -e ./pyvex --config-settings editable_mode=strict
 pip install -e ./cle --config-settings editable_mode=strict
 pip install -e ./claripy --config-settings editable_mode=strict
-pip install -e ./ailment --config-settings editable_mode=strict
 pip install --no-build-isolation -e ./angr --config-settings editable_mode=compat
 pip install -e ./angr-management --config-settings editable_mode=strict
