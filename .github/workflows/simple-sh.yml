@@ -17,9 +17,11 @@ jobs:
       matrix:
         os:
         - ubuntu-22.04
-        - macos-12
+        - ubuntu-24.04
+        - macos-15
         python:
         - "3.10"
+        - "3.13"
       fail-fast: false
     name: Run extremely-simple-setup.sh on ${{ matrix.os }} with python ${{ matrix.python }}
     runs-on: ${{ matrix.os }}
