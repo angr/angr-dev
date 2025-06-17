@@ -11,7 +11,14 @@ with import <nixpkgs> { };
 stdenv.mkDerivation {
   name = "angr-env";
 
-  nativeBuildInputs = [ cmake pkg-config git ];
+  nativeBuildInputs = [
+    cmake
+    pkg-config
+    git
+    rustc
+    cargo
+    autoPatchelfHook
+  ];
 
   buildInputs = [
     python3
@@ -25,16 +32,44 @@ stdenv.mkDerivation {
     glib
     debootstrap
     pixman
-    qt5.qtdeclarative
+    #qt5.qtdeclarative
     openssl
     jdk8
+
+    # pyside6 deps for binary patching
+    speechd
+    cups
+    gdk-pixbuf
+    cairo
+    at-spi2-atk
+    pango
+    gtk3
+    xcb-util-cursor
+    libpq
+    mysql80
+    unixODBC
+    pcsclite
+    libpulseaudio
+    alsa-lib
+    nspr
+    nss
+    xorg.libXrandr
+    xorg.libXdamage
+    xorg.libxkbfile
+    kdePackages.qtwayland
+    kdePackages.qt3d
 
     # needed for pure environments
     which
   ];
 
+  autoPatchelfIgnoreMissingDeps = [
+    "libmimerapi.so"
+    "libQt6EglFsKmsGbmSupport.so.6"
+  ];
+
   shellHook = ''
-    export LD_LIBRARY_PATH="${lib.getLib stdenv.cc.cc}/lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="${lib.makeLibraryPath [stdenv.cc.cc zstd glib libGL]}:$LD_LIBRARY_PATH"
     if ! [ -d ".venv" ]; then
       python -m venv .venv
       source .venv/bin/activate
@@ -42,5 +77,6 @@ stdenv.mkDerivation {
     else
       source .venv/bin/activate
     fi
+    autoPatchelf .venv/lib
   '';
 }
