@@ -33,7 +33,7 @@ elif [ -f "/etc/arch-release" ]; then
     SUBVERSION=$(pacman -Si pypy3 | grep "Version\s*:\s*[0-9.\-]*" | grep -o "[0-9.\-]*")
     VERSION=${2-pypy3-$SUBVERSION-$ARCH}
     # get pypy
-    [ ! -e $VERSION.pkg.tar.zst ] && wget https://mirrors.kernel.org/archlinux/community/os/$ARCH/$VERSION.pkg.tar.zst
+    [ ! -e $VERSION.pkg.tar.zst ] && wget https://mirrors.kernel.org/archlinux/extra/os/$ARCH/$VERSION.pkg.tar.zst
     if [ ! -e $VERSION ]; then
         tar xf $VERSION.pkg.tar.zst
         mv ./opt/pypy3 ./$VERSION
