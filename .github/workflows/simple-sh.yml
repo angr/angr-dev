@@ -19,7 +19,7 @@ jobs:
       matrix:
         os:
         - ubuntu-22.04
-        - macos-12
+        - macos-13
         python:
         - "3.10"
       fail-fast: false
