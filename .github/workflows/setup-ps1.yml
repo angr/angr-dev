@@ -3,6 +3,8 @@ name: Test setup.ps1
 on:
   workflow_call:
   push:
+    branches:
+    - master
     paths:
     - "setup.ps1"
     - ".github/workflows/setup-ps1.yml"

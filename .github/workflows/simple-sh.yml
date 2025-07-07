@@ -3,6 +3,8 @@ name: Test extremely-simple-setup.sh
 on:
   workflow_call:
   push:
+    branches:
+    - master
     paths:
     - "extremely-simple-setup.sh"
     - ".github/workflows/simple-sh.yml"

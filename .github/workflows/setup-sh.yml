@@ -3,6 +3,8 @@ name: Test setup.sh
 on:
   workflow_call:
   push:
+    branches:
+    - master
     paths:
     - "setup.sh"
     - ".github/workflows/setup-sh.yml"
