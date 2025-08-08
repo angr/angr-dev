@@ -21,8 +21,7 @@ stdenv.mkDerivation {
   ];
 
   buildInputs = [
-    python3
-    python3Packages.pip
+    python312
     nasm
     libxml2
     libxslt
@@ -32,7 +31,6 @@ stdenv.mkDerivation {
     glib
     debootstrap
     pixman
-    #qt5.qtdeclarative
     openssl
     jdk8
 
@@ -77,6 +75,11 @@ stdenv.mkDerivation {
     else
       source .venv/bin/activate
     fi
-    autoPatchelf .venv/lib
+    if [ -e ".venv/fixed" ]; then
+      echo "If you encounter issues related to shared object loading, remove the file '$VIRTUAL_ENV/fixed' and restart the shell."
+    else
+      autoPatchelf $VIRTUAL_ENV/lib
+    touch .venv/fixed
+    fi
   '';
 }
