@@ -19,6 +19,12 @@ $ workon angr
 [1] import angr
 ```
 
+If you are going to be contributing to the project, please also install the pre-commit hook that will make sure your code conforms to the angr style:
+
+```ShellSession
+$ pip install pre-commit && pre-commit install
+```
+
 ### MacOS
 
 Mojave seems to be working with the current version, so this fixing might not be necessary. Will need to verify.
