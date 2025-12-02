@@ -8,11 +8,11 @@ git clone https://github.com/angr/angr.git
 git clone https://github.com/angr/angr-management.git
 git clone https://github.com/angr/binaries.git
 
-python -m pip install -U pip wheel setuptools setuptools-rust cffi "unicorn==2.0.1.post1"
+python -m pip install -U pip wheel setuptools setuptools-rust cffi "unicorn==2.0.1.post1" nanobind scikit_build_core
 
-pip install -e ./archinfo --config-settings editable_mode=strict
-pip install -e ./pyvex
-pip install -e ./cle --config-settings editable_mode=strict
-pip install -e ./claripy --config-settings editable_mode=strict
-pip install --no-build-isolation -e ./angr --config-settings editable_mode=compat
-pip install -e ./angr-management --config-settings editable_mode=strict
+pip install ${PIP_OPTIONS-} -e ./archinfo --config-settings editable_mode=strict
+pip install ${PIP_OPTIONS-} -e ./pyvex
+pip install ${PIP_OPTIONS-} -e ./cle --config-settings editable_mode=strict
+pip install ${PIP_OPTIONS-} -e ./claripy --config-settings editable_mode=strict
+pip install ${PIP_OPTIONS-} --no-build-isolation -e ./angr --config-settings editable_mode=compat
+pip install ${PIP_OPTIONS-} -e ./angr-management --config-settings editable_mode=strict
