@@ -8,6 +8,7 @@ To set up angr for development, automatically install dependencies, and automati
 
 ```bash
 ./setup.sh -i -e angr
+./extremely-simple-setup.sh
 ```
 
 This will grab and install angr.
