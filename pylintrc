@@ -32,15 +32,11 @@ load-plugins=pylint.extensions.no_self_use,pylint.extensions.bad_builtin
 # it should appear only once).
 
 disable=
-    abstract-method,
     fixme,
     invalid-name,
-    len-as-condition,
     locally-disabled,
     missing-function-docstring,
     missing-module-docstring,
-    no-else-return,
-    protected-access,
     too-few-public-methods,
     too-many-ancestors,
     too-many-arguments,
@@ -53,8 +49,6 @@ disable=
     too-many-public-methods,
     too-many-return-statements,
     too-many-statements,
-    unidiomatic-typecheck,
-    consider-using-f-string,
 
 
 [REPORTS]
