@@ -8,7 +8,7 @@ git clone https://github.com/angr/angr.git
 git clone https://github.com/angr/angr-management.git
 git clone https://github.com/angr/binaries.git
 
-python -m pip install -U pip wheel setuptools setuptools-rust cffi "unicorn==2.0.1.post1" nanobind scikit_build_core
+python -m pip install -U pip wheel setuptools setuptools-rust cffi "unicorn==2.1.4" nanobind scikit_build_core
 
 pip install ${PIP_OPTIONS-} -e ./archinfo --config-settings editable_mode=strict
 pip install ${PIP_OPTIONS-} -e ./pyvex

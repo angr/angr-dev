@@ -17,7 +17,7 @@ $build_deps = $(
     "setuptools-rust"
     "wheel"
     "cffi"
-    "unicorn==2.0.1.post1"
+    "unicorn==2.1.4"
 )
 
 $extras_install = $(
