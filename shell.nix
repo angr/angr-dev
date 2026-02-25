@@ -15,13 +15,16 @@ stdenv.mkDerivation {
     cmake
     pkg-config
     git
-    rustc
-    cargo
-    autoPatchelfHook
+    #rustc
+    #cargo
+    rust_1_91.packages.stable.rustc
+    rust_1_91.packages.stable.cargo
   ];
 
   buildInputs = [
     python312
+    #python314FreeThreading
+    #python314
     nasm
     libxml2
     libxslt
@@ -35,51 +38,59 @@ stdenv.mkDerivation {
     jdk8
 
     # pyside6 deps for binary patching
-    speechd
-    cups
-    gdk-pixbuf
-    cairo
-    at-spi2-atk
-    pango
-    gtk3
-    xcb-util-cursor
-    libpq
-    mysql80
-    unixODBC
-    pcsclite
-    libpulseaudio
-    alsa-lib
-    nspr
-    nss
-    xorg.libXrandr
-    xorg.libXdamage
-    xorg.libxkbfile
-    kdePackages.qtwayland
-    kdePackages.qt3d
+    # speechd
+    # cups
+    # gdk-pixbuf
+    # cairo
+    # at-spi2-atk
+    # pango
+    # gtk3
+    # xcb-util-cursor
+    # libpq
+    # mysql80
+    # unixODBC
+    # pcsclite
+    # libpulseaudio
+    # alsa-lib
+    # nspr
+    # nss
+    # xorg.libXrandr
+    # xorg.libXdamage
+    # xorg.libxkbfile
+    # kdePackages.qtwayland
+    # kdePackages.qt3d
 
     # needed for pure environments
     which
   ];
 
-  autoPatchelfIgnoreMissingDeps = [
-    "libmimerapi.so"
-    "libQt6EglFsKmsGbmSupport.so.6"
-  ];
+  # autoPatchelfIgnoreMissingDeps = [
+  #   "libmimerapi.so"
+  #   "libQt6EglFsKmsGbmSupport.so.6"
+  # ];
 
   shellHook = ''
-    export LD_LIBRARY_PATH="${lib.makeLibraryPath [stdenv.cc.cc zstd glib libGL]}:$LD_LIBRARY_PATH"
+    #export LD_LIBRARY_PATH="${lib.makeLibraryPath [stdenv.cc.cc zstd glib libGL]}:$LD_LIBRARY_PATH"
     if ! [ -d ".venv" ]; then
       python -m venv .venv
-      source .venv/bin/activate
-      NIX_ENFORCE_PURITY= ./extremely-simple-setup.sh
-    else
-      source .venv/bin/activate
+      VIRTUAL_ENV="$(realpath .venv)"
+      MY_NIX_LD="/${stdenv.hostPlatform.libDir}/${builtins.unsafeDiscardStringContext ( lib.last (lib.splitString "/" stdenv.cc.bintools.dynamicLinker) )}"
+      SETUP_COMMAND=()
+      if [[ -e "$NIX_LD" ]]; then
+        mv "$VIRTUAL_ENV/bin/python" "$VIRTUAL_ENV/bin/.python-wrapped"
+        echo "#!/bin/sh" >>"$VIRTUAL_ENV/bin/python"
+        echo "exec \"$MY_NIX_LD\" --argv0 \"\$0\" \"$VIRTUAL_ENV/bin/.python-wrapped\" \"\$@\"" >>"$VIRTUAL_ENV/bin/python"
+        chmod +x "$VIRTUAL_ENV/bin/python"
+      else
+        SETUP_COMMAND+=("NIX_ENFORCE_PURITY=")
+      fi
+      SETUP_COMMAND+=('./extremely-simple-setup.sh')
+      echo '##'
+      echo '##'
+      echo '## Welcome!'" You may wish to run ''${SETUP_COMMAND[@]} in order to set up your new virtualenv."
+      echo '##'
+      echo '##'
     fi
-    if [ -e ".venv/fixed" ]; then
-      echo "If you encounter issues related to shared object loading, remove the file '$VIRTUAL_ENV/fixed' and restart the shell."
-    else
-      autoPatchelf $VIRTUAL_ENV/lib
-    touch .venv/fixed
-    fi
+    source .venv/bin/activate
   '';
 }
