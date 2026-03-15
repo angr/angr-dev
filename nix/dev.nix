@@ -67,7 +67,7 @@ in mkShell {
             pwd
             break
           fi
-          if [[ $(cwd) == "/" ]]; then
+          if [[ $(pwd) == "/" ]]; then
             break
           fi
           cd ..
