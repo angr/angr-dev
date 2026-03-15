@@ -1,0 +1,16 @@
+// ┏┓╻+╻ ╱┏┳┓┏┓┏┳┓┏┓╻
+// ┃┃┃┃┗━┓╹┃╹┣┫┃┃┃┣┫┃   Read the manpage:
+// ╹┗┛╹╱ ╹ ╹ ╹╹╹ ╹╹╹┗┛  $ man nixtamal-manifest
+version "1.0.0"
+inputs {
+	nixpkgs {
+		archive {
+			url "https://github.com/NixOS/nixpkgs/archive/{{fresh_value}}.tar.gz"
+		}
+		hash algorithm=SHA-256
+		fresh-cmd {
+			$ git ls-remote "https://github.com/NixOS/nixpkgs.git" --refs "refs/heads/nixos-25.11"
+			| cut -f1
+		}
+	}
+}
