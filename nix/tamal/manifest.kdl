@@ -9,7 +9,17 @@ inputs {
 		}
 		hash algorithm=SHA-256
 		fresh-cmd {
-			$ git ls-remote "https://github.com/NixOS/nixpkgs.git" --refs "refs/heads/nixos-25.11"
+			$ git ls-remote "https://github.com/NixOS/nixpkgs.git" --refs "refs/heads/nixpkgs-unstable"
+			| cut -f1
+		}
+	}
+	pyproject-nix {
+		archive {
+			url "https://github.com/pyproject-nix/pyproject.nix/archive/{{fresh_value}}.tar.gz"
+		}
+		hash algorithm=SHA-256
+		fresh-cmd {
+			$ git ls-remote "https://github.com/pyproject-nix/pyproject.nix" --refs "refs/heads/master"
 			| cut -f1
 		}
 	}

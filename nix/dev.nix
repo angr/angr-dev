@@ -22,9 +22,13 @@
 
     enableGui ? true,
     extraDeps ? [],
+    extraNativeDeps ? [],
     extraVenvInstalls ? [ "ipython" "ipdb" "monkeyhex" ],
     venvName ? ".venv",
     rootMarker ? "shell.nix",
+    extraEnv ? {},
+    postShellHook ? "",
+    postVenvCreation ? "",
 }:
 let
     commonSetup = ''
@@ -59,7 +63,7 @@ in mkShell {
         git
         rustc
         cargo
-    ];
+    ] ++ extraNativeDeps;
 
     preShellHook = lib.optionalString (rootMarker != null) ''
         ROOT="$(while true; do
@@ -83,7 +87,9 @@ in mkShell {
 
         echo "Welcome to your angr-dev environment."
         echo "You may wish to run ./extremely-simple-setup.sh to clone and install the angr repos."
-    '';
+    '' + postVenvCreation;
 
-    postShellHook = commonSetup;
+    postShellHook = commonSetup + postShellHook;
+
+    env = extraEnv;
 }
