@@ -1,7 +1,9 @@
 {"v":"1.0.0"
 ,"i":{
-"nixpkgs":{"kd":[1,{"ft":0,"ur":"https://github.com/NixOS/nixpkgs/archive/13043924aaa7375ce482ebe2494338e058282925.tar.gz","ms":[]}],"ha":{"al":0,"vl":"sha256-nwASzrRDD1JBEu/o8ekKYEXm/oJW6EMCzCRdrwcLe90="},"fv":"13043924aaa7375ce482ebe2494338e058282925","ps":[]}
+"nixpkgs":{"kd":[1,{"ft":0,"ur":"https://github.com/NixOS/nixpkgs/archive/13043924aaa7375ce482ebe2494338e058282925.tar.gz","ms":[]}],"ha":{"al":0,"vl":"sha256-nwASzrRDD1JBEu/o8ekKYEXm/oJW6EMCzCRdrwcLe90="},"fv":"13043924aaa7375ce482ebe2494338e058282925","ps":["fix-qtads"]}
 ,"pyproject-nix":{"kd":[1,{"ft":0,"ur":"https://github.com/pyproject-nix/pyproject.nix/archive/fb6b728260f3f32761367e9fd1e1a25b4245bcd0.tar.gz","ms":[]}],"ha":{"al":0,"vl":"sha256-NHY9SJNU019n+8NCabBDtmuzRFeE2gZlYKHowp9bV24="},"fv":"fb6b728260f3f32761367e9fd1e1a25b4245bcd0","ps":[]}
 }
-,"p":{}
+,"p":{
+"fix-qtads":{"ur":"https://patch-diff.githubusercontent.com/raw/NixOS/nixpkgs/pull/509469.patch","ha":{"al":0,"vl":"sha256-NGL0fCVeQieDx4DSqE1t1f4F3U/Dv1Lr65mPCrAaoyM="}}
+}
 }

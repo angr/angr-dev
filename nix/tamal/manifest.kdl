@@ -2,6 +2,11 @@
 // ┃┃┃┃┗━┓╹┃╹┣┫┃┃┃┣┫┃   Read the manpage:
 // ╹┗┛╹╱ ╹ ╹ ╹╹╹ ╹╹╹┗┛  $ man nixtamal-manifest
 version "1.0.0"
+patches {
+	fix-qtads "https://patch-diff.githubusercontent.com/raw/NixOS/nixpkgs/pull/509469.patch" {
+		hash algorithm=SHA-256 expected="f192c407904980b63ec25c3abc2411e709d96a039995c12f6199bb3d4baf48f8"
+	}
+}
 inputs {
 	nixpkgs {
 		archive {
@@ -12,6 +17,7 @@ inputs {
 			$ git ls-remote "https://github.com/NixOS/nixpkgs.git" --refs "refs/heads/nixpkgs-unstable"
 			| cut -f1
 		}
+		patches fix-qtads
 	}
 	pyproject-nix {
 		archive {

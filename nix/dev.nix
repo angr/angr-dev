@@ -18,7 +18,7 @@
     glib,
     pixman,
     openssl,
-    jdk8,
+    jdk25,
 
     enableGui ? true,
     extraDeps ? [],
@@ -51,7 +51,7 @@ in mkShell {
         glib
         pixman
         openssl
-        jdk8
+        jdk25
     ] ++ lib.optionals enableGui [
         python3Packages.pyside6
         python3Packages.pyside6-qtads
