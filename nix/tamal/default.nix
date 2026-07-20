@@ -28,7 +28,7 @@ OF THIS SOFTWARE.
 }:
 
 let lock = builtins.fromJSON (builtins.readFile ./lock.json); in
-assert (lock.v == "1.0.0");
+assert (lock.v == "1.2.0");
 let
 	local-patches = {};
 	hash-token = {
@@ -37,7 +37,7 @@ let
 		"2" = "blake3";
 	};
 
-	try-fetch = name: fetcher:
+	try-fetch = input-name: fetcher:
 		let
 			try-fetch' = failed-urls: url: urls:
 				let result = builtins.tryEval (fetcher url); in
@@ -47,25 +47,31 @@ let
 					let failed-urls' = [ url ] ++ failed-urls; in
 					if builtins.length urls <= 0 then
 						let fus = builtins.concatStringsSep " " failed-urls'; in
-						throw "Input 「${name}」fetchable @ [ ${fus} ]"
+						throw "Input 「${input-name}」fetchable @ [ ${fus} ]"
 					else
 						try-fetch' failed-urls' (builtins.head urls) (builtins.tail urls);
 		in
 		try-fetch' [ ];
 
-	builtin-fetch-tarball = {name, kind, hash}:
-		try-fetch name (url:
-			builtins.fetchTarball {
+	builtin-fetch-tarball = {input-name, name, kind, hash}:
+		try-fetch input-name (url:
+			builtins.fetchTarball ({
 				inherit url;
 				${hash-token.${builtins.toString hash.al}} = hash.vl;
 			}
+			// (if name != null then {inherit name;} else {}))
 		) kind.ur kind.ms;
 
-	builtin-to-input = name: input:
-		let k = builtins.head input.kd; in
+	builtin-to-input = input-name: input:
+		let
+			name = input.sn;
+			hash = input.ha;
+			k = builtins.head input.kd;
+		in
 		if k == 1 then
 			builtin-fetch-tarball {
 				inherit name;
+				input-name = input-name;
 				kind = builtins.elemAt input.kd 1;
 				hash = input.ha;
 			}
@@ -87,43 +93,45 @@ let
 
 	inherit (pkgs) lib;
 
-	fetch-zip = {name, kind, hash}: pkgs.fetchzip {
-		inherit name;
+	fetch-zip = {input-name, name, kind, hash}: pkgs.fetchzip ({
 		url = kind.ur;
 		hash = hash.vl;
-	} // lib.optionalAttrs (builtins.length kind.ms > 0) { urls = kind.ms; };
+	}
+	// lib.optionalAttrs (name != null) {inherit name;}
+	// lib.optionalAttrs (builtins.length kind.ms > 0) {urls = kind.ms;});
 
-	fetch-patch = name: {ur, ha}:
+	fetch-patch = patch-name: {ur, ha}:
 		pkgs.fetchpatch2 {
 			url = ur;
 			hash = ha.vl;
 		};
 
-	to-input = name: input:
+	to-input = input-name: input:
 		let
+			name = input.sn;
+			hash = input.ha;
 			k = builtins.head input.kd;
 			raw-input =
 				if k == 1 then
 					let
 						kind = builtins.elemAt input.kd 1;
 						fetch_time = kind.ft;
-						hash = input.ha;
 					in
 					if fetch_time == 0 then
-						fetch-zip {inherit name kind hash;}
+						fetch-zip {inherit input-name name kind hash;}
 					else if fetch_time == 1 then
-						builtin-fetch-tarball {inherit name kind hash;}
+						builtin-fetch-tarball {inherit input-name name kind hash;}
 					else
 						throw "Unsupported fetch time ${fetch_time}."
 				else
-					throw "Unsupported input kind “${builtins.toString}”.";
+					throw "Unsupported input kind “${builtins.toString k}”.";
 		in
 		if builtins.length input.ps == 0 then
 			raw-input
 		else
 			pkgs.applyPatches {
 				src = raw-input;
-				name = "${name}-patched";
+				name = "${if name != null then name else "src"}-patched";
 				patches = map (p:
 					if local-patches ? "${p}" then
 						local-patches."${p}"

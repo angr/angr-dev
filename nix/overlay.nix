@@ -25,6 +25,9 @@ in {
             };
             extraAttrs = {
               version = "${devVersion}-${commitShort}";
+              prePatch = ''
+                ${lib.getExe final.git} clean -Xdf
+              '';
             };
           in final'.buildPythonPackage (pyprojectAttrs // extraAttrs // attrs);
         in {
@@ -71,20 +74,6 @@ in {
             pyxdia = final'.callPackage ./pyxdia.nix { };
             uefi-firmware = final'.uefi-firmware-parser;
             rust-demangler = final'.callPackage ./rust-demangler.nix { };
-            scikit-build-core = prev'.scikit-build-core.overrideAttrs {
-              version = "0.12.2";
-              src = final.fetchFromGitHub {
-                owner = "scikit-build";
-                repo = "scikit-build-core";
-                rev = "v0.12.2";
-                hash = "sha256-JE6z44u1FLfI+Gguhd2rVUvY8tyEoo/WviGJmPRT8kc=";
-              };
-              patches = [];
-              disabledTestPaths = [
-                "tests/test_editable.py"
-                "tests/test_builder.py"
-              ];
-            };
             pypcode = prev'.pypcode.overrideAttrs {
               version = "4.0.0";
               src = final.fetchFromGitHub {
