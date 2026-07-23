@@ -27,7 +27,6 @@
     venvName ? ".venv",
     rootMarker ? "shell.nix",
     extraEnv ? {},
-    autoInstallEditables ? true,
     postShellHook ? "",
     postVenvCreation ? "",
 }:
@@ -90,11 +89,7 @@ in mkShell {
         echo "You may wish to run ./extremely-simple-setup.sh to clone and install the angr repos."
     '' + postVenvCreation;
 
-    postShellHook = commonSetup + lib.optionalString (autoInstallEditables && rootMarker != null) ''
-        if [[ -x "$ROOT/nix/install-editables.sh" ]]; then
-            "$ROOT/nix/install-editables.sh" "$ROOT"
-        fi
-    '' + postShellHook;
+    postShellHook = commonSetup + postShellHook;
 
     env = extraEnv;
 }

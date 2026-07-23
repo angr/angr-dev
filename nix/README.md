@@ -6,21 +6,12 @@ The exception to this is pyproject.nix, which is imported directly when you just
 
 ## Dev shell with editable installs
 
-Run:
+Just use shell.nix. It'll build a venv for you and make everything work just right.
 
+e.g:
 ```shell
-nix develop
+nix-shell
 ```
-
-The shell creates a persistent `.venv` and editable-installs each checked-out
-core package it finds (`angr-data`, `archinfo`, `pyvex`, `cle`, `claripy`,
-`angr`, and `angr-management`). Re-entering the shell only verifies the editable
-install paths, so it does not rebuild the packages each time.
-
-To rebuild the editable installs after changing native code, run
-`./nix/install-editables.sh --force` from inside the development shell.
-
-The non-flake `nix-shell` entry point remains supported.
 
 ## Building a derivation with a pinned version of angr
 
