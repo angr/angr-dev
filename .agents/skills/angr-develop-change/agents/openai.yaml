@@ -1,0 +1,4 @@
+interface:
+  display_name: "Develop an angr Change"
+  short_description: "Implement root-cause fixes across angr repos"
+  default_prompt: "Use $angr-develop-change to implement this angr ecosystem change with a focused regression."

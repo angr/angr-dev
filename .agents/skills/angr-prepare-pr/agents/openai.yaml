@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare an angr PR"
+  short_description: "Turn angr changes into focused, tested PRs"
+  default_prompt: "Use $angr-prepare-pr to prepare and publish a focused angr ecosystem pull request."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review an angr PR"
+  short_description: "Review angr changes like core maintainers"
+  default_prompt: "Use $angr-review-pr to perform an evidence-backed review of this pull request."

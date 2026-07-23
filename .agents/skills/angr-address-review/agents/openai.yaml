@@ -1,0 +1,4 @@
+interface:
+  display_name: "Address angr Review"
+  short_description: "Resolve feedback and shepherd angr CI"
+  default_prompt: "Use $angr-address-review to address every actionable comment and shepherd this PR to green."

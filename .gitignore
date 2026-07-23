@@ -6,4 +6,9 @@ core
 !.github/
 !.github/workflows
 !.github/ISSUE_TEMPLATE
+!.agents/
+!.agents/skills/
+!.agents/skills/**
+!.claude/
+!.claude/skills
 .env
