@@ -9,7 +9,7 @@ git clone https://github.com/angr/angr-management.git
 git clone https://github.com/angr/binaries.git
 git clone https://github.com/angr/angr-data.git
 
-python -m pip install -U pip wheel setuptools setuptools-rust cffi "unicorn==2.1.4" nanobind scikit_build_core
+python -m pip install -U pip wheel setuptools setuptools-rust cffi "unicorn==2.1.4" nanobind scikit_build_core "grpcio-tools~=1.80.0"
 
 pip install ${PIP_OPTIONS-} -e ./angr-data --config-settings editable_mode=strict
 pip install ${PIP_OPTIONS-} -e ./archinfo --config-settings editable_mode=strict
