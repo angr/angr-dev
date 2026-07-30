@@ -10,10 +10,10 @@ jobs:
     name: "User Story - Telemetry"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: "3.10"
+          python-version: "3.12"
       - name: Deps
         run: 'sudo apt-get update && sudo apt-get install -y jq'
       - name: Install
@@ -27,11 +27,11 @@ jobs:
               BatchSpanProcessor,
               ConsoleSpanExporter,
           )
-          
+
           provider = TracerProvider()
           processor = BatchSpanProcessor(ConsoleSpanExporter(out=open('/tmp/telemetry.json', 'w')))
           provider.add_span_processor(processor)
-          
+
           # Sets the global default tracer provider
           trace.set_tracer_provider(provider)
 
@@ -46,3 +46,35 @@ jobs:
           jq .name /tmp/telemetry.json | grep -m1 CFGFast
           jq .attributes.\"project.binary_name\" /tmp/telemetry.json | grep -m1 /bin/true
           jq .attributes.\"arg.func\" /tmp/telemetry.json | grep -m1 main
+
+  new-dev-environment:
+    name: "User Story - New Development Environment"
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+
+      # No actions/setup-python here on purpose: this job is the story from the
+      # README, where a fresh machine sets up an angr virtualenv with nothing but
+      # the python and the packages its distro provides.
+      - name: Set up an angr virtualenv
+        run: ./setup.sh -i -u -s -c -e angr
+
+      - name: Import angr from the new virtualenv
+        run: ~/.virtualenvs/angr/bin/python -c "import angr, angrmanagement; print(angr.__version__)"
+
+      - name: Analyze a binary in the new virtualenv
+        run: |
+          ~/.virtualenvs/angr/bin/python <<EOF
+          import angr
+          p = angr.Project('/bin/true', auto_load_libs=False)
+          cfg = p.analyses.CFGFast(normalize=True)
+          print(f'recovered {len(cfg.functions)} functions')
+          assert len(cfg.functions) > 0
+          EOF
+
+      - name: Activate the new virtualenv with workon
+        run: |
+          source /usr/share/virtualenvwrapper/virtualenvwrapper.sh || true
+          workon angr
+          python -c "import angr; print(angr.__file__)"

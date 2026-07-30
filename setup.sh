@@ -44,20 +44,42 @@ then
 	exit 1;
 fi
 
+QT_DEBS="libgl1 libegl1 libx11-xcb1 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-sync1 libxcb-util1 libxcb-xfixes0 libxcb-xkb1 libdbus-1-3 libfontconfig1"
+QT_ARCHDEBS="libglvnd libx11 libxcb xcb-util-cursor xcb-util-image xcb-util-keysyms xcb-util-renderutil xcb-util-wm libxkbcommon-x11 dbus fontconfig"
+QT_RPMS="mesa-libGL mesa-libEGL libX11-xcb libxcb xcb-util-cursor xcb-util-image xcb-util-keysyms xcb-util-renderutil xcb-util-wm libxkbcommon-x11 dbus-libs fontconfig"
+QT_OPENSUSE_RPMS="Mesa-libGL1 Mesa-libEGL1 libX11-xcb1 libxcb1 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-sync1 libxcb-util1 libxcb-xfixes0 libxcb-xkb1 libxkbcommon-x11-0 dbus-1 fontconfig"
 
-DEBS=${DEBS-python3-pip python3-dev build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev qtdeclarative5-dev binutils-multiarch nasm libssl-dev}
+DEBS=${DEBS-python3-pip python3-dev python3-venv build-essential libxml2-dev libxslt1-dev git libffi-dev cmake libreadline-dev libtool debootstrap debian-archive-keyring libglib2.0-dev libpixman-1-dev binutils-multiarch nasm libssl-dev $QT_DEBS}
 HOMEBREW_DEBS=${HOMEBREW_DEBS-python3 libxml2 libxslt libffi cmake libtool glib binutils nasm patchelf}
-ARCHDEBS=${ARCHDEBS-python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman qt5-base binutils nasm}
+ARCHDEBS=${ARCHDEBS-python-pip libxml2 libxslt git libffi cmake readline libtool debootstrap glib2 pixman binutils nasm $QT_ARCHDEBS}
 ARCHCOMDEBS=${ARCHCOMDEBS}
-RPMS=${RPMS-gcc gcc-c++ make python3-pip python3-devel libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel qt5-qtdeclarative-devel binutils-x86_64-linux-gnu nasm openssl-devel}
-OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-pip python3-devel libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel libQt5Core5 libqt5-qtdeclarative-devel binutils nasm libopenssl-devel}
-REPOS=${REPOS-archinfo pyvex cle claripy angr angr-management binaries}
+RPMS=${RPMS-gcc gcc-c++ make python3-pip python3-devel libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap debian-keyring glib2-devel pixman-devel binutils-x86_64-linux-gnu nasm openssl-devel $QT_RPMS}
+OPENSUSE_RPMS=${OPENSUSE_RPMS-gcc gcc-c++ make python3-pip python3-devel libxml2-devel libxslt-devel git libffi-devel cmake readline-devel libtool debootstrap glib2-devel libpixman-1-0-devel binutils nasm libopenssl-devel $QT_OPENSUSE_RPMS}
+
+# virtualenvwrapper is only needed for -e/-E/-p/-P, so it is not part of the
+# lists above. It is installed from the distro's package manager because the
+# system pythons of most modern distros are externally managed (PEP 668) and
+# refuse to be pip-installed into.
+VENVWRAPPER_DEB=${VENVWRAPPER_DEB-virtualenvwrapper}
+VENVWRAPPER_RPM=${VENVWRAPPER_RPM-python3-virtualenvwrapper}
+VENVWRAPPER_BREW=${VENVWRAPPER_BREW-virtualenvwrapper}
+# Where a private copy of virtualenvwrapper goes if the distro has none
+VENVWRAPPER_HOME=${VENVWRAPPER_HOME-${XDG_DATA_HOME-$HOME/.local/share}/angr-dev/virtualenvwrapper}
+
+# angr requires this python, and its native extension requires this rust (edition 2024)
+MIN_PYTHON_VERSION=${MIN_PYTHON_VERSION-3.12}
+MIN_RUST_VERSION=${MIN_RUST_VERSION-1.85}
+
+REPOS=${REPOS-angr-data archinfo pyvex cle claripy angr angr-management binaries}
 REPOS_CPYTHON=${REPOS_CPYTHON-angr-management}
 # archr is Linux only because of shellphish-qemu dependency
 if [ `uname` == "Linux" ]; then REPOS="${REPOS} archr"; fi
 declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="sqlalchemy unicorn==2.1.4"
-EXTRA_DEPS["pyvex"]="--pre capstone scikit-build-core"
+# angr's build imports the pyvex installed in this environment, so it is the one
+# package that cannot be built in an isolated environment.
+declare -A PIP_EXTRA_OPTIONS
+PIP_EXTRA_OPTIONS["angr"]="--no-build-isolation"
 
 ORIGIN_REMOTE=${ORIGIN_REMOTE-$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|[^/:]*/angr-dev.*||")}
 REMOTES=${REMOTES-${ORIGIN_REMOTE}angr ${ORIGIN_REMOTE}shellphish ${ORIGIN_REMOTE}mechaphish https://git:@github.com/zardus https://git:@github.com/rhelmot https://git:@github.com/salls https://git:@github.com/lukas-dresel https://git:@github.com/mborgerson}
@@ -154,6 +176,49 @@ function error
 	exit 1
 }
 
+# Is version $1 at least version $2? Trailing junk (1.90.0-nightly) is ignored.
+function version_ge
+{
+	local IFS=.
+	local -a have=($1) want=($2)
+	local i x y
+	for ((i = 0; i < ${#want[@]}; i++))
+	do
+		x=${have[i]:-0}; x=${x%%[!0-9]*}
+		y=${want[i]:-0}; y=${y%%[!0-9]*}
+		if [ ${x:-0} -gt ${y:-0} ]; then return 0; fi
+		if [ ${x:-0} -lt ${y:-0} ]; then return 1; fi
+	done
+	return 0
+}
+
+function check_python_version
+{
+	local python=$1
+	local version
+	version=$("$python" -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null) || error "Cannot run $python."
+	version_ge "$version" "$MIN_PYTHON_VERSION" || error "angr requires python >= $MIN_PYTHON_VERSION, but $python is $version.\nInstall a newer python and make sure it comes first in your \$PATH."
+}
+
+# Print an interpreter that can import the virtualenvwrapper module backing the
+# virtualenvwrapper.sh at $1, if there is one. The script and the module come
+# from the same installation, which is frequently not the python3 in $PATH:
+# distro packages install into the system python, homebrew into its own libexec.
+function find_venvwrapper_python
+{
+	local script_dir=$(dirname "$1")
+	local python
+	for python in "$VIRTUALENVWRAPPER_PYTHON" "$script_dir/python3" "$script_dir/../libexec/bin/python3" /usr/bin/python3 "$(command -v python3)"
+	do
+		if [ -x "$python" ] && "$python" -c "import virtualenvwrapper.hook_loader" >/dev/null 2>&1
+		then
+			echo "$python"
+			return 0
+		fi
+	done
+	return 1
+}
+
 if [ "$INSTALL_REQS" -eq 1 ]
 then
 	if [ $EUID -eq 0 ]
@@ -172,6 +237,11 @@ then
 		fi
 		info "Installing dependencies..."
 		$SUDO apt-get install -y $DEBS
+		if [ -n "$ANGR_VENV" ]
+		then
+			info "Installing virtualenvwrapper..."
+			$SUDO apt-get install -y $VENVWRAPPER_DEB || warning "Could not install $VENVWRAPPER_DEB. A private copy will be used instead."
+		fi
 	elif [ -e /etc/pacman.conf ]
 	then
 		if ! grep --quiet "^\[multilib\]" /etc/pacman.conf;
@@ -187,10 +257,20 @@ then
 	then
 		info "Installing dependencies..."
 		$SUDO dnf install -y $RPMS
+		if [ -n "$ANGR_VENV" ]
+		then
+			info "Installing virtualenvwrapper..."
+			$SUDO dnf install -y $VENVWRAPPER_RPM || warning "Could not install $VENVWRAPPER_RPM. A private copy will be used instead."
+		fi
 	elif [ -e /etc/zypp ]
 	then
 		info "Installing dependencies..."
 		$SUDO zypper install -y $OPENSUSE_RPMS
+		if [ -n "$ANGR_VENV" ]
+		then
+			info "Installing virtualenvwrapper..."
+			$SUDO zypper install -y $VENVWRAPPER_RPM || warning "Could not install $VENVWRAPPER_RPM. A private copy will be used instead."
+		fi
 	elif [ $IS_MACOS -eq 1 ]
 	then
 		if ! which brew > /dev/null;
@@ -198,6 +278,11 @@ then
 			error "Your system doesn't have homebrew installed, I don't know how to install the dependencies.\nPlease install homebrew: https://brew.sh/\nOr install the equivalent of these homebrew packages: $HOMEBREW_DEBS."
 		fi
 		brew install $HOMEBREW_DEBS
+		if [ -n "$ANGR_VENV" ]
+		then
+			info "Installing virtualenvwrapper..."
+			brew install $VENVWRAPPER_BREW || warning "Could not install $VENVWRAPPER_BREW. A private copy will be used instead."
+		fi
 	elif [ -e /etc/NIXOS ]
 	then
 		info "Doing nothing about dependencies installation for NixOS, as they are provided via shell.nix..."
@@ -237,43 +322,17 @@ else
 	warning "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS."
 fi
 
+# angr's native extension is compiled by cargo. Distro rust packages are usually
+# too old for it, so this is not part of the package lists above.
+if [ $INSTALL -eq 1 ] && [[ " $REPOS " == *" angr "* ]]
+then
+	command -v cargo >/dev/null || error "angr requires rust >= $MIN_RUST_VERSION to build its native extension, but cargo was not found.\nInstall a toolchain from https://rustup.rs/ (distro rust packages are often too old)."
+	RUST_VERSION=$(cargo --version | awk '{print $2}')
+	version_ge "$RUST_VERSION" "$MIN_RUST_VERSION" || error "angr requires rust >= $MIN_RUST_VERSION to build its native extension, but cargo is $RUST_VERSION.\nUpdate your toolchain, e.g. with \`rustup update stable\`."
+fi
+
 if [ -n "$ANGR_VENV" ]
 then
-	info "Enabling virtualenvwrapper."
-	# The idea here is to attpempt to use a preinstalled version of
-	# virtualenvwrapper. If we can't we'll install it using pip3. This should
-	# minimize issues where there are conflicting distro and pip versions.
-	virtualenvwrapper_locations=( \
-		$(command -v virtualenvwrapper.sh || true) \
-		~/.local/bin/virtualenvwrapper.sh \
-		/usr/share/virtualenvwrapper/virtualenvwrapper.sh \
-		/etc/bash_completion.d/virtualenvwrapper \
-	)
-	export VIRTUALENVWRAPPER_PYTHON=$(which python3)
-	for f in ${virtualenvwrapper_locations[@]}; do
-		if [ -e $f ]; then
-			set +e
-			source $f
-			set -e
-			venvwrapper_loc=$f
-			break
-		fi
-	done
-	if ! command -v workon &> /dev/null; then
-		info "Could not find virtualenvwrapper preinstalled, installing via pip3..."
-		pip3 install --user virtualenvwrapper
-		set +e
-		source ~/.local/bin/virtualenvwrapper.sh
-		set -e
-		venvwrapper_loc=~/.local/bin/virtualenvwrapper.sh
-	fi
-	if [[ $venvwrapper_loc == "~/.local/bin/virtualenvwrapper.sh" && ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-		info "\$HOME/.local/bin is not in your path, adding temporarily."
-		info "To make this permanent, add $HOME/.local/bin to your \$PATH"
-		export PATH=$HOME/.local/bin:$PATH
-	fi
-
-	set +e
 	if [ -n "$VIRTUAL_ENV" ]
 	then
 		# We can't just deactivate, since those functions are in the parent shell.
@@ -282,6 +341,58 @@ then
 		unset VIRTUAL_ENV
 	fi
 
+	# The python the new virtualenv will be built on, as opposed to the python
+	# running virtualenvwrapper itself -- they are not necessarily the same one.
+	VENV_PYTHON=$(command -v python3) || error "No python3 found in your \$PATH."
+	check_python_version "$VENV_PYTHON"
+
+	info "Enabling virtualenvwrapper."
+	# Use a preinstalled (usually distro-provided) virtualenvwrapper if there is
+	# one, to minimize issues where there are conflicting distro and pip
+	# versions. Otherwise install one into a private virtualenv: `pip install
+	# --user` is rejected on distros whose python is externally managed.
+	virtualenvwrapper_locations=( \
+		$(command -v virtualenvwrapper.sh || true) \
+		~/.local/bin/virtualenvwrapper.sh \
+		/usr/share/virtualenvwrapper/virtualenvwrapper.sh \
+		/usr/local/bin/virtualenvwrapper.sh \
+		/etc/bash_completion.d/virtualenvwrapper \
+	)
+	venvwrapper_loc=
+	for f in ${virtualenvwrapper_locations[@]}; do
+		[ -e "$f" ] || continue
+		if venvwrapper_python=$(find_venvwrapper_python "$f"); then
+			venvwrapper_loc=$f
+			export VIRTUALENVWRAPPER_PYTHON=$venvwrapper_python
+			break
+		fi
+		warning "$f exists, but no python here can import virtualenvwrapper. Ignoring it."
+	done
+
+	if [ -z "$venvwrapper_loc" ]; then
+		info "Could not find virtualenvwrapper preinstalled, installing a private copy in $VENVWRAPPER_HOME..."
+		info "Install your distro's virtualenvwrapper package (or rerun with -i) to use a system-wide one instead."
+		if [ ! -x "$VENVWRAPPER_HOME/bin/python" ]; then
+			"$VENV_PYTHON" -m venv "$VENVWRAPPER_HOME" || error "Failed to create $VENVWRAPPER_HOME.\nOn debian-based systems, this needs the python3-venv package."
+		fi
+		"$VENVWRAPPER_HOME/bin/pip" install -qU pip virtualenvwrapper || error "Failed to install virtualenvwrapper."
+		venvwrapper_loc="$VENVWRAPPER_HOME/bin/virtualenvwrapper.sh"
+		export VIRTUALENVWRAPPER_PYTHON="$VENVWRAPPER_HOME/bin/python"
+		export VIRTUALENVWRAPPER_VIRTUALENV="$VENVWRAPPER_HOME/bin/virtualenv"
+	fi
+
+	set +e
+	source "$venvwrapper_loc"
+	set -e
+	command -v mkvirtualenv >/dev/null || error "Failed to enable virtualenvwrapper from $venvwrapper_loc."
+
+	if [[ $venvwrapper_loc == "$HOME/.local/bin/virtualenvwrapper.sh" && ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+		info "\$HOME/.local/bin is not in your path, adding temporarily."
+		info "To make this permanent, add $HOME/.local/bin to your \$PATH"
+		export PATH=$HOME/.local/bin:$PATH
+	fi
+
+	set +e
 	if [ "$RMVENV" -eq 1 ]
 	then
 		info "Removing existing virtual environment $ANGR_VENV..."
@@ -297,7 +408,7 @@ then
 		./pypy_venv.sh $ANGR_VENV
 	else
 		info "Creating cpython virtualenv $ANGR_VENV..."
-		mkvirtualenv --python=$(which python3) $ANGR_VENV
+		mkvirtualenv --python="$VENV_PYTHON" $ANGR_VENV
 	fi
 
 	set -e
@@ -307,12 +418,16 @@ then
 	pip3 install -U 'pip>=20.0.2'
 fi
 
-# Must happen after virutalenv is enabled to correctly detect python implementation
-implementation=$(python -c "import sys; print(sys.implementation.name)")
+# Must happen after virutalenv is enabled: this is the python angr gets installed into
+PYTHON=$(command -v python || command -v python3) || error "No python found in your \$PATH."
+check_python_version "$PYTHON"
+implementation=$("$PYTHON" -c "import sys; print(sys.implementation.name)")
 if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
-# Install build dependencies until build isolation can be enabled
-pip install -U pip "setuptools>=66.1.0" setuptools-rust wheel cffi unicorn==2.1.4 cmake ninja
+# Everything but angr is built in an isolated environment, so only the tools used
+# to drive the installs themselves are needed here. angr's own build dependencies
+# are installed further down, straight out of its pyproject.toml.
+pip install -U pip "setuptools>=77.0.0" wheel
 
 function try_remote
 {
@@ -444,20 +559,45 @@ then
 		export MACOS_UNIVERSAL=no
 	fi
 
+	# angr is installed without build isolation, so its build dependencies (right
+	# now: setuptools-rust, grpcio-tools and protobuf, which generate its native
+	# extension and its protobuf modules) have to be in the environment already.
+	# They are read out of angr's pyproject.toml rather than duplicated here, so
+	# that adding one upstream does not break this script. The angr repos among
+	# them are skipped: they are installed from these checkouts below, and their
+	# development versions do not exist on PyPI.
+	if [ -e angr/pyproject.toml ]
+	then
+		info "Installing angr's build dependencies."
+		ANGR_BUILD_DEPS=$("$PYTHON" -c "
+import re, tomllib
+with open('angr/pyproject.toml', 'rb') as f:
+    requirements = tomllib.load(f)['build-system']['requires']
+local = set('''$REPOS'''.split())
+print(' '.join(r for r in requirements if re.split('[^A-Za-z0-9._-]', r.strip())[0] not in local))
+") || error "Could not read angr's build dependencies from angr/pyproject.toml."
+		pip_install $ANGR_BUILD_DEPS
+	fi
+
 	info "Install list: $TO_INSTALL"
 	for PACKAGE in $TO_INSTALL; do
 		info "Installing $PACKAGE."
 		[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
-		pip_install --no-build-isolation -e $PACKAGE
+		pip_install ${PIP_EXTRA_OPTIONS[$PACKAGE]} -e $PACKAGE
 	done
 
 	info "Installing some other helpful stuff"
-	# we need the pyelftools from upstream
-	pip3 install -U ipython pylint ipdb nose nose-timer coverage flaky keystone-engine 'git+https://github.com/eliben/pyelftools#egg=pyelftools'
+	pip3 install -U ipython pylint ipdb pytest pytest-xdist coverage flaky keystone-engine \
+		|| warning "Failed to install some of the optional development packages. The angr environment itself is fine."
 
 	echo ''
-	info "All done! Execute \"workon $ANGR_VENV\" to use your new angr virtual"
-	info "environment. Any changes you make in the repositories will reflect"
+	if [ -n "$ANGR_VENV" ]
+	then
+		info "All done! Execute \"workon $ANGR_VENV\" to use your new angr virtual"
+		info "environment. Any changes you make in the repositories will reflect"
+	else
+		info "All done! Any changes you make in the repositories will reflect"
+	fi
 	info "immediately in the virtual environment, with the exception of things"
 	info "requiring compilation (i.e., pyvex). For those, you will need to rerun"
 	info "the install after changes (i.e., \"pip install -e pyvex\")."
