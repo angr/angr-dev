@@ -62,16 +62,20 @@ VENVWRAPPER_BREW=${VENVWRAPPER_BREW-virtualenvwrapper}
 # Where a private copy of virtualenvwrapper goes if the distro has none
 VENVWRAPPER_HOME=${VENVWRAPPER_HOME-${XDG_DATA_HOME-$HOME/.local/share}/angr-dev/virtualenvwrapper}
 
-# The python angr requires
+# angr requires this python, and its native extension requires this rust (edition 2024)
 MIN_PYTHON_VERSION=${MIN_PYTHON_VERSION-3.12}
+MIN_RUST_VERSION=${MIN_RUST_VERSION-1.85}
 
-REPOS=${REPOS-archinfo pyvex cle claripy angr angr-management binaries}
+REPOS=${REPOS-angr-data archinfo pyvex cle claripy angr angr-management binaries}
 REPOS_CPYTHON=${REPOS_CPYTHON-angr-management}
 # archr is Linux only because of shellphish-qemu dependency
 if [ `uname` == "Linux" ]; then REPOS="${REPOS} archr"; fi
 declare -A EXTRA_DEPS
 EXTRA_DEPS["angr"]="sqlalchemy unicorn==2.1.4"
-EXTRA_DEPS["pyvex"]="--pre capstone scikit-build-core"
+# angr's build imports the pyvex installed in this environment, so it is the one
+# package that cannot be built in an isolated environment.
+declare -A PIP_EXTRA_OPTIONS
+PIP_EXTRA_OPTIONS["angr"]="--no-build-isolation"
 
 ORIGIN_REMOTE=${ORIGIN_REMOTE-$(git remote -v | grep origin | head -n1 | awk '{print $2}' | sed -e "s|[^/:]*/angr-dev.*||")}
 REMOTES=${REMOTES-${ORIGIN_REMOTE}angr ${ORIGIN_REMOTE}shellphish ${ORIGIN_REMOTE}mechaphish https://git:@github.com/zardus https://git:@github.com/rhelmot https://git:@github.com/salls https://git:@github.com/lukas-dresel https://git:@github.com/mborgerson}
@@ -314,6 +318,15 @@ else
 	warning "WARNING: make sure you have dependencies installed.\nThe debian equivalents are: $DEBS."
 fi
 
+# angr's native extension is compiled by cargo. Distro rust packages are usually
+# too old for it, so this is not part of the package lists above.
+if [ $INSTALL -eq 1 ] && [[ " $REPOS " == *" angr "* ]]
+then
+	command -v cargo >/dev/null || error "angr requires rust >= $MIN_RUST_VERSION to build its native extension, but cargo was not found.\nInstall a toolchain from https://rustup.rs/ (distro rust packages are often too old)."
+	RUST_VERSION=$(cargo --version | awk '{print $2}')
+	version_ge "$RUST_VERSION" "$MIN_RUST_VERSION" || error "angr requires rust >= $MIN_RUST_VERSION to build its native extension, but cargo is $RUST_VERSION.\nUpdate your toolchain, e.g. with \`rustup update stable\`."
+fi
+
 if [ -n "$ANGR_VENV" ]
 then
 	if [ -n "$VIRTUAL_ENV" ]
@@ -407,8 +420,10 @@ check_python_version "$PYTHON"
 implementation=$("$PYTHON" -c "import sys; print(sys.implementation.name)")
 if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
-# Install build dependencies until build isolation can be enabled
-pip install -U pip "setuptools>=66.1.0" setuptools-rust wheel cffi unicorn==2.1.4 cmake ninja
+# Everything but angr is built in an isolated environment, so only the tools used
+# to drive the installs themselves are needed here. angr's own build dependencies
+# are installed further down, straight out of its pyproject.toml.
+pip install -U pip "setuptools>=77.0.0" wheel
 
 function try_remote
 {
@@ -540,16 +555,36 @@ then
 		export MACOS_UNIVERSAL=no
 	fi
 
+	# angr is installed without build isolation, so its build dependencies (right
+	# now: setuptools-rust, grpcio-tools and protobuf, which generate its native
+	# extension and its protobuf modules) have to be in the environment already.
+	# They are read out of angr's pyproject.toml rather than duplicated here, so
+	# that adding one upstream does not break this script. The angr repos among
+	# them are skipped: they are installed from these checkouts below, and their
+	# development versions do not exist on PyPI.
+	if [ -e angr/pyproject.toml ]
+	then
+		info "Installing angr's build dependencies."
+		ANGR_BUILD_DEPS=$("$PYTHON" -c "
+import re, tomllib
+with open('angr/pyproject.toml', 'rb') as f:
+    requirements = tomllib.load(f)['build-system']['requires']
+local = set('''$REPOS'''.split())
+print(' '.join(r for r in requirements if re.split('[^A-Za-z0-9._-]', r.strip())[0] not in local))
+") || error "Could not read angr's build dependencies from angr/pyproject.toml."
+		pip_install $ANGR_BUILD_DEPS
+	fi
+
 	info "Install list: $TO_INSTALL"
 	for PACKAGE in $TO_INSTALL; do
 		info "Installing $PACKAGE."
 		[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
-		pip_install --no-build-isolation -e $PACKAGE
+		pip_install ${PIP_EXTRA_OPTIONS[$PACKAGE]} -e $PACKAGE
 	done
 
 	info "Installing some other helpful stuff"
-	# we need the pyelftools from upstream
-	pip3 install -U ipython pylint ipdb nose nose-timer coverage flaky keystone-engine 'git+https://github.com/eliben/pyelftools#egg=pyelftools'
+	pip3 install -U ipython pylint ipdb pytest pytest-xdist coverage flaky keystone-engine \
+		|| warning "Failed to install some of the optional development packages. The angr environment itself is fine."
 
 	echo ''
 	if [ -n "$ANGR_VENV" ]

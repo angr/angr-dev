@@ -2,6 +2,14 @@
 
 This is a repository to make installing a development version of angr easier.
 
+## Requirements
+
+* python >= 3.12
+* a rust toolchain >= 1.85, for angr's native extension. Distro rust packages are
+  frequently too old; get one from [rustup](https://rustup.rs/) if in doubt.
+
+Everything else is installed for you by `setup.sh -i`.
+
 ## Install
 
 To set up angr for development, automatically install dependencies, and automatically create a python virtualenv, do:
