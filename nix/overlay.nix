@@ -31,14 +31,26 @@ in {
             };
           in final'.buildPythonPackage (pyprojectAttrs // extraAttrs // attrs);
         in {
-            angr = (angrRepo angr {
-              pythonRelaxDeps = [ "capstone" "lmdb" "angr-data" ];
+            angr = ((angrRepo angr {
+              pythonRelaxDeps = [
+                "capstone"
+                "lmdb"
+                "angr-data"
+                "grpcio-tools"
+              ];
               nativeBuildInputs = [
                 final.rustPlatform.cargoSetupHook
                 final.cargo
                 final.rustc
               ];
-            }).overrideAttrs (prev: {
+            }).overridePythonAttrs (prev: {
+              build-system = with final'; [
+                protobuf6
+                grpcio-tools-180
+                setuptools
+                setuptools-rust
+              ];
+            })).overrideAttrs (prev: {
               cargoDeps = final.rustPlatform.importCargoLock {
                 lockFile = "${prev.src}/Cargo.lock";
                 outputHashes = {
@@ -81,6 +93,24 @@ in {
                 repo = "pypcode";
                 tag = "v4.0.0";
                 hash = "sha256-OwnwgN2/MElH7SOwauS/hfVkgwAd0uMH0y00Ydkq+8I=";
+              };
+            };
+            grpcio-tools-180 = prev'.grpcio-tools.overrideAttrs {
+              version = "1.80.0";
+              src = final.fetchPypi {
+                pname = "grpcio_tools";
+                version = "1.80.0";
+                hash = "sha256-JgUrGcbODc9S0QJElq6j4r36hkFZ8G3HuXsi0EGpSyY=";
+              };
+            };
+            pydemumble = prev'.pydemumble.overrideAttrs {
+              version = "0.1.3";
+              src = final.fetchFromGitHub {
+                owner = "angr";
+                repo = "pydemumble";
+                rev = "v0.1.3";
+                hash = "sha256-Po19NXY4I97Aj1SY1KqpspEqYpVGIsAirOo6iAjBrbk=";
+                fetchSubmodules = true;
               };
             };
         })
