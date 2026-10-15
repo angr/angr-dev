@@ -1,10 +1,7 @@
 // ┏┓╻+╻ ╱┏┳┓┏┓┏┳┓┏┓╻
 // ┃┃┃┃┗━┓╹┃╹┣┫┃┃┃┣┫┃   Read the manpage:
 // ╹┗┛╹╱ ╹ ╹ ╹╹╹ ╹╹╹┗┛  $ man nixtamal-manifest
-version "1.2.0"
-patches {
-	fix-qtads "https://patch-diff.githubusercontent.com/raw/NixOS/nixpkgs/pull/509469.patch"
-}
+version "1.4.0"
 inputs {
 	nixpkgs {
 		archive {
@@ -15,7 +12,6 @@ inputs {
 			$ git ls-remote "https://github.com/NixOS/nixpkgs.git" --refs "refs/heads/nixpkgs-unstable"
 			| cut -f1
 		}
-		patches fix-qtads
 	}
 	pyproject-nix {
 		archive {

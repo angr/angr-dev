@@ -5,23 +5,23 @@
   buildPythonPackage,
   fetchFromGitHub,
   fetchzip,
-  fetchpatch,
+  # fetchpatch,
   pytestCheckHook,
   setuptools,
   blink,
 }:
 let
-  version = "0.1.0";
+  version = "0.1.1";
   xdiaSrc = fetchFromGitHub {
-    owner = "rhelmot";
+    owner = "mborgerson";
     repo = "xdia";
-    rev = "1383980a3f27abab253eeab2d7d3559d3c306a2a";
-    hash = "sha256-G8Cou3nygLc/WSwWzWtf5hJuC5T7bk941PkXpMPv0dg=";
+    rev = "cc04e77e8542f29397729639a59024fc535cc2e5";
+    hash = "sha256-t/pMoSe7r0cCz/+GWdpaaVxccnZh/VnDuyOm1dI5Sqo=";
   };
 
   xdiaBinaries = fetchzip {
     url = "https://github.com/mborgerson/xdia/releases/download/v${version}/xdia.zip";
-    hash = "sha256-/r60NLacyL92drPpligmom5Eb3wNfzTJ0M0cieu7Ouw=";
+    hash = "sha256-lPAv279asABhGWcAhimu4QCaJcZksrzgzVvolO5vlFI=";
     stripRoot = false;
   };
 
@@ -45,14 +45,14 @@ let
       buildInputs = [ icu ];
 
       patches = [
-        (fetchpatch {
-          url = "https://aur.archlinux.org/cgit/aur.git/plain/fix-pyproject.patch?h=python-pyxdia";
-          hash = "sha256-WnerNR3VRJqLNSfTgXaCmYfCfhzLXvA8dsVL46DofIM=";
-        })
-        (fetchpatch {
-          url = "https://aur.archlinux.org/cgit/aur.git/plain/fix-cmake.patch?h=python-pyxdia";
-          hash = "sha256-Hj+HYlYOCkOpNSnHjn0wHSadJSH7iNUqYLkCCtzHIsI=";
-        })
+        # (fetchpatch {
+        #   url = "https://aur.archlinux.org/cgit/aur.git/plain/fix-pyproject.patch?h=python-pyxdia";
+        #   hash = "sha256-WnerNR3VRJqLNSfTgXaCmYfCfhzLXvA8dsVL46DofIM=";
+        # })
+        # (fetchpatch {
+        #   url = "https://aur.archlinux.org/cgit/aur.git/plain/fix-cmake.patch?h=python-pyxdia";
+        #   hash = "sha256-Hj+HYlYOCkOpNSnHjn0wHSadJSH7iNUqYLkCCtzHIsI=";
+        # })
       ];
 
       postPatch = ''
@@ -64,7 +64,7 @@ let
 in
 buildPythonPackage {
   pname = "pyxdia";
-  inherit version;
+  version = "0.1.2.dev0";
   src = "${xdiaSrc}/pyxdia";
   pyproject = true;
 

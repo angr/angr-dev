@@ -1,7 +1,6 @@
 {
   angr ? pkgs: ../angr,
   pyvex ? pkgs: ../pyvex,
-  claripy ? pkgs: ../claripy,
   cle ? pkgs: ../cle,
   archinfo ? pkgs: ../archinfo,
   angr-data ? pkgs: ../angr-data,
@@ -24,9 +23,10 @@ in {
               inherit (final') python;
             };
             extraAttrs = {
-              version = "${devVersion}-${commitShort}";
-              prePatch = ''
-                ${lib.getExe final.git} clean -Xdf
+              name = "${project.pyproject.project.name}-${devVersion}+${commitShort}";
+              version = devVersion;
+              postUnpack = ''
+                ${lib.getExe final.git} -C $sourceRoot clean -Xdf
               '';
             };
           in final'.buildPythonPackage (pyprojectAttrs // extraAttrs // attrs);
@@ -55,9 +55,11 @@ in {
                 lockFile = "${prev.src}/Cargo.lock";
                 outputHashes = {
                   # well this is a nightmare
-                  "icicle-cpu-0.1.0" = "sha256-dF4ic0r+Z4WXqVIkKpxYfLiBg+i6Ohxy6rAgikJMZew=";
+                  "icicle-cpu-0.1.0" = "sha256-p2tO1nFOA+RQ3XYyOuYvFrxz7DRebGChswxFdBkUApk=";
                 };
               };
+              pypaBuildFlags = (prev.pypaBuildFlags or []) ++ [ "--skip-dependency-check" ];
+              dontCheckRuntimeDeps = true;
             });
             pyvex = angrRepo pyvex {
               build-system = with final'; [
@@ -72,10 +74,6 @@ in {
 
               dontUseCmakeConfigure = true;
             };
-            claripy = angrRepo claripy {
-              # z3 does not provide a dist-info, so python-runtime-deps-check will fail
-              pythonRemoveDeps = [ "z3-solver" ];
-            };
             cle = angrRepo cle {
               pythonRelaxDeps = [ "arpy" ];
             };
@@ -84,15 +82,14 @@ in {
               pname = "angr_data";
             };
             pyxdia = final'.callPackage ./pyxdia.nix { };
-            uefi-firmware = final'.uefi-firmware-parser;
             rust-demangler = final'.callPackage ./rust-demangler.nix { };
             pypcode = prev'.pypcode.overrideAttrs {
-              version = "4.0.0";
+              version = "4.0.1";
               src = final.fetchFromGitHub {
                 owner = "angr";
                 repo = "pypcode";
-                tag = "v4.0.0";
-                hash = "sha256-OwnwgN2/MElH7SOwauS/hfVkgwAd0uMH0y00Ydkq+8I=";
+                tag = "v4.0.1";
+                hash = "sha256-qQgOtz8TRbP6LkGehSJM8ig6TsmwTz7gy8aA4dozwoc=";
               };
             };
             grpcio-tools-180 = prev'.grpcio-tools.overrideAttrs {
@@ -108,9 +105,18 @@ in {
               src = final.fetchFromGitHub {
                 owner = "angr";
                 repo = "pydemumble";
-                rev = "v0.1.3";
+                tag = "v0.1.3";
                 hash = "sha256-Po19NXY4I97Aj1SY1KqpspEqYpVGIsAirOo6iAjBrbk=";
                 fetchSubmodules = true;
+              };
+            };
+            cxxheaderparser = prev'.cxxheaderparser.overrideAttrs {
+              version = "2.0.1";
+              src = final.fetchFromGitHub {
+                owner = "robotpy";
+                repo = "cxxheaderparser";
+                tag = "2.0.1";
+                hash = "sha256-YF7ImKD+QsGb6IxntySHSYQafrDJw9fFD5TwShs5Q18=";
               };
             };
         })

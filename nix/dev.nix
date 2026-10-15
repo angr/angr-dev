@@ -23,7 +23,7 @@
     enableGui ? true,
     extraDeps ? [],
     extraNativeDeps ? [],
-    extraVenvInstalls ? [ "ipython" "ipdb" "monkeyhex" ],
+    extraVenvInstalls ? [ "ipython" "ipdb" "monkeyhex" "pytest" ],
     venvName ? ".venv",
     rootMarker ? "shell.nix",
     extraEnv ? {},
@@ -34,7 +34,7 @@ let
     commonSetup = ''
         # allow pip to install wheels
         unset SOURCE_DATE_EPOCH
-        export LD_LIBRARY_PATH="${lib.makeLibraryPath [ stdenv.cc.cc zstd glib libGL ]}:$LD_LIBRARY_PATH"
+        export LD_LIBRARY_PATH="${lib.makeLibraryPath [ stdenv.cc.cc zstd glib libGL ]}:$(echo $venvDir/lib/python3*/site-packages/z3/lib):$LD_LIBRARY_PATH"
     '';
 in mkShell {
     name = "angr-dev";
