@@ -5,6 +5,8 @@
     python3Packages,
     rustc,
     cargo,
+    rustfmt,
+    rust-analyzer,
     zstd,
     cmake,
     pkg-config,
@@ -19,6 +21,8 @@
     pixman,
     openssl,
     jdk25,
+    ruff,
+    pyright,
 
     enableGui ? true,
     extraDeps ? [],
@@ -34,7 +38,7 @@ let
     commonSetup = ''
         # allow pip to install wheels
         unset SOURCE_DATE_EPOCH
-        export LD_LIBRARY_PATH="${lib.makeLibraryPath [ stdenv.cc.cc zstd glib libGL ]}:$(echo $venvDir/lib/python3*/site-packages/z3/lib):$LD_LIBRARY_PATH"
+        export LD_LIBRARY_PATH="${lib.makeLibraryPath [ stdenv.cc.cc zstd libGL ]}:$(echo $venvDir/lib/python3*/site-packages/z3/lib):$LD_LIBRARY_PATH"
     '';
 in mkShell {
     name = "angr-dev";
@@ -43,6 +47,8 @@ in mkShell {
         python3Packages.python
         python3Packages.venvShellHook
 
+        pyright
+        ruff
         nasm
         libxml2
         libxslt
@@ -63,6 +69,8 @@ in mkShell {
         git
         rustc
         cargo
+        rustfmt
+        rust-analyzer
     ] ++ extraNativeDeps;
 
     preShellHook = lib.optionalString (rootMarker != null) ''
@@ -89,7 +97,10 @@ in mkShell {
         echo "You may wish to run ./extremely-simple-setup.sh to clone and install the angr repos."
     '' + postVenvCreation;
 
-    postShellHook = commonSetup + postShellHook;
+    postShellHook = commonSetup + ''
+        # if these are in the venv we don't want them
+        PATH="${lib.makeBinPath [ pyright ruff ]}:$PATH"
+    '' + postShellHook;
 
     env = extraEnv;
 }
